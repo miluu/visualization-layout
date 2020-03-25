@@ -31,6 +31,14 @@ import I18N_IDS from 'src/i18n/ids';
 export class ElementButtonGroupComponent extends BaseElementComponent {
   render() {
     const groupButtons = this.props.groupButtons || [];
+    let dropDownNeedBinding = false;
+    const groupButtonsNeedbinding = _.map(groupButtons, item => {
+      const b = !item.methodName;
+      if (b && !item.isShowLable) {
+        dropDownNeedBinding = true;
+      }
+      return b;
+    });
     return (
       <div
         {...this._createRootProps(['editor-element-button-group', 'group'])}
@@ -38,20 +46,25 @@ export class ElementButtonGroupComponent extends BaseElementComponent {
         <div className="primaryButtonGroup" style={{ display: 'inline-block' }}>
           {
             !groupButtons.length
-              ? <button type="button" className="button-default"> {t(I18N_IDS.TEXT_NOT_SETTING)} </button>
-              : _.map(groupButtons, (item, i) => (
+            ? <button type="button" className="button-default"> {t(I18N_IDS.TEXT_NOT_SETTING)} </button>
+            : _.map(groupButtons, (item, i) => (
                   item['isShowLable']
                     ? <button
                         key={i}
                         type="button"
-                        className={classnames([this._getButtonStyle(item), { 'is-sub-button': !item.isShowLable }])}
+                        className={classnames([this._getButtonStyle(item), {
+                          'is-sub-button': !item.isShowLable,
+                          'editor-not-bind': groupButtonsNeedbinding[i],
+                        }])}
                       >
                         {item['methodDesc'] || item['fieldText'] || item['columnName']}
                       </button>
                     : null
                 ))
           }
-          <button className={classnames('groupActionButtonRight', this._getButtonStyle())} >
+          <button className={classnames('groupActionButtonRight', this._getButtonStyle(), {
+            'editor-not-bind': dropDownNeedBinding,
+          })} >
             <span />
             <i className="fi fi-caret" />
           </button>

@@ -151,7 +151,7 @@ export class UiFormSettingsGrid extends React.PureComponent<IUiFormSettingsGridP
                 {' '}{t(I18N_IDS.TEXT_COLUMNS)}
               </div>
               <div className="editor-grid-buttons">
-                <Button size="small" onClick={joinCols} >{t(I18N_IDS.TEXT_JOIN)}</Button>
+              <Button size="small" onClick={joinCols} >{t(I18N_IDS.TEXT_JOIN)}</Button>
                 <Button size="small" onClick={splitCol} >{t(I18N_IDS.TEXT_SPLIT)}</Button>
                 <Button size="small" disabled={!canUndo} onClick={undo} >{t(I18N_IDS.UNDO)}</Button>
                 <Button size="small" disabled={!canRedo} onClick={redo} >{t(I18N_IDS.REDO)}</Button>
@@ -288,7 +288,10 @@ interface IItemProps {
   element?: any;
 }
 
-class Item extends React.PureComponent<IItemProps> {
+class Item extends React.PureComponent<IItemProps, any> {
+  state = {
+    editorCancel: false,
+  };
   private _ref = React.createRef<HTMLDivElement>();
   private _inputContainerRef = React.createRef<HTMLDivElement>();
   render() {
@@ -324,7 +327,7 @@ class Item extends React.PureComponent<IItemProps> {
                 onDrop={onDrop}
                 ref={this._ref}
               >
-                <span className="editor-grid-item-text">
+                <span className="editor-grid-item-text" onDoubleClick={e => this._onEdit(e, onEdit)}>
                   {display}
                 </span>
                 <div className="editor-grid-item-actions" style={editingItem === element ? {
@@ -359,6 +362,9 @@ class Item extends React.PureComponent<IItemProps> {
   private _onEdit = (e: React.MouseEvent, callback?: (item: any) => any) => {
     e.stopPropagation();
     const { element } = this.props;
+    this.setState({
+      editorCancel: false,
+    });
     if (callback) {
       callback(element);
     }
@@ -392,18 +398,28 @@ class Item extends React.PureComponent<IItemProps> {
           <Input
             value={editingValue.fieldText}
             onChange={e => onEditorChange('fieldText', e.target.value)}
+            onBlur={e => {
+              if (!this.state.editorCancel) {
+                onEditorClose(true);
+              }
+              this.setState({
+                editorCancel: false,
+              });
+            }}
             size="small"
           />
         </div>
         <div className="editor-settings-item-editor-actions">
           <a
             title={t(I18N_IDS.TEXT_OK)} href="javascript:void(0)"
-            onClick={() => onEditorClose(true)}
-          >
+            >
             <Icon type="check" />
           </a>
           <a
             title={t(I18N_IDS.TEXT_CANCEL)} href="javascript:void(0)"
+            onMouseDown={() => this.setState({
+              editorCancel: true,
+            })}
             onClick={() => onEditorClose(false)}
           >
             <Icon type="close" />

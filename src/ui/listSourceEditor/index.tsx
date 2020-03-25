@@ -88,13 +88,13 @@ export class UiListSourceEditorModal extends React.Component<any, IUiListSourceE
                         type="default"
                         size="small"
                         onClick={this._addField}
-                      ><span style={{ width: '4em' }}>{t(I18N_IDS.TEXT_ADD_FIELD)}</span></Button>
-                      <Button
+                        ><span style={{ width: '4em' }}>{t(I18N_IDS.TEXT_ADD_FIELD)}</span></Button>
+                        <Button
                         type="primary"
                         size="small"
                         onClick={this._submitFields}
-                      ><span style={{ width: '4em' }}>{t(I18N_IDS.TEXT_OK)}</span></Button>
-                    </div>
+                        ><span style={{ width: '4em' }}>{t(I18N_IDS.TEXT_OK)}</span></Button>
+                        </div>
                   </div>
                 </>
               )
@@ -104,8 +104,8 @@ export class UiListSourceEditorModal extends React.Component<any, IUiListSourceE
             <div className="editor-list-source-editor-toolbar">
               {
                 columnsEditable
-                  ? <><Button size="small" onClick={this._toggleEditColumns} >{isEditingColumn ? t(I18N_IDS.TEXT_EDIT_FIELD_CANCLE) : t(I18N_IDS.TEXT_EDIT_FIELD)}</Button>{' '}</>
-                  : null
+                ? <><Button size="small" onClick={this._toggleEditColumns} >{isEditingColumn ? t(I18N_IDS.TEXT_EDIT_FIELD_CANCLE) : t(I18N_IDS.TEXT_EDIT_FIELD)}</Button>{' '}</>
+                : null
               }
               <Button size="small" onClick={this._addRow} >{t(I18N_IDS.TEXT_ADD_DATA)}</Button>
               {' '}
@@ -114,30 +114,32 @@ export class UiListSourceEditorModal extends React.Component<any, IUiListSourceE
               <Button size="small" onClick={this._removeRows} >{t(I18N_IDS.DELETE)}</Button>
             </div>
             <div className="editor-list-source-editor-table" ref={this.tableWrapRef} >
-              <Table
-                bordered
-                pagination={false}
-                size="small"
-                scroll={{
-                  x: 150 * columns.length + 50,
-                  y: 500,
-                }}
-                rowKey="__id"
-                onRow={(record) => {
-                  return {
-                    onClick: (e: React.MouseEvent) => {
-                      this._startEdit(record.__id);
-                    },
-                  };
-                }}
-                columns={columns}
-                dataSource={sourceObj}
-                rowSelection={{
-                  selectedRowKeys: selectedRows,
-                  onChange: keys => this.setState({ selectedRows: keys as string[] }),
-                  columnWidth: 50,
-                }}
-              />
+              <div className="editor-list-source-editor-table-inner">
+                <Table
+                  bordered
+                  pagination={false}
+                  size="small"
+                  scroll={{
+                    x: 150 * columns.length + 50,
+                    y: 'calc(100vh - 260px)',
+                  }}
+                  rowKey="__id"
+                  onRow={(record) => {
+                    return {
+                      onClick: (e: React.MouseEvent) => {
+                        this._startEdit(record.__id);
+                      },
+                    };
+                  }}
+                  columns={columns}
+                  dataSource={sourceObj}
+                  rowSelection={{
+                    selectedRowKeys: selectedRows,
+                    onChange: keys => this.setState({ selectedRows: keys as string[] }),
+                    columnWidth: 50,
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
