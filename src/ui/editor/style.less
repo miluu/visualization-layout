@@ -1,0 +1,59 @@
+.editor-main-wrap {
+  position: absolute;
+  top: 40px;
+  bottom: 0;
+  background: #fff;
+  padding: 0;
+  margin: 0;
+  .editor-main {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: #fff;
+    overflow-x: auto;
+    overflow-y: scroll;
+    padding: 15px 10px;
+    transform-origin: top left;
+    transition: all ease 0.1s;
+
+    .editor-hit-top,
+    .editor-hit-left,
+    .editor-hit-bottom,
+    .editor-hit-right {
+      pointer-events: none;
+    }
+
+    &.editor-dragging {
+
+      outline: 1px dashed green;
+      outline-offset: -1px;
+
+      .editor-hit-top,
+      .editor-hit-left,
+      .editor-hit-bottom,
+      .editor-hit-right {
+        pointer-events: all;
+        // background: #000;
+      }
+
+    }
+  }
+  &.editor-with-head .editor-main {
+    top: 40px;
+  }
+}
+.editor-head {
+  height: 40px;
+  line-height: 40px;
+  background: #eee;
+  padding: 0 10px;
+  h3 {
+    float: left;
+    font-size: 14px;
+    color: #000;
+    line-height: 40px;
+    margin-right: 20px;
+  }
+}

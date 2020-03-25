@@ -1,0 +1,39 @@
+@colorPrimary: #1890ff;
+
+.editor-page-list {
+  padding: 5px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  li, a {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+  }
+  li {
+    user-select: none;
+    > a {
+      display: block;
+      height: 24px;
+      font-size: 12px;
+      line-height: 24px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-decoration: none;
+      cursor: pointer;
+      color: #000;
+      padding: 0 5px;
+      border-radius: 3px;
+      &:hover {
+        background: lighten(@colorPrimary, 40%);
+      }
+    }
+    &.active a, &.active:hover a {
+      background-color: @colorPrimary;
+      color: #fff;
+    }
+  }
+}

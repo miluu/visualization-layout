@@ -1,0 +1,59 @@
+.editor-list-source-editor-modal {
+  .ant-table-thead > tr {
+    background: #fafafa;
+    th {
+      font-weight: bold;
+    }
+  }
+  .ant-table td {
+    position: relative !important;
+    height: 34px;
+    .editor-list-source-editor-cell {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      line-height: 34px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding: 0 4px;
+    }
+  }
+  .editor-list-source-editor-content {
+    display: flex;
+    height: 100%;
+  }
+  .editor-list-source-editor-fields {
+    width: 180px;
+    margin-right: 8px;
+    flex: none;
+    display: flex;
+    flex-direction: column;
+  }
+  .editor-list-source-editor-fields-buttons {
+    display: flex;
+    margin-top: 4px;
+    .ant-btn {
+      flex: auto;
+      margin-right: 4px;
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+  }
+  .editor-list-source-editor-table-wrap {
+    flex: auto;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  .editor-list-source-editor-toolbar {
+    flex: none;
+    margin-bottom: 4px;
+  }
+  .editor-list-source-editor-table {
+    flex: auto;
+  }
+}

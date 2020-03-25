@@ -1,0 +1,48 @@
+@iconSize: 16px * 4;
+
+.editor-tree-node-title {
+  position: relative;
+  &:hover {
+    padding-right: @iconSize;
+  }
+  .editor-tree-action {
+    margin-left: 4px;
+  }
+  .editor-tree-actions {
+    display: none;
+    width: @iconSize;
+    position: absolute;
+    right: 0;
+  }
+  &:hover .editor-tree-actions {
+    display: inline;
+  }
+  .editor-tree-title-text {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.ant-tree-node-selected {
+  a {
+    color: rgba(255, 255, 255, 0.75);
+
+    &:hover {
+      color: #fff;
+    }
+  }
+}
+
+.editor-page-tree {
+  user-select: none;
+}
+.editor-page-tree-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  .ant-btn {
+    flex: auto;
+    margin: 0 4px 4px 4px;
+  }
+}

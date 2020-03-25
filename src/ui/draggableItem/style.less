@@ -1,0 +1,125 @@
+.editor-draggable-item {
+  &.editor-draggable-item-V {
+    width: 75px;
+    margin: 5px 5px;
+    float: left;
+    position: relative;
+  }
+
+  &.editor-draggable-item-H {
+    display: flex;
+    align-items: center;
+  }
+
+  cursor: not-allowed;
+  user-select: none;
+  transition: transform ease 0.1s;
+
+  &.editor-editable {
+    cursor: move;
+    cursor: -webkit-grabbing;
+  }
+
+  &:hover {
+    z-index: 10;
+    .editor-item-name {
+      .editor-item-text {
+        color: #000;
+        outline: 5px solid #fff;
+        background: #fff;
+      }
+    }
+    .editor-item-icon {
+      .editor-item-icon-inner {
+        color: #000;
+      }
+    }
+  }
+}
+
+.editor-item-icon {
+  background: #eee;
+  border-radius: 3px;
+  text-align: center;
+  .editor-item-icon-inner {
+    color: #999;
+  }
+}
+
+.editor-item-name {
+  font-size: 12px;
+  line-height: 18px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: consolas;
+}
+
+.editor-draggable-item-V {
+  &:hover {
+    transform: scale(1.2);
+    .editor-item-name {
+      text-overflow: initial;
+      overflow: visible;
+    }
+  }
+  .editor-item-icon {
+    margin: 0 auto;
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    font-size: 22px;
+    .editor-item-icon-inner {
+      line-height: 32px;
+      color: #999;
+    }
+  }
+  .editor-item-name {
+    margin-top: 3px;
+    text-align: center;
+    line-height: 18px;
+  }
+  .editor-item-icon {
+    margin: 0 auto;
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    font-size: 22px;
+    .editor-item-icon-inner {
+      line-height: 32px;
+      color: #999;
+    }
+  }
+  .editor-item-name {
+    margin-top: 3px;
+    text-align: center;
+    line-height: 18px;
+  }
+}
+
+.editor-draggable-item-H {
+  margin-top: 8px;
+  &:first-child {
+    margin-top: 0;
+  }
+  &:hover {
+    background: #eee;
+    .editor-item-name {
+      .editor-item-text {
+        outline: none;
+        background: transparent;
+      }
+    }
+  }
+  .editor-item-icon {
+    width: 20px;
+    height: 20px;
+    .editor-item-icon-inner {
+      line-height: 20px;
+    }
+  }
+  .editor-item-name {
+    margin-left: 8px;
+  }
+}
+

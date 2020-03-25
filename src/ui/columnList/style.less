@@ -1,0 +1,164 @@
+.editor-list-container {
+  position: relative;
+  color: #000;
+  user-select: none;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  .editor-list-head {
+    height: 24px;
+    line-height: 24px;
+    overflow: hidden;
+    padding: 0 5px;
+    font-size: 12px;
+    flex: none;
+    h3 {
+      font-size: 12px;
+      float: left;
+    }
+  }
+  .editor-list-btns {
+    float: right;
+    a {
+      padding: 2px;
+      font-size: 12px;
+      color: #000;
+      cursor: pointer;
+      &:hover {
+        color: blue;
+      }
+    }
+  }
+
+  .editor-list-body {
+    border: 1px solid #ddd;
+    overflow: auto;
+    flex: auto;
+    background: #fff;
+    transition: background ease-in 0.3s;
+    &.editor-is-select-open {
+      background: #ddd;
+    }
+  }
+  .editor-list-filter {
+    padding-bottom: 4px;
+  }
+  ul, li {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  li {
+    height: 20px;
+    line-height: 20px;
+    padding: 0 5px;
+    cursor: default;
+    font-size: 12px;
+    color: #000;
+    position: relative;
+    .editor-list-display {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      top: 0;
+      left: 0;
+      padding: 0 8px;
+      .editor-list-count {
+        background: #999;
+        border-radius: 10px;
+        display: inline-block;
+        text-align: center;
+        min-width: 16px;
+        height: 16px;
+        vertical-align: middle;
+        line-height: 16px;
+        margin-right: 4px;
+      }
+    }
+    &.editor-hidden {
+      display: none;
+    }
+    &.editor-disabled {
+      color: #999;
+    }
+    &.editor-active, &.editor-active:hover {
+      background: #3875d6;
+      color: #fff;
+      &.editor-disabled {
+        color: #999;
+        background: #b6cff7;
+      }
+    }
+    &:hover {
+      background: #f5f5f5;
+      .editor-list-actions {
+        display: block;
+      }
+    }
+    &.editor-active {
+      .editor-list-actions {
+        a {
+          color: #fff;
+        }
+      }
+    }
+    .editor-list-actions {
+      display: none;
+      position: absolute;
+      height: 100%;
+      right: 4px;
+      display: none;
+      a {
+        color: #40a9ff;
+        margin-left: 4px;
+      }
+    }
+    .editor-list-editor {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background: #fff;
+      .editor-list-editor-actions {
+        width: 40px;
+        position: absolute;
+        right: 0;
+        top: 0;
+        height: 100%;
+        a {
+          color: #40a9ff;
+          margin-left: 4px;
+        }
+      }
+      .editor-list-editor-input {
+        width: calc(~"100% - 44px");
+        position: absolute;
+        top: 0;
+        left: 4px;
+        height: 100%;
+        .ant-input-sm {
+          height: 100%;
+        }
+      }
+    }
+  }
+  .editor-list-extend {
+    margin-top: 4px;
+    flex: none;
+  }
+  .editor-column-list-checkboxs {
+    position: absolute;
+    right: 5px;
+  }
+  .editor-list-head-checkbox {
+    height: 28px;
+    text-align: right;
+    padding-right: 6px;
+    padding-top: 4px;
+  }
+}

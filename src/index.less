@@ -1,0 +1,164 @@
+@colorPrimary: #1890ff;
+@colorDanger: #d9534f;
+
+.__clearfix {
+  &:before {
+    display: table;
+    content: " ";
+  }
+  &:after {
+    display: table;
+    content: " ";
+    clear: both;
+  }
+}
+
+// .editor-base-layout.editor-dragging-over {
+//   background: rgb(180, 255, 202) !important;
+// }
+
+// .editor-base-layout.editor-dragging-source {
+//   background: rgb(210, 248, 255) !important;
+// }
+
+// ---
+.editor-root {
+  width: 100vw;
+  height: 100vh;
+  // background: #fff;
+  position: relative;
+}
+
+.ant-tooltip-inner {
+  min-height: 24px;
+  font-size: 12px;
+}
+
+.ant-select-dropdown {
+  font-size: 12px;
+}
+
+.ant-select-dropdown-menu-item {
+  line-height: 14px;
+}
+
+// #root .ant-spin-container::after {
+//   background: #000;
+// }
+
+#root .ant-spin-blur::after {
+  opacity: 0.1;
+}
+
+.editor-root-spin.ant-spin {
+  z-index: 99999999;
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: rgba(255, 255, 255, 0.4);;
+  .ant-spin-dot {
+    top: calc(40vh);
+  }
+}
+
+/* .... */
+.editor-sign {
+  position: absolute;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  font-size: 12px;
+  font-family: consolas;
+  margin: 0;
+  padding: 0 5px;
+  left: 5px;
+  top: -9px;
+  height: 18px;
+  line-height: 14px;
+  box-sizing: border-box;
+  background: #fff;
+  white-space: nowrap;
+  color: #000;
+  z-index: 1;
+  .editor-collpase {
+    color: #333;
+    margin-right: 5px;
+  }
+  .editor-ui-type {
+    color: #3875d6;
+    margin-right: 5px;
+    .editor-class-display {
+      color: #f0ad4e;
+    }
+  }
+  .editor-parent {
+    background-color: #5cb85c;
+    color: #fff;
+    border-radius: 2px;
+    padding: 0 2px;
+    margin-top: -1px;
+    cursor: pointer;
+    &.editor-parent-false {
+      background-color: #aaa;
+    }
+  }
+}
+
+/* patch */
+button, html [type="button"], [type="reset"], [type="submit"] {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.editor-pagetree-modal .ant-modal-body {
+  max-height: calc(~"100vh - 300px");
+  overflow: auto;
+  font-size: 12px;
+  .ant-tree li {
+    padding: 0;
+    font-size: 12px;
+  }
+  .ant-tree > li:first-child {
+    padding: 0;
+  }
+  .ant-tree-child-tree > li:first-child {
+    padding: 0;
+  }
+  .ant-tree li .ant-tree-node-content-wrapper.ant-tree-node-selected {
+    background-color: @colorPrimary;
+    color: #fff;
+    &:hover {
+      background-color: @colorPrimary;
+    }
+  }
+  .ant-tree li .ant-tree-node-content-wrapper:hover {
+    background: lighten(@colorPrimary, 40%);
+  }
+  .ant-btn {
+    font-size: 12px;
+  }
+}
+
+.editor-tree-select {
+  .ant-select-tree {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+  .ant-select-tree li {
+    margin: 0;
+  }
+  .ant-select-tree li .ant-select-tree-node-content-wrapper {
+    padding: 2px 0;
+    font-size: 12px;
+  }
+}
+
+.editor-error-notification .editor-ui-link {
+  color: @colorDanger;
+}
+
+.ant-notification-notice {
+  max-height: calc(~"100vh - 100px");
+  overflow: auto;
+}

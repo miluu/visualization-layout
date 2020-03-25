@@ -1,0 +1,50 @@
+{
+  "name": "visualization-src",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@types/html2canvas": "^0.0.35",
+    "@types/jquery": "^3.3.29",
+    "@types/react-router-dom": "^4.3.1",
+    "@types/uuid": "^3.4.4",
+    "antd": "^3.15.1",
+    "axios": "^0.18.0",
+    "classnames": "^2.2.6",
+    "customize-cra": "^0.2.12",
+    "dva": "^2.4.1",
+    "html2canvas": "^1.0.0-rc.1",
+    "immer": "^2.1.4",
+    "jquery": "^3.4.1",
+    "lodash": "^4.17.11",
+    "mockjs": "^1.0.1-beta3",
+    "qs": "^6.7.0",
+    "react": "^16.8.5",
+    "react-color": "^2.17.3",
+    "react-dom": "^16.8.5",
+    "react-perf-devtool": "^3.1.8",
+    "react-scripts-ts-antd": "2.17.0",
+    "rxjs": "^6.4.0",
+    "tslint": "^5.14.0",
+    "tslint-config-airbnb": "^5.11.1",
+    "uuid": "^3.3.2"
+  },
+  "scripts": {
+    "start": "react-scripts-ts-antd start",
+    "build": "react-scripts-ts-antd build",
+    "test": "react-scripts-ts-antd test --env=jsdom",
+    "eject": "react-scripts-ts-antd eject"
+  },
+  "devDependencies": {
+    "@types/classnames": "^2.2.7",
+    "@types/jest": "^24.0.11",
+    "@types/lodash": "^4.14.123",
+    "@types/mockjs": "^1.0.2",
+    "@types/node": "^11.11.6",
+    "@types/qs": "^6.5.2",
+    "@types/react": "^16.8.8",
+    "@types/react-color": "^3.0.1",
+    "@types/react-dom": "^16.8.3",
+    "typescript": "^3.3.4000"
+  },
+  "homepage": "http://localhose:300/html/platform/visualization/common"
+}
