@@ -23,6 +23,7 @@ import { queryPageList } from './service';
 import { BUILT_IN_STYLE_CLASSES } from 'src/config';
 import { t } from 'src/i18n';
 import I18N_IDS from 'src/i18n/ids';
+import { UiComponentGroupList } from 'src/ui/componentGroupList';
 // import { UiComponentGroupList } from 'src/ui/componentGroupList';
 
 const INIT_LAYOUT_DATA: IBoPageLayout = {
@@ -1567,14 +1568,14 @@ export const PROTOTYPE_CONFIG = {
         },
       ],
     },
-    // {
-    //   groupTitle: '控件组合',
-    //   render: () => {
-    //     return (
-    //       <UiComponentGroupList />
-    //     );
-    //   },
-    // },
+    {
+      groupTitle: '控件组合',
+      render: () => {
+        return (
+          <UiComponentGroupList />
+        );
+      },
+    },
   ] as IUiDraggableListGroupItem[],
 
   /** 获取 Layout 对应的 Component Key, 用于动态渲染界面时获取对应的 Component
