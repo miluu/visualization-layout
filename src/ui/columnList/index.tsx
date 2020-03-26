@@ -80,6 +80,7 @@ interface IUiColumnListState {
   selectValue?: any;
 
   draggingItem?: any;
+  editorCancel?: boolean;
 }
 
 export class UiColumnList extends React.PureComponent<IUiColumnListProps, IUiColumnListState> {
@@ -209,6 +210,7 @@ export class UiColumnList extends React.PureComponent<IUiColumnListProps, IUiCol
       editingValue: {
         [editProp]: item && item[editProp],
       },
+      editorCancel: false,
     });
     this._delayFocusInput();
   }
@@ -434,17 +436,20 @@ export class UiColumnList extends React.PureComponent<IUiColumnListProps, IUiCol
             value={editingValue[editProp]}
             size="small"
             onChange={e => this._onEditorChange(e.target.value)}
+            onBlur={this._onEditorBlur}
             onKeyDown={this._onEditorKeyDown}
           />
         </div>
         <div className="editor-list-editor-actions">
           <a
-            onClick={e => this._closeEditor(true)}
             title={t(I18N_IDS.TEXT_OK)} href="javascript:void(0)"
           >
             <Icon type="check" />
           </a>
           <a
+            onMouseDown={() => this.setState({
+              editorCancel: true,
+            })}
             onClick={e => this._closeEditor(false)}
             title={t(I18N_IDS.TEXT_CANCEL)} href="javascript:void(0)"
           >
@@ -483,6 +488,15 @@ export class UiColumnList extends React.PureComponent<IUiColumnListProps, IUiCol
       this._closeEditor(false);
       return;
     }
+  }
+
+  private _onEditorBlur = (e: React.FocusEvent) => {
+    if (!this.state.editorCancel) {
+      this._closeEditor(true);
+    }
+    this.setState({
+      editorCancel: false,
+    });
   }
 
   private _onDragStart = async (e: React.DragEvent, item: any) => {
