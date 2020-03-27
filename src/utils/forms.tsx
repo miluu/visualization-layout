@@ -60,6 +60,7 @@ export interface IFormItemOption {
   showWhen?: (values: any) => boolean;
   /** change 时同步更新其它字段 */
   changeExt?: (values: any) => any;
+  placeholder?: string;
   [key: string]: any;
 }
 
@@ -204,6 +205,7 @@ export function renderInput(item: IFormItemOption, onChangeCallback: OnChangeCal
   return <WrappedInput
     disabled={item.disabled}
     size="small"
+    placeholder={item.placeholder}
     onChange={(value: any) => onChangeCallback(item, value)}
   />;
 }
@@ -222,6 +224,7 @@ export function renderTextarea(item: IFormItemOption, onChangeCallback: OnChange
     disabled={item.disabled}
     autosize={{ minRows: 2, maxRows: 10 }}
     onChange={value => onChangeCallback(item, value)}
+    placeholder={item.placeholder}
   />;
 }
 
@@ -232,6 +235,7 @@ export function renderSelect(item: IFormItemOption, dicts: IDictsMap, onChangeCa
       size="small"
       allowClear
       onChange={(value) => onChangeCallback(item, value)}
+      placeholder={item.placeholder}
     >
         {_.map((item.list || dicts[item.dictName]), listItem => (
           <Option title={listItem.value} key={listItem.key} value={listItem.key}>
@@ -252,6 +256,7 @@ export function renderNumberInput(item: IFormItemOption, onChangeCallback: OnCha
       step={item.step || 1}
       precision={item.precision || 0}
       width="100%"
+      placeholder={item.placeholder}
       onChange={v => onChangeCallback(item, v)}
     />
   );
@@ -271,6 +276,7 @@ export function renderMultiSelect(item: IFormItemOption, dicts: IDictsMap, onCha
       mode="tags"
       tokenSeparators={[' ']}
       onChange={() => onChangeCallback(item)}
+      placeholder={item.placeholder}
     >
       {_.map((item.list || dicts[item.dictName]), listItem => {
         let key: string;

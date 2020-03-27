@@ -101,6 +101,10 @@ const I18N_IDS = {
   LABEL_PARENT_CELL_NAME: 'Label Parent Cell Name',
   /** 是否父栅格 */
   LABEL_IS_PARENT: 'Label Is Parent',
+  /** 是否固定高度显示 */
+  LABEL_IS_VISUALIZATION_MAX_HEIGHT_OPEN: 'Label Is Visualization Max Height Open',
+  /** 是否固定高度显示 */
+  TEXT_VISUALIZATION_MAX_HEIGHT_PLACEHOLDER: 'Text Visualization Max Height Placeholder',
   /** 布局元素业务对象名称 */
   LABEL_LAYOUT_BO_NAME: 'Label Layout Bo Name',
   /** 包含栅格数 */

@@ -148,6 +148,7 @@ export class BaseLayoutComponent extends React.Component<IBaseLayoutComponentPro
   protected _createRootProps = (extendsClassNames: string[], draggable = true, droppable = true) => {
     const { isDragging, isDraggingOver, editorStatus, isSelected } = this.props;
     const { isCollpased } = this.state;
+    const maxHeightStyle = this._getMaxHeightStyle();
     return ({
       id: this._getDomRootId(),
       onClick: this._selectLayout,
@@ -163,6 +164,9 @@ export class BaseLayoutComponent extends React.Component<IBaseLayoutComponentPro
         this._getStyleClass(),
         this._getColClass(),
         {
+          'editor-layout-max-height': !!maxHeightStyle.maxHeight,
+        },
+        {
           'editor-dragging-over': isDragging,
           'editor-dragging-source': isDraggingOver,
           'editor-layout-collpased': isCollpased,
@@ -172,7 +176,8 @@ export class BaseLayoutComponent extends React.Component<IBaseLayoutComponentPro
       style: editorStatus === EditorStatus.EDIT ? {
         position: 'relative',
         outlineColor: this._getDatasourceBgColor(),
-      } as React.CSSProperties : null,
+        ...maxHeightStyle,
+      } as React.CSSProperties : maxHeightStyle,
     });
   }
 
@@ -412,6 +417,24 @@ export class BaseLayoutComponent extends React.Component<IBaseLayoutComponentPro
       return `col-xs-${layout.unitCount}`;
     }
     return null;
+  }
+
+  protected _getMaxHeightStyle = () => {
+    const { layout } = this.props;
+    const { pageLayoutAttr } = layout;
+    let attrObj: any = {};
+    if (pageLayoutAttr) {
+      try {
+        attrObj = JSON.parse(pageLayoutAttr) || {};
+      } catch (__) {/*  */}
+    }
+    if (!attrObj.visualizationMaxHeightOpen) {
+      return {};
+    }
+    return {
+      // overflow: 'auto',
+      maxHeight: attrObj.visualizationMaxHeight || 500,
+    };
   }
 
   protected _getUiTypeText = () => {

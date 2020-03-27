@@ -50,6 +50,8 @@ export default {
 
   [ids.LABEL_CELL_NAME]: 'Cell Name',
   [ids.LABEL_PARENT_CELL_NAME]: 'Parent Cell Name',
+  [ids.LABEL_IS_VISUALIZATION_MAX_HEIGHT_OPEN]: 'Max Height',
+  [ids.TEXT_VISUALIZATION_MAX_HEIGHT_PLACEHOLDER]: 'Default 500px',
   [ids.LABEL_IS_PARENT]: 'Is Parent',
   [ids.LABEL_LAYOUT_BO_NAME]: 'Layout Bo Name',
   [ids.LABEL_UNIT_COUNT]: 'Unit Count',

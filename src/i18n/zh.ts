@@ -51,6 +51,8 @@ export default {
   [ids.LABEL_CELL_NAME]: '栅格名称',
   [ids.LABEL_PARENT_CELL_NAME]: '父栅格',
   [ids.LABEL_IS_PARENT]: '是否父栅格',
+  [ids.LABEL_IS_VISUALIZATION_MAX_HEIGHT_OPEN]: '固定高度',
+  [ids.TEXT_VISUALIZATION_MAX_HEIGHT_PLACEHOLDER]: '默认 500px',
   [ids.LABEL_LAYOUT_BO_NAME]: '布局元素业务对象名称',
   [ids.LABEL_UNIT_COUNT]: '包含栅格数',
   [ids.LABEL_LAYOUT_CONTAINER_TYPE]: '页面布局容器类型',

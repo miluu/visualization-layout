@@ -147,6 +147,19 @@ export const PROTOTYPE_CONFIG = {
       disabled: true,
     },
     {
+      property: 'pageLayoutAttr#visualizationMaxHeightOpen',
+      type: 'checkbox',
+      label: t(I18N_IDS.LABEL_IS_VISUALIZATION_MAX_HEIGHT_OPEN),
+    },
+    {
+      property: 'pageLayoutAttr#visualizationMaxHeight',
+      type: 'number',
+      label: '',
+      min: 0,
+      placeholder: t(I18N_IDS.TEXT_VISUALIZATION_MAX_HEIGHT_PLACEHOLDER),
+      showWhen: values => values && values['pageLayoutAttr#visualizationMaxHeightOpen'],
+    },
+    {
       property: 'isParent',
       label: t(I18N_IDS.LABEL_IS_PARENT),
       type: 'checkbox',
