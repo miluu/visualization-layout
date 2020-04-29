@@ -940,6 +940,15 @@ export const DATASOURCE_BINDING_CONFIG = {
         },
         {
           source: createElement({
+            uiType: '40',
+            columnName: t(I18N_IDS.CONTROL_TEXT_EXACT_MATCHING),
+          }),
+          type: 'element',
+          title: t(I18N_IDS.CONTROL_TEXT_EXACT_MATCHING),
+          icon: 'icongl-search-form',
+        },
+        {
+          source: createElement({
             layoutElementType: 'BUTTON',
           }),
           type: 'element',

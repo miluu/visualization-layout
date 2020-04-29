@@ -18,7 +18,7 @@ export class ElementListViewColumnComponent extends BaseElementComponent {
         {...this._createRootProps(['editor-element-list-view-column', 'header-column-cell align-center'])}
         style={{
           position: 'relative',
-          width: element['controlWidth'] || 150,
+          width: `${element['controlWidth'] || 150}px`,
         }}
       >
         {

@@ -302,6 +302,7 @@ export function createLayoutsModel<L = any, E = any>({
           let _layouts = layouts;
           if (addHistory === 'INIT') {
             _layouts = initGridColumnData(layouts, childrenElementsKey);
+            console.log('...... INIT');
           }
           draft.layouts = _layouts as any;
         });

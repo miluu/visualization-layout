@@ -345,6 +345,7 @@ export function formatSaveData(dataIn: any, _dm: any) {
   opts = {
     id: dm.ipfCcmBoPageId || dm.ipfCcmBoId,
     isPage: dm.isPage,
+    baseViewId: dm.baseViewId,
   };
   return JSON.parse(JSON.stringify(_.assign({}, postData, opts), (k: any, v: any) => {
     if (k.indexOf('__') === 0) {

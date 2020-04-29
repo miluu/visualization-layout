@@ -64,6 +64,7 @@ import { UiImportLayoutsJsonModal } from 'src/ui/importLayoutsJsonModal';
 import { t } from 'src/i18n';
 import I18N_IDS from 'src/i18n/ids';
 import { UiSaveAsPrototypeForm } from 'src/ui/saveAsPrototypeForm';
+import { cellNameManager } from 'src/utils/cellName';
 
 const { Panel } = Collapse;
 const { TabPane } = Tabs;
@@ -335,6 +336,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
       this.props.dispatch(
         createLoadPageListEffect(queryPageList, [{
           ipfCcmBoId: this.props.urlParams['ipfCcmBoId'],
+          baseViewId: this.props.urlParams['baseViewId'],
         }]),
       );
     }
@@ -494,6 +496,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
     console.log(boPageLayout);
     this._closePrototypePageListModal();
     this.props.dispatch(createReplaceLayoutsAction(boPageLayout, true, true));
+    cellNameManager.init(boPageLayout, cellNameManager.configName);
   }
 
   private _onClickSave = (e: React.MouseEvent) => {

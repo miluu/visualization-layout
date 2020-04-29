@@ -4,6 +4,9 @@ export class CellNameManager {
   private _existCellNames: string[] = [];
   private _configName: string;
 
+  get configName() {
+    return this._configName;
+  }
   create(parentCellName?: string) {
     let prefix: string;
     if (parentCellName === 'ROOT_E') {
@@ -41,6 +44,7 @@ export class CellNameManager {
   init(layouts: any[], configName?: string, cellNameKey = 'cellName') {
     this._existCellNames = _.map(layouts, l => l[cellNameKey]);
     this._configName = configName;
+    console.log('...... cellname.INIT');
   }
 }
 

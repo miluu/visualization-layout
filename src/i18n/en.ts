@@ -155,6 +155,8 @@ export default {
   [ids.LABEL_MODAL_MESSAGE]: 'Modal Message',
   [ids.LABEL_MODAL_WIDTH]: 'Modal Width',
   [ids.LABEL_MODAL_HEIGHT]: 'Modal Height',
+  [ids.LABEL_LIMIT_COUNT]: 'Limit Count',
+  [ids.LABEL_QUERY_NAME]: 'Query Name',
 
   [ids.TEXT_ALL]: 'All',
   [ids.TEXT_OPTION]: 'OPTION',
@@ -233,6 +235,7 @@ export default {
   [ids.CONTROL_HIDDEN]: 'Hidden',
   [ids.CONTROL_FILE_UPLOADER]: 'File Uploader',
   [ids.CONTROL_BUTTON_GROUP]: 'Button Group',
+  [ids.CONTROL_TEXT_EXACT_MATCHING]: 'Exact Matching',
 
   [ids.MESSAGE_NO_LAYOUT]: 'There is no layout data on the current page. Is the prototype interface layout imported?',
   [ids.MESSAGE_SELECT_PROTOTYPE]: 'Please double click to select a prototype page',

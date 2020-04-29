@@ -476,6 +476,16 @@ export const VISUALIZATION_CONFIG = {
       dictName: 'IpfCcmBoUIType',
     },
     {
+      property: 'layoutElementAttr#limitCount',
+      label: t(I18N_IDS.LABEL_LIMIT_COUNT),
+      showWhen: values => values && values.uiType === '40',
+    },
+    {
+      property: 'layoutElementAttr#queryName',
+      label: t(I18N_IDS.LABEL_QUERY_NAME),
+      showWhen: values => values && values.uiType === '40',
+    },
+    {
       property: 'searchHelp',
       label: t(I18N_IDS.LABEL_SEARCH_HELP),
     },
@@ -538,6 +548,16 @@ export const VISUALIZATION_CONFIG = {
     {
       property: 'layoutElementAttr#placeholder',
       label: t(I18N_IDS.LABEL_PLACEHOLDER),
+    },
+    {
+      property: 'layoutElementAttr#limitCount',
+      label: t(I18N_IDS.LABEL_LIMIT_COUNT),
+      showWhen: values => values && values.uiType === '40',
+    },
+    {
+      property: 'layoutElementAttr#queryName',
+      label: t(I18N_IDS.LABEL_QUERY_NAME),
+      showWhen: values => values && values.uiType === '40',
     },
     {
       property: 'isInline',
@@ -1065,6 +1085,15 @@ export const VISUALIZATION_CONFIG = {
           type: 'element',
           title: t(I18N_IDS.CONTROL_ADVANCED_SEARCH),
           icon: 'icongl-more-search',
+        },
+        {
+          source: createElement({
+            uiType: '40',
+            columnName: t(I18N_IDS.CONTROL_TEXT_EXACT_MATCHING),
+          }),
+          type: 'element',
+          title: t(I18N_IDS.CONTROL_TEXT_EXACT_MATCHING),
+          icon: 'icongl-search-form',
         },
         {
           source: createElement({

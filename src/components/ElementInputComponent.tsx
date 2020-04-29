@@ -107,6 +107,8 @@ export class ElementInputComponent extends BaseElementComponent {
         return this._renderQueryFilter();
       case 'query-filter-multi':
         return this._renderQueryFilterMulti();
+      case 'exact-matching':
+        return this._renderExactMatching();
       default:
         return this._renderTextInput(element);
     }
@@ -277,6 +279,30 @@ export class ElementInputComponent extends BaseElementComponent {
           <li>{`${t(I18N_IDS.TEXT_OPTION)}-3`}</li>
           <li>{`${t(I18N_IDS.TEXT_OPTION)}-4`}</li>
         </ul>
+      </div>
+    );
+  }
+
+  private _renderExactMatching() {
+    const { element } = this.props;
+    let placeholder: string;
+    try {
+      placeholder = JSON.parse(element.layoutElementAttr).placeholder;
+    } catch (e) { /*  */ }
+    const rows = element.textLineNum || 3;
+    return (
+      <div className="glpaas-exact-matching-wrap">
+        <textarea
+          placeholder={placeholder}
+          className="form-control textarea-rows"
+          value={this._getDisplayValue()}
+          rows={rows}
+        />
+        <label>
+          <input
+            type="checkbox"
+          /> 精确匹配
+        </label>
       </div>
     );
   }

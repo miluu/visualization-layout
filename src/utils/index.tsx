@@ -482,6 +482,8 @@ export function transformUiType(uiType: any) {
       return 'query-filter';
     case '36': // 多选筛选
       return 'query-filter-multi';
+    case '40': // 精确匹配
+      return 'exact-matching';
     case '17':
     case '26':
     case '27':

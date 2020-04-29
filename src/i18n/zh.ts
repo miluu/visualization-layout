@@ -155,6 +155,8 @@ export default {
   [ids.LABEL_MODAL_MESSAGE]: '弹窗消息',
   [ids.LABEL_MODAL_WIDTH]: '弹窗宽度',
   [ids.LABEL_MODAL_HEIGHT]: '弹窗高度',
+  [ids.LABEL_LIMIT_COUNT]: '最大返回数',
+  [ids.LABEL_QUERY_NAME]: '查询名称',
 
   [ids.TEXT_ALL]: '全部',
   [ids.TEXT_OPTION]: '选项',
@@ -232,6 +234,7 @@ export default {
   [ids.CONTROL_HIDDEN]: '隐藏',
   [ids.CONTROL_FILE_UPLOADER]: '上传控件',
   [ids.CONTROL_BUTTON_GROUP]: '按钮组',
+  [ids.CONTROL_TEXT_EXACT_MATCHING]: '精确匹配',
 
   [ids.MESSAGE_NO_LAYOUT]: '当前页面无布局数据，是否导入原型界面布局?',
   [ids.MESSAGE_SELECT_PROTOTYPE]: '请双击选择一个原型页面',

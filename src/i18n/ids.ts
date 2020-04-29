@@ -307,6 +307,10 @@ const I18N_IDS = {
   LABEL_MODAL_WIDTH: 'Label Modal Width',
   /** 弹窗高度 */
   LABEL_MODAL_HEIGHT: 'Label Modal Height',
+  /** 精确查询: 数量限制 */
+  LABEL_LIMIT_COUNT: 'Label Limit Count',
+  /** 精确查询: 查询名称 */
+  LABEL_QUERY_NAME: 'Label Query Name',
 
   /** 文字: 选项 */
   TEXT_OPTION: 'Text Option',
@@ -465,6 +469,8 @@ const I18N_IDS = {
   CONTROL_MULTIPLE_QUERY_FILTER: 'Control Multiple Query Filter',
   /** 控件: 按钮组 */
   CONTROL_BUTTON_GROUP: 'Control Button Group',
+  /** 控件： 精确匹配 */
+  CONTROL_TEXT_EXACT_MATCHING: 'Control Text Exact Matching',
 
   /** 提示信息: 当前页面无布局数据，是否导入原型界面布局? */
   MESSAGE_NO_LAYOUT: 'Message No Layout',

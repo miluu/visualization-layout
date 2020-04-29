@@ -2,11 +2,14 @@ import * as React from 'react';
 import * as _ from 'lodash';
 
 import { BaseLayoutComponent, connector } from './BaseLayoutComponent';
-import { registGlobalComponentClass, renderPagination } from 'src/utils';
+import { registGlobalComponentClass, renderPagination, isEqual, getControlDefaultSetting } from 'src/utils';
 
 import { ElementListViewColumnComponent } from './ElementListViewColumnComponent';
 
 import './LayoutListViewComponent.less';
+import produce from 'immer';
+import { createUpdateLayoutsAction } from 'src/models/layoutsActions';
+import { openPrototypeGridSettingsModal, openGridSettingsModal } from 'src/utils/modal';
 
 /**
  * 布局元素类型: LIST_VIEW
@@ -55,6 +58,59 @@ export class LayoutListViewComponent extends BaseLayoutComponent {
 
       </div>
     );
+  }
+
+  clickSettings = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const { config, layout, properties, methods, location, defaultSetting } = this.props;
+
+    const onSubmit = (list: any[]) => {
+      const childrenElements = layout[config.childrenElementsKey];
+      if (isEqual(childrenElements, list)) {
+        console.log('[openGridSettingsModal onSubmit] 没有变化。');
+        return;
+      }
+      const newChildrenElements = _.map(list, (item, i) => {
+        const isNew = !_.find(childrenElements, column => column[config.elementIdKey] === item[config.elementIdKey]);
+        return produce(item, draft => {
+          draft[config.elementOrderKey] = i + config.elementStartIndex;
+          if (isNew) {
+            const gridDefaultSetting = getControlDefaultSetting(defaultSetting, 'G', item.uiType);
+            _.assign(draft, gridDefaultSetting);
+          }
+        });
+      });
+      const newLayout = produce(layout, draft => {
+        draft[config.childrenElementsKey] = newChildrenElements;
+      });
+      this.props.dispatch(createUpdateLayoutsAction(
+        [newLayout],
+        true,
+        true,
+      ));
+    };
+
+    if (location.pathname === '/prototype') {
+      openPrototypeGridSettingsModal({
+        config,
+        layout,
+        gridColumns: layout[config.childrenElementsKey] || [],
+        onSubmit: (__, list) => {
+          onSubmit(list);
+        },
+      });
+      return;
+    }
+
+    openGridSettingsModal({
+      config,
+      layout,
+      properties,
+      methods,
+      onSubmit: (__, ___, list) => {
+        onSubmit(list);
+      },
+    });
   }
 
   private _renderListViewColumns() {
