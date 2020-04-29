@@ -478,6 +478,10 @@ export const VISUALIZATION_CONFIG = {
     {
       property: 'layoutElementAttr#limitCount',
       label: t(I18N_IDS.LABEL_LIMIT_COUNT),
+      type: 'number',
+      max: Infinity,
+      min: 0,
+      step: 1,
       showWhen: values => values && values.uiType === '40',
     },
     {
@@ -548,16 +552,6 @@ export const VISUALIZATION_CONFIG = {
     {
       property: 'layoutElementAttr#placeholder',
       label: t(I18N_IDS.LABEL_PLACEHOLDER),
-    },
-    {
-      property: 'layoutElementAttr#limitCount',
-      label: t(I18N_IDS.LABEL_LIMIT_COUNT),
-      showWhen: values => values && values.uiType === '40',
-    },
-    {
-      property: 'layoutElementAttr#queryName',
-      label: t(I18N_IDS.LABEL_QUERY_NAME),
-      showWhen: values => values && values.uiType === '40',
     },
     {
       property: 'isInline',

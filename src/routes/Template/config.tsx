@@ -357,6 +357,20 @@ export const TEMPLATE_CONFIG = {
       dictName: 'IpfCcmBoUIType',
     },
     {
+      property: 'layoutElementAttr#limitCount',
+      label: t(I18N_IDS.LABEL_LIMIT_COUNT),
+      type: 'number',
+      max: Infinity,
+      min: 0,
+      step: 1,
+      showWhen: values => values && values.uiType === '40',
+    },
+    {
+      property: 'layoutElementAttr#queryName',
+      label: t(I18N_IDS.LABEL_QUERY_NAME),
+      showWhen: values => values && values.uiType === '40',
+    },
+    {
       property: 'searchHelp',
       label: '搜索帮助名',
     },
