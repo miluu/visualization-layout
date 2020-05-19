@@ -490,6 +490,11 @@ export const VISUALIZATION_CONFIG = {
       showWhen: values => values && values.uiType === '40',
     },
     {
+      property: 'layoutElementAttr#fieldName',
+      label: t(I18N_IDS.LABEL_FIELD_NAME),
+      showWhen: values => values && values.uiType === '40',
+    },
+    {
       property: 'searchHelp',
       label: t(I18N_IDS.LABEL_SEARCH_HELP),
     },

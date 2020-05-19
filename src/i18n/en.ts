@@ -157,6 +157,7 @@ export default {
   [ids.LABEL_MODAL_HEIGHT]: 'Modal Height',
   [ids.LABEL_LIMIT_COUNT]: 'Limit Count',
   [ids.LABEL_QUERY_NAME]: 'Query Name',
+  [ids.LABEL_FIELD_NAME]: 'Field Name',
 
   [ids.TEXT_ALL]: 'All',
   [ids.TEXT_OPTION]: 'OPTION',

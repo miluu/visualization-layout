@@ -56,6 +56,7 @@ import {
   findElementById,
   transformUiType,
   checkUiType,
+  checkExactMatch,
   confirm,
   findChildren,
   createGridSourceFromColumns,
@@ -499,6 +500,32 @@ export const appModel: IAppModel = {
         } as ModalFuncProps);
         if (!checkUiTypeConfirm) {
           yield put(createSelectElementAction(checkUiTypeResult.element[config.elementIdKey], {}, true));
+          return;
+        }
+      }
+
+      // 校验精确匹配控件
+      const checkExactMatchResult = checkExactMatch(layouts, config.childrenElementsKey);
+      if (!checkExactMatchResult.valid) {
+        const checkExactMatchConfirm: boolean = yield call(confirm, {
+          content: (
+            <>
+              {_.map(checkExactMatchResult.msgs, (msg, i) => {
+                return (
+                  <React.Fragment key={i}>
+                    {msg}
+                    <br />
+                  </React.Fragment>
+                );
+              })}
+              <br />
+              是否继续保存？
+            </>
+          ),
+          okText: '仍然保存',
+        } as ModalFuncProps);
+        if (!checkExactMatchConfirm) {
+          yield put(createSelectElementAction(checkExactMatchResult.element[config.elementIdKey], {}, true));
           return;
         }
       }

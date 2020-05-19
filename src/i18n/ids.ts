@@ -311,6 +311,8 @@ const I18N_IDS = {
   LABEL_LIMIT_COUNT: 'Label Limit Count',
   /** 精确查询: 查询名称 */
   LABEL_QUERY_NAME: 'Label Query Name',
+  /** 精确查询: 查询名称 */
+  LABEL_FIELD_NAME: 'Label Filter Name',
 
   /** 文字: 选项 */
   TEXT_OPTION: 'Text Option',

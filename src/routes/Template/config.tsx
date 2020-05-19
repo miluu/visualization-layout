@@ -371,6 +371,11 @@ export const TEMPLATE_CONFIG = {
       showWhen: values => values && values.uiType === '40',
     },
     {
+      property: 'layoutElementAttr#fieldName',
+      label: t(I18N_IDS.LABEL_FIELD_NAME),
+      showWhen: values => values && values.uiType === '40',
+    },
+    {
       property: 'searchHelp',
       label: '搜索帮助名',
     },

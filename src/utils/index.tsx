@@ -1010,6 +1010,34 @@ export function checkUiType(layouts: any[], properties: IPropertiesMap, children
 }
 
 /**
+ * 校验精确匹配控件
+ */
+export function checkExactMatch(layouts: any[], childrenElementKey: string) {
+  const elements = _.filter(getLayoutElements(layouts, true, childrenElementKey), e => transformUiType(e.uiType) === 'exact-matching');
+  const ret = {
+    valid: true,
+    msgs: [] as string[],
+    element: null as any,
+    tipType: 'confirm',
+  };
+  _.forEach(elements, e => {
+    const { layoutElementAttr } = e;
+    let obj: any = {};
+    try {
+      obj = JSON.parse(layoutElementAttr || '{}');
+    } catch (e) {
+      /* Parse Error */
+    }
+    if (!obj.fieldName || !obj.queryName) {
+      ret.valid = false;
+      ret.element = e;
+      ret.msgs = [`【${e.fieldText || e.columnName || '-'}】精确查询控件未配置查询名称或过滤名称。`];
+    }
+  });
+  return ret;
+}
+
+/**
  * 校验 FORM 的布局元素名称是否重复
  */
 export function checkFormElementName(layouts: any[]) {
