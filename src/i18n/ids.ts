@@ -313,6 +313,8 @@ const I18N_IDS = {
   LABEL_QUERY_NAME: 'Label Query Name',
   /** 精确查询: 查询名称 */
   LABEL_FIELD_NAME: 'Label Filter Name',
+  /** 精确查询: 查询URL */
+  LABEL_MATCHING_URL: 'Label Matching Url',
 
   /** 文字: 选项 */
   TEXT_OPTION: 'Text Option',

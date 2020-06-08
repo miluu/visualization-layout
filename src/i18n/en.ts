@@ -158,6 +158,7 @@ export default {
   [ids.LABEL_LIMIT_COUNT]: 'Limit Count',
   [ids.LABEL_QUERY_NAME]: 'Query Name',
   [ids.LABEL_FIELD_NAME]: 'Field Name',
+  [ids.LABEL_MATCHING_URL]: 'Query Url',
 
   [ids.TEXT_ALL]: 'All',
   [ids.TEXT_OPTION]: 'OPTION',

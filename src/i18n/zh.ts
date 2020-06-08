@@ -158,6 +158,7 @@ export default {
   [ids.LABEL_LIMIT_COUNT]: '最大返回数',
   [ids.LABEL_QUERY_NAME]: '查询名称',
   [ids.LABEL_FIELD_NAME]: '字段名称',
+  [ids.LABEL_MATCHING_URL]: '查询Url',
 
   [ids.TEXT_ALL]: '全部',
   [ids.TEXT_OPTION]: '选项',

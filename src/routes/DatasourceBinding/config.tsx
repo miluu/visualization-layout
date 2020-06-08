@@ -382,6 +382,11 @@ export const DATASOURCE_BINDING_CONFIG = {
       showWhen: values => values && values.uiType === '40',
     },
     {
+      property: 'layoutElementAttr#url',
+      label: t(I18N_IDS.LABEL_MATCHING_URL),
+      showWhen: values => values && values.uiType === '40',
+    },
+    {
       property: 'searchHelp',
       label: t(I18N_IDS.LABEL_SEARCH_HELP),
     },
