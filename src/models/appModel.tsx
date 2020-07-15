@@ -873,7 +873,7 @@ export const appModel: IAppModel = {
     },
 
     *[ActionTypes.GetSessionAttrsEffect]({ manual }: IGetSessionAttrsEffect, { call, put, select }) {
-      const { showSessionModal, closeTime }: IAppState = yield select((s: any) => s.APP);
+      const { showSessionModal, closeTime, sessionAttrs }: IAppState = yield select((s: any) => s.APP);
       // if (showSessionModal) {
       //   return;
       // }
@@ -884,13 +884,17 @@ export const appModel: IAppModel = {
         yield put(createSetKeyValueAction('closeTime', null));
       }
       try {
-        /* const result =  */yield call(getSessionAttrsAndNoPermits);
-        // yield put(createSetKeyValueAction('sessionAttrs', result));
+        const result = yield call(getSessionAttrsAndNoPermits);
+        if (!sessionAttrs) {
+          yield put(createSetKeyValueAction('sessionAttrs', result));
+          window['__sessionAttrs'] = result;
+        }
         if (showSessionModal) {
           yield put(createSetKeyValueAction('showSessionModal', false));
         }
       } catch (e) {
-        // yield put(createSetKeyValueAction('sessionAttrs', null));
+        yield put(createSetKeyValueAction('sessionAttrs', null));
+        window['__sessionAttrs'] = null;
         if (e === 'NOT_LOGIN' && !showSessionModal) {
           yield put(createSetKeyValueAction('showSessionModal', true));
         }
@@ -979,6 +983,7 @@ export const appModel: IAppModel = {
     },
 
     checkLogin(api) {
+      api.dispatch(createGetSessionAttrsEffect(true, false));
       const timmer = setInterval(() => {
         api.dispatch(createGetSessionAttrsEffect(false, false));
       }, 15000);

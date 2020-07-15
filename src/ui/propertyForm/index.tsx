@@ -29,6 +29,7 @@ function createConnector(type: string) {
     }) => {
       const formItemsOpts = FORMS && FORMS[`${type}PropertyFormOptions`] || [];
       const dicts =  APP && APP.dicts || {};
+      const params = APP.params;
       const selectedItemType = LAYOUTS.selectedElement ? 'element' : (LAYOUTS.selectedLayout ? 'layout' : null);
       const isInReference = _.get(LAYOUTS, 'selectionOptions.isInReference');
       let isGridColumn = false;
@@ -50,6 +51,7 @@ function createConnector(type: string) {
         type,
         formItemsOpts,
         dicts,
+        params,
         selectedItemType,
         activeFormKey: FORMS.activeFormKey,
         renderLocked: LAYOUTS.isTemp,
@@ -73,6 +75,7 @@ interface IPropertyFormProps {
 
   formItemsOpts?: IFormItemOption[];
   dicts?: IDictsMap;
+  params?: any;
   form?: WrappedFormUtils;
   selectedItem?: any;
   selectedItemType?: string;
@@ -88,7 +91,7 @@ interface IPropertyFormProps {
 
 class PropertyForm extends React.Component<IPropertyFormProps> {
   render() {
-    const { selectedItem, dicts, formItemsOpts, form, selectedItemType, type, isGridColumn, isInReference, config, dispatch } = this.props;
+    const { selectedItem, dicts, params, formItemsOpts, form, selectedItemType, type, isGridColumn, isInReference, config, dispatch } = this.props;
     const values = selectedItem ? createValues(formItemsOpts, selectedItem, isGridColumn, isInReference) : null;
     if (selectedItem && selectedItem.layoutElementType === 'GRID') {
       values.__gridColumns = selectedItem[config.childrenElementsKey];
@@ -103,7 +106,15 @@ class PropertyForm extends React.Component<IPropertyFormProps> {
         </div>
 
         <Form style={{ display: values ? 'block' : 'none' }} autoComplete="off">
-          {_.map(formItemsOpts, item => renderFormItem(form, item, values, dicts, this._onValueChange, dispatch))}
+          {_.map(formItemsOpts, item => renderFormItem({
+            form,
+            item,
+            values,
+            dicts,
+            urlParams: params,
+            onChangeCallback: this._onValueChange,
+            dispatch,
+          }))}
         </Form>
       </div>
     );
@@ -246,7 +257,14 @@ export class UiPagePropertyForm extends React.PureComponent<IUiPagePropertyForm>
     return (
       <div className="editor-property-form">
         <Form autoComplete="off">
-          {_.map(formItemsOpts, item => renderFormItem(form, item, page, dicts, () => undefined, dispatch))}
+          {_.map(formItemsOpts, item => renderFormItem({
+            form,
+            item,
+            values: page,
+            dicts,
+            onChangeCallback: () => undefined,
+            dispatch,
+          }))}
         </Form>
       </div>
     );

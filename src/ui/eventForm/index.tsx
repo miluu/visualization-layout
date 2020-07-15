@@ -150,13 +150,13 @@ export class UiEventForm extends React.Component<IUiEventFormProps> {
                               const opt = _.assign({}, item, {
                                 property: `${eventType.key}.${item.property}`,
                               });
-                              return renderFormItem(
+                              return renderFormItem({
                                 form,
-                                opt,
-                                eventMap,
+                                item: opt,
+                                values: eventMap,
                                 dicts,
-                                (__, value) => this._onChange({ [item.property]: value }, eventType.key),
-                              );
+                                onChangeCallback: (__, value) => this._onChange({ [item.property]: value }, eventType.key),
+                              });
                             })
                           }
                         </div>

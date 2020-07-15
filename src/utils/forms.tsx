@@ -10,6 +10,8 @@ import {
 import { IDictsMap } from 'src/models/appModel';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { Dispatch, AnyAction } from 'redux';
+import { DROPDOWN_ALIGN_PROPS } from 'src/config';
+import { IAssociateColumn, IQueryOptions, IQueryResult, UiAssociate } from 'src/ui/associate';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -26,6 +28,8 @@ export interface IFormItemOption {
   property?: string;
   /** 控件类型 */
   type?: string | ((values: any) => string);
+  /** 是否隐藏 */
+  hidden?: boolean;
   /** 自定义渲染控件 */
   render?: (
     opts?: IFormItemOption,
@@ -61,10 +65,17 @@ export interface IFormItemOption {
   /** change 时同步更新其它字段 */
   changeExt?: (values: any) => any;
   placeholder?: string;
+  // 联想控件
+  refProperty?: string;
+  valueProp?: string;
+  labelProp?: string;
+  columns?: IAssociateColumn[];
+  queryMethod?: (options: IQueryOptions) => Promise<IQueryResult>;
+  queryMethodCreator?: (options: any) => (options: IQueryOptions) => Promise<IQueryResult>;
   [key: string]: any;
 }
 
-export type OnChangeCallback = (item?: IFormItemOption, value?: any) => any;
+export type OnChangeCallback = (item?: IFormItemOption, value?: any, forceChange?: boolean) => any;
 
 /**
  * 对输入控件进行包装，只在离开焦点或按下回车键时触发 onChange 事件，onChange 事件的参数设置为控件值
@@ -132,7 +143,14 @@ export function onChangeWrap<P>(WrappedComponent: React.ComponentClass<P>, chang
   };
 }
 
-export function renderControl(item: IFormItemOption, values: any, dicts: IDictsMap, onChangeCallback: OnChangeCallback, dispatch: Dispatch<AnyAction>) {
+export function renderControl({
+  item,
+  values,
+  dicts,
+  urlParams,
+  onChangeCallback,
+  dispatch,
+}: IRenderFormItemOptions) {
   let _item = item;
   if (values && values.__isInReference) {
     _item = _.assign({}, item, {
@@ -160,12 +178,32 @@ export function renderControl(item: IFormItemOption, values: any, dicts: IDictsM
       return renderCheckbox(_item, onChangeCallback);
     case 'multiSelect':
       return renderMultiSelect(_item, dicts, onChangeCallback);
+    case 'associate':
+      return renderAssociate(_item, values, urlParams, onChangeCallback);
     default:
       return renderInput(_item, onChangeCallback);
   }
 }
 
-export function renderFormItem(form: WrappedFormUtils, item: IFormItemOption, values: any, dicts: IDictsMap, onChangeCallback?: OnChangeCallback, dispatch?: Dispatch<AnyAction>) {
+interface IRenderFormItemOptions {
+  form?: WrappedFormUtils;
+  item?: IFormItemOption;
+  values?: any;
+  dicts?: IDictsMap;
+  urlParams?: any;
+  onChangeCallback?: OnChangeCallback;
+  dispatch?: Dispatch<AnyAction>;
+}
+
+export function renderFormItem({
+  form,
+  item,
+  values,
+  dicts,
+  urlParams,
+  onChangeCallback,
+  dispatch,
+}: IRenderFormItemOptions) {
   const { getFieldDecorator } = form;
   if (item.showWhen && !item.showWhen(values)) {
     return null;
@@ -184,15 +222,23 @@ export function renderFormItem(form: WrappedFormUtils, item: IFormItemOption, va
 
   return (
     <FormItem
-      key={item.property}
+      key={item.key || item.property}
       label={label}
       colon={false}
+      style={item.hidden ? { display: 'none' } : null}
     >
       {getFieldDecorator(item.property, {
         initialValue: _.get(values, item.property),
         valuePropName: item.type === 'checkbox' ? 'checked' : 'value',
       })(
-        renderControl(item, values, dicts, onChangeCallback, dispatch),
+        renderControl({
+          item,
+          values,
+          dicts,
+          urlParams,
+          onChangeCallback,
+          dispatch,
+        }),
       )}
       {
         item.extra ? item.extra(item, values, onChangeCallback, dicts, dispatch) : null
@@ -234,8 +280,9 @@ export function renderSelect(item: IFormItemOption, dicts: IDictsMap, onChangeCa
       disabled={item.disabled}
       size="small"
       allowClear
-      onChange={(value) => onChangeCallback(item, value)}
+      onChange={(value: any) => onChangeCallback(item, value)}
       placeholder={item.placeholder}
+      {...DROPDOWN_ALIGN_PROPS}
     >
         {_.map((item.list || dicts[item.dictName]), listItem => (
           <Option title={listItem.value} key={listItem.key} value={listItem.key}>
@@ -243,6 +290,33 @@ export function renderSelect(item: IFormItemOption, dicts: IDictsMap, onChangeCa
           </Option>
         ))}
     </Select>
+  );
+}
+
+export function renderAssociate(item: IFormItemOption, values: any, urlParams: any, onChangeCallback: OnChangeCallback) {
+  const {
+    property,
+    refProperty,
+    valueProp,
+    labelProp,
+    columns,
+    queryMethod,
+    queryMethodCreator,
+  } = item;
+  return (
+    <>
+      <UiAssociate
+        value={_.get(values, property)}
+        valueProp={valueProp}
+        labelProp={labelProp}
+        columns={columns}
+        queryMethod={queryMethod || queryMethodCreator(urlParams)}
+        labelInit={_.get(values, refProperty)}
+        onChange={(v, o) => onChangeCallback([item, {
+          property: item.refProperty,
+        }], [v || null, _.get(o, labelProp, null)], true)}
+      />
+    </>
   );
 }
 
@@ -277,6 +351,7 @@ export function renderMultiSelect(item: IFormItemOption, dicts: IDictsMap, onCha
       tokenSeparators={[' ']}
       onChange={() => onChangeCallback(item)}
       placeholder={item.placeholder}
+      {...DROPDOWN_ALIGN_PROPS}
     >
       {_.map((item.list || dicts[item.dictName]), listItem => {
         let key: string;

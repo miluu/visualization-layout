@@ -3,9 +3,10 @@ import * as _ from 'lodash';
 import { IUiDraggableListItem } from 'src/ui/draggableList';
 import { ROW_STATUS } from 'src/config';
 
-let getSessionUrl: string;
+let sessionUrl: string;
 
-(async function () {
+async function getSessionUrl() {
+  let url: string;
   let result: any = {};
   try {
     result = await axios.get(`/bower_components/requirejs/require.js?t=${+new Date()}`, {
@@ -16,13 +17,14 @@ let getSessionUrl: string;
   }
   const data = result.data;
   if (_.includes(data, '/gillion_gurs_web/system/security/getSessionAttrsAndNoPermits2')) {
-    getSessionUrl = '/gillion_gurs_web/system/security/getSessionAttrsAndNoPermits2';
+    url = '/gillion_gurs_web/system/security/getSessionAttrsAndNoPermits2';
   } else if (_.includes(data, '/ipf/system/security/getSessionAttrsAndNoPermits2')) {
-    getSessionUrl = '/ipf/system/security/getSessionAttrsAndNoPermits2';
+    url = '/ipf/system/security/getSessionAttrsAndNoPermits2';
   } else {
-    getSessionUrl = '/gillion_gurs_web/system/security/getSessionAttrsAndNoPermits2';
+    url = '/gillion_gurs_web/system/security/getSessionAttrsAndNoPermits2';
   }
-})();
+  return url;
+}
 
 export async function httpGet(url: string, config?: AxiosRequestConfig) {
   return axiosResponse(axios.get(url, config));
@@ -185,7 +187,10 @@ export async function queryViews() {
 
 export async function getSessionAttrsAndNoPermits() {
   // const url = '/ipf/system/security/getSessionAttrsAndNoPermits2';
-  const url = getSessionUrl;
+  if (!sessionUrl) {
+    sessionUrl = await getSessionUrl();
+  }
+  const url = sessionUrl;
   if (!url) {
     return Promise.resolve({});
   }

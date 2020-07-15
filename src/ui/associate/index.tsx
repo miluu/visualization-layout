@@ -1,106 +1,176 @@
 import * as React from 'react';
 import { Select, Icon } from 'antd';
 import * as _ from 'lodash';
-import axios from 'axios';
 
-import { delay, paramsSerializer } from '../../utils';
-import { IAppState } from 'src/models/appModel';
-import { connect } from 'dva';
+import { delay } from '../../utils';
+import { DROPDOWN_ALIGN_PROPS } from 'src/config';
+import './style.less';
 
 const { Option, OptGroup } = Select;
 
+export interface IQueryOptions {
+  keywords: string;
+  pageSize: number;
+  currentPage: number;
+}
+
+export interface IQueryResult {
+  source: any[];
+  total?: number;
+}
+
+export interface IAssociateColumn {
+  field: string;
+  title: string;
+  width?: number;
+  format?: (value: any) => string;
+}
+
 export interface IUiAssociateProps {
-  urlParams?: any;
-  onChange?: (value: string) => void;
-  value?: string;
+  queryMethod: (options: IQueryOptions) => Promise<IQueryResult>;
+  columns: IAssociateColumn[];
+  value?: any;
+  valueProp: string;
+  labelProp: string;
+  labelInit?: string;
   disabled?: boolean;
-  // url: string;
+  onChange?: (value: any, option: any) => any;
 }
 
 export interface IUiAssociateState {
   source: any[];
-  value: any;
-  currentPage: number;
-  prevPage: number;
-  total: number;
+  originSource: any[];
   pageSize: number;
+  currentPage: number;
+  total: number;
+  keywords: string;
   prevSearchKeywords: string;
   isLoading: boolean;
 }
 
-@connect(
-  ({ APP }: {
-    APP: IAppState,
-  }) => ({
-    urlParams: APP.params,
-  }),
-)
 export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssociateState> {
 
-  static getDerivedStateFromProps(nextProps: IUiAssociateProps) {
-    if ('value' in nextProps) {
-      return {
-        value: nextProps.value,
-      };
-    }
-    return null;
-  }
-
-  private _debounceHandleSearch: (value: string) => Promise<void>;
+  private _debounceHandleSearch: (keywords: string) => void;
 
   constructor(props: IUiAssociateProps) {
     super(props);
-    this._debounceHandleSearch = _.debounce(this._handleSearch, 300);
+
     this.state = {
       source: [],
-      value: null,
-      currentPage: 1,
-      prevPage: 1,
-      total: 0,
+      originSource: [],
       pageSize: 10,
+      currentPage: 1,
+      total: null,
+      keywords: null,
       prevSearchKeywords: null,
       isLoading: false,
     };
+
+    this._debounceHandleSearch = _.debounce((keywords: string = '') => {
+      if (this.state.isLoading) {
+        return;
+      }
+      this._handleSearch(keywords);
+    }, 300);
   }
 
   render() {
-    const options = this.state.source.map(d => {
-      const text = `${d.messageKey} - ${d.messageText}`;
-      return <Option value={d.messageKey} key={d.messageKey} title={text}>{text}</Option>;
+    const {
+      value,
+      valueProp,
+      labelProp,
+      labelInit,
+      columns,
+      disabled,
+    } = this.props;
+    const { total, pageSize, currentPage, isLoading, source } = this.state;
+    let renderSource = source;
+    if (!_.find(renderSource, item => item[valueProp] === value) && labelInit) {
+      renderSource = [
+        {
+          [valueProp]: value,
+          [labelProp]: labelInit,
+          __hidden: true,
+        },
+        ...renderSource,
+      ];
+    }
+    const options = renderSource.map(d => {
+      const text = columns.map(c => (
+        <span className="editor-associate-td" key={c.field}>
+          {d[c.field] || ''}
+        </span>
+      ));
+      return (
+        <Option
+          value={d[valueProp]}
+          key={d[valueProp]}
+          label={d[labelProp]}
+          className="editor-associate-tr"
+          disabled={d.__hidden}
+          style={d.__hidden ? { display: 'none' } : null}
+          {...{ dataSource: d }}
+        >{text}</Option>
+      );
     });
-    const { total, pageSize, currentPage/* , source */, prevPage, isLoading } = this.state;
-    const { disabled } = this.props;
-    // const count = source.length;
-    const page = isLoading ? prevPage : currentPage;
-    // let from: number;
-    // let to: number;
-    const totalPages = Math.ceil(total / pageSize);
-    // if (count) {
-    //   from = (page - 1) * pageSize + 1;
-    //   to = from + count - 1;
-    // }
+    const from = (currentPage - 1) * pageSize + 1;
+    const to = from + source.length - 1;
     return (
       <Select
         showSearch
         size="small"
-        value={this.state.value}
+        value={value}
         style={{ width: '100%' }}
         onSearch={this._debounceHandleSearch}
         onChange={this._handleChange}
         onDropdownVisibleChange={this._onDropdownVisibleChange}
         defaultActiveFirstOption={true}
-        optionLabelProp="value"
+        optionLabelProp="label"
         filterOption={false}
         allowClear={true}
         notFoundContent={null}
+        suffixIcon={<Icon type="search" />}
         disabled={disabled}
+        {...DROPDOWN_ALIGN_PROPS}
+        dropdownClassName="editor-associate-dropdown"
+        className="editor-associate"
       >
-        <OptGroup label={
-          <>
-            第{ page }/{ totalPages }页{' '}
-            <a href="javascript:void(0)" onClick={this._prevPage} title="上一页"><Icon type="backward" /></a>
-            <a href="javascript:void(0)" onClick={this._nextPage} title="下一页"><Icon type="forward" /></a>
-          </>
+        <OptGroup key="1" label={
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}>
+            <div>
+              <span>第 {from} - {to} 条</span>
+              {
+                total
+                  ? <span>，共 {total} 条</span>
+                  : null
+              }
+              {
+                isLoading
+                  ? <Icon type="loading" />
+                  : null
+              }
+            </div>
+            <div>
+              <a href="javascript:void(0)" onClick={this._prevPage} title="上一页"><Icon type="backward" /></a>
+              <a href="javascript:void(0)" onClick={this._nextPage} title="下一页"><Icon type="forward" /></a>
+            </div>
+          </div>
+        }>
+          <Option className="editor-associate-none" disabled value="----"> --- </Option>
+        </OptGroup>
+        <OptGroup {...{ className: 'editor-associate-table' }} key="2" label={
+          <div className="editor-associate-head-tr">
+            {
+              _.map(columns, c => (
+                <span className="editor-associate-th" key={c.field}>
+                  {c.title}
+                </span>
+              ))
+            }
+          </div>
         }>
           {options}
         </OptGroup>
@@ -108,48 +178,52 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
     );
   }
 
-  private _handleSearch = async (value: string) => {
+  private _createQueryOptions = (keywords: string = ''): IQueryOptions => {
+    return {
+      keywords,
+      pageSize: this.state.pageSize,
+      currentPage: this.state.currentPage,
+    };
+  }
+
+  private _handleSearch = async (keywords: string = '') => {
     await delay(0);
-    const keywords = value || '';
-    const { currentPage, pageSize } = this.state;
     this.setState({
       isLoading: true,
     });
-    let result: any;
+    const options = this._createQueryOptions(keywords);
     try {
-      result = await query(keywords, this.props.urlParams, currentPage, pageSize);
+      const result = await this.props.queryMethod(options);
+      const source = result.source || [];
+      const uniqSource = _.uniqBy(source, this.props.valueProp);
+      console.log('handleSearch', result);
+      this.setState({
+        source: uniqSource,
+        originSource: source,
+        total: result.total,
+        prevSearchKeywords: keywords,
+        isLoading: false,
+      });
     } catch (e) {
+      console.warn(e);
       this.setState({
         source: [],
+        originSource: [],
         total: 0,
-        prevSearchKeywords: '',
         isLoading: false,
-        prevPage: 1,
         currentPage: 1,
       });
-      return;
     }
-    console.log('handleSearch', result);
-    this.setState({
-      source: result.ipfLanguageMsgs,
-      total: result.total,
-      prevSearchKeywords: keywords,
-      isLoading: false,
-      prevPage: this.state.currentPage,
-    });
   }
 
-  private _handleChange = (value: string) => {
-    if (!('value' in this.props)) {
-      this.setState({ value });
-    }
-    this._triggerChange(value);
+  private _handleChange = (value: string, option: any) => {
+    this._triggerChange(value, option);
   }
 
-  private _triggerChange = (value: string) => {
+  private _triggerChange = (value: string, option: any) => {
     const onChange = this.props.onChange;
     if (onChange) {
-      onChange(value);
+      onChange(value, option && option.props && option.props.dataSource);
     }
   }
 
@@ -158,14 +232,14 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
       this.setState({
         currentPage: 1,
       });
-      this._handleSearch(this.state.value);
+      this._handleSearch(this.props.value);
     }
   }
 
   private _prevPage = () => {
     console.log('UiAssociate_prevPage');
-    const { currentPage, prevSearchKeywords } = this.state;
-    if (currentPage <= 1) {
+    const { currentPage, prevSearchKeywords, isLoading } = this.state;
+    if (currentPage <= 1 || isLoading) {
       return;
     }
     this.setState({
@@ -177,9 +251,9 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
 
   private _nextPage = () => {
     console.log('UiAssociate_nextPage');
-    const { currentPage, total, pageSize, prevSearchKeywords } = this.state;
+    const { currentPage, total, pageSize, prevSearchKeywords, isLoading } = this.state;
     const totalPages = Math.ceil(total / pageSize);
-    if (currentPage >= totalPages) {
+    if (currentPage >= totalPages || isLoading) {
       return;
     }
     this.setState({
@@ -189,61 +263,4 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
     this._handleSearch(prevSearchKeywords);
   }
 
-}
-
-async function query(keywords: string, urlParams: any, currentPage = 1, pageSize = 10): Promise<any> {
-  const searchColumns = createSearchColumns(keywords, urlParams);
-  return axios.get('/ipf/ipfLanguageMsg/query', {
-    params: {
-      currentPage,
-      messageKey: keywords,
-      pageSize,
-      queryResultType: 'page',
-      searchColumns,
-      sum: false,
-    },
-    paramsSerializer,
-  }).then(resp => {
-    return resp.data;
-  });
-}
-
-function createSearchColumns(keywords: string, urlParams: any) {
-  const searchColumns = [];
-  if (keywords) {
-    searchColumns.push({
-      propertyName:'messageKey',
-      columnName:'MESSAGE_KEY',
-      dataType:'S',
-      junction:'or',
-      value: keywords,
-      operation:'LIKEIC',
-    });
-    searchColumns.push({
-      propertyName:'messageText',
-      columnName:'MESSAGE_TEXT',
-      dataType:'S',
-      junction:'or',
-      value: keywords,
-      operation:'LIKEIC',
-    });
-  }
-  searchColumns.push({
-    propertyName: 'baseViewId',
-    columnName: 'BASE_VIEW_ID',
-    dataType: 'S',
-    value: urlParams.baseViewId || '',
-    operation:'EQ',
-  });
-
-  if (urlParams.configItemCode) {
-    searchColumns.push({
-      propertyName:'configItemCode',
-      columnName:'CONFIG_ITEM_CODE',
-      dataType:'S',
-      value: urlParams.configItemCode || '',
-      operation: 'EQ',
-    });
-  }
-  return searchColumns;
 }

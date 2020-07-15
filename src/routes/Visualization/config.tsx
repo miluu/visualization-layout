@@ -6,12 +6,14 @@ import { PAGE_TYPE, BUILT_IN_STYLE_CLASSES } from '../../config';
 import { IFormItemOption } from 'src/utils/forms';
 import { IUiDraggableListItem } from 'src/ui/draggableList';
 import { IUiDraggableListGroupItem } from 'src/ui/draggableListGroup';
-import { transformUiType, createId } from 'src/utils';
+import { transformUiType, createId, paramsSerializer } from 'src/utils';
 import { Button, Select } from 'antd';
 import { openUploaderModal, openListSourceEditor } from 'src/utils/modal';
 import { UiComponentGroupList } from 'src/ui/componentGroupList';
 import I18N_IDS from 'src/i18n/ids';
 import { t } from 'src/i18n';
+import { IQueryOptions, IQueryResult } from 'src/ui/associate';
+import { httpGet } from 'src/services';
 
 const { Option } = Select;
 
@@ -419,6 +421,50 @@ export const VISUALIZATION_CONFIG = {
     {
       property: 'fieldText',
       label: t(I18N_IDS.LABEL_FIELD_TEXT),
+    },
+    {
+      property: 'dataElementCode',
+      label: '数据元素',
+      type: 'associate',
+      refProperty: 'dataElementText',
+      valueProp: 'elementCode',
+      labelProp: 'fieldText',
+      columns: [
+        { title: '数据元素代码', field: 'elementCode' },
+        { title: '显示文本', field: 'fieldText' },
+        { title: '数据类型', field: 'dataType' },
+        { title: '字段长度', field: 'fieldLength' },
+        { title: '小数位', field: 'decimals' },
+        { title: '数据库类型', field: 'dbType' },
+      ],
+      queryMethodCreator: dataElementCodeQueryMethodCreator,
+      extra(opts, values) {
+        if (!values) {
+          return null;
+        }
+        return (
+          <Button.Group size="small" >
+            <Button disabled={!(values && values.dataElementCode)}>
+              修改
+            </Button>
+            <Button>
+              新增
+            </Button>
+          </Button.Group>
+        );
+      },
+    },
+    {
+      property: 'dataElementCode',
+      label: '数据元素编码',
+      key: 'dataElementCode_1',
+      disabled: true,
+    },
+    {
+      property: 'dataElementText',
+      label: '字段标题',
+      refProperty: 'dataElementText_1',
+      disabled: true,
     },
     {
       property: 'layoutElementType',
@@ -1395,4 +1441,67 @@ function isButton(values: any) {
 
 function isGridColumn(values: any): boolean {
   return values && values.__isGridColumn;
+}
+
+function dataElementCodeQueryMethodCreator(urlParams: any) {
+  const baseViewId = urlParams.baseViewId;
+  return async function dataElementCodeQueryMethod(options: IQueryOptions) {
+    let result: IQueryResult;
+    const {
+      currentPage,
+      pageSize,
+      keywords,
+    } = options;
+    const searchColumns: any[] = [{
+      propertyName: 'baseViewId',
+      columnName: 'BASE_VIEW_ID',
+      dataType: 'S',
+      value: baseViewId,
+      operation:'EQ',
+    }];
+    if (keywords) {
+      searchColumns.push({
+        propertyName: 'elementCode',
+        columnName: 'ELEMENT_CODE',
+        dataType: 'S',
+        junction: 'or',
+        value: keywords,
+        operation:'LIKEIC',
+      }, {
+        propertyName: 'fieldText',
+        columnName: 'FIELD_TEXT',
+        dataType: 'S',
+        junction:'or',
+        value: keywords,
+        operation:'LIKEIC',
+      }, {
+        propertyName: 'dbType',
+        columnName: 'DB_TYPE',
+        dataType: 'S',
+        junction: 'or',
+        value: keywords,
+        operation:'LIKEIC',
+      });
+    }
+    const res = await httpGet('/ipf/ipfDmlElement/query', {
+      paramsSerializer,
+      params: {
+        type: 'S',
+        sourceName: 'IpfDmlElement',
+        searchName: 'ElementCode',
+        baseViewId,
+        currentPage,
+        elementCode: keywords,
+        pageSize,
+        queryResultType: 'page',
+        sum: 'false',
+        searchColumns,
+      },
+    });
+    result = {
+      source: res.ipfDmlElements || [],
+      total: res.total,
+    };
+    return result;
+  };
 }

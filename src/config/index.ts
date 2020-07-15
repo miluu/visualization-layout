@@ -82,3 +82,15 @@ export const BUILT_IN_STYLE_CLASSES = [
   'glpaas-layout-expand-state',
   'glpaas-text-right',
 ];
+
+export const DROPDOWN_ALIGN_PROPS = {
+  dropdownMatchSelectWidth: false,
+  dropdownAlign: {
+    points: ['tl', 'bl', 'tr', 'br'],
+    offset: [0, 4],
+    overflow: {
+      adjustX: true,
+      adjustY: true,
+    },
+  },
+};

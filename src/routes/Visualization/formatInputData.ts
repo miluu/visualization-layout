@@ -174,6 +174,8 @@ function formatBoPgLoElement(boPgLoElementIn: any) {
       initValueType2: _ipfCcmBoPgLoElement.initValueType2 || (elementFormData ? elementFormData.initValueType2 : null),
       defaultValue2: _ipfCcmBoPgLoElement.defaultValue2 || (elementFormData ? elementFormData.defaultValue2 : null),
       isZeroFill: _ipfCcmBoPgLoElement.isZeroFill || (elementFormData ? elementFormData.isZeroFill : null),
+      dataElementCode: _ipfCcmBoPgLoElement.dataElementCode || (elementFormData ? elementFormData.dataElementCode : null),
+      dataElementText: _ipfCcmBoPgLoElement.dataElementText || (elementFormData ? elementFormData.dataElementText : null),
       layoutElementAttr: _ipfCcmBoPgLoElement.layoutElementAttr || (elementFormData ? elementFormData.layoutElementAttr : null),
       seqNo: _ipfCcmBoPgLoElement.seqNo,
       rowStatus: boPgLoElementIn.rowStatus || 2,
