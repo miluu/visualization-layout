@@ -459,7 +459,7 @@ export const VISUALIZATION_CONFIG = {
                   boName: values.layoutBoName,
                   propertyName: values?.propertyName,
                 });
-                formData = getResult?.ipfDmlElement ?? {};
+                formData = getResult?.data ?? {};
               } catch (e) {
                 console.error(e);
               }
@@ -483,7 +483,7 @@ export const VISUALIZATION_CONFIG = {
                     result = await saveElementCode(postData);
                   } catch (e) {
                     console.error(e);
-                    Modal.error({ content: e?.errMsg ?? '保存失败。' });
+                    Modal.error({ content: e?.msg ?? '保存失败。' });
                     return;
                   } finally {
                     dispatch(createSetIsLoadingAction(false, true));

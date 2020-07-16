@@ -8,7 +8,5 @@ export async function getDataElement(options?: any) {
 }
 
 export async function saveElementCode(data: any) {
-  return httpPost('/ipf/ipfDmlElement/custom/saveOrUpdateAndCommit', {
-    ipfDmlElement: data,
-  });
+  return httpPost('/ipf/ipfDmlElement/custom/saveOrUpdateAndCommit', data);
 }
