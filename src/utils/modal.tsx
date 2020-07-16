@@ -16,6 +16,7 @@ import { UiTreeEditorModal, IUiTreeEditorModalState } from 'src/ui/treeEditorMod
 import { UiJumpByGridSettingsModal } from 'src/ui/jumpByGridSettingsModal';
 import { UiDisabledExpreeModal } from 'src/ui/disabledExpreeModal';
 import { UiImportLayoutsJsonModal } from 'src/ui/importLayoutsJsonModal';
+import { UiElementCodeFormModal } from 'src/ui/ElementCodeForm';
 import { t } from 'src/i18n';
 import I18N_IDS from 'src/i18n/ids';
 
@@ -28,6 +29,7 @@ export const treeEditorModalRef = React.createRef<UiTreeEditorModal>();
 export const jumpByGridSettingsModal = React.createRef<UiJumpByGridSettingsModal>();
 export const disabledExpreeModal = React.createRef<UiDisabledExpreeModal>();
 export const importLayoutsJsonModal = React.createRef<UiImportLayoutsJsonModal>();
+export const elementCodeFormModalRef = React.createRef<UiElementCodeFormModal>();
 
 const propertyListProp = {
   keyProp: 'propertyName',
@@ -690,4 +692,24 @@ export async function openDisabledExpreeModal(target: any, targetType: string) {
 export async function openImportLayoutsJsonModal() {
   const modal: UiImportLayoutsJsonModal = importLayoutsJsonModal.current['wrappedInstance'];
   modal.open();
+}
+
+/**
+ * 打开数据元素弹窗
+ */
+export function openElementCodeFormModal(options?: {
+  title?: string,
+  formData?: any,
+  onSubmit?(data: any): any,
+}) {
+  const modal: UiElementCodeFormModal = elementCodeFormModalRef.current['wrappedInstance'];
+  modal.open(options);
+}
+
+/**
+ * 关闭数据元素弹窗
+ */
+export function closeElementCodeFormModal() {
+  const modal: UiElementCodeFormModal = elementCodeFormModalRef.current['wrappedInstance'];
+  modal.close();
 }

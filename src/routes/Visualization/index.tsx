@@ -52,7 +52,7 @@ import { createSetLayoutAndElementPropertyFormOptionsAction, createSetActiveForm
 import { IFormsState } from 'src/models/formsModel';
 import { UiTransferModal } from 'src/ui/transferModal';
 import { UiFormSettingsModal } from 'src/ui/formSettingsModal';
-import { transferModalRef, formSettingsModalRef, uploaderRef, listSourceEditorModalRef, importLayoutsJsonModal } from 'src/utils/modal';
+import { transferModalRef, formSettingsModalRef, uploaderRef, listSourceEditorModalRef, importLayoutsJsonModal, elementCodeFormModalRef } from 'src/utils/modal';
 import { UiPropertyMehodListTabs } from 'src/ui/draggableTree/propertyMethodListTabs';
 import { UiUploader } from 'src/ui/uploaderModal';
 import { UiListSourceEditorModal } from 'src/ui/listSourceEditor';
@@ -65,6 +65,7 @@ import { t } from 'src/i18n';
 import I18N_IDS from 'src/i18n/ids';
 import { UiSaveAsPrototypeForm } from 'src/ui/saveAsPrototypeForm';
 import { cellNameManager } from 'src/utils/cellName';
+import { UiElementCodeFormModal } from 'src/ui/ElementCodeForm';
 
 const { Panel } = Collapse;
 const { TabPane } = Tabs;
@@ -288,6 +289,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
             onSubmit={this._onSaveAsPrototypeSubmit}
             onCancle={this._onSaveAsPrototypeCancle}
           />
+          <UiElementCodeFormModal ref={elementCodeFormModalRef} />
         </>,
 
         {/* 原型列表 */}
@@ -329,7 +331,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
 
   private _init = () => {
     // tslint:disable-next-line:max-line-length
-    this.props.dispatch(createLoadDictsEffect('CellType,GroupWidget,layoutElementType,layoutElementType2,PageType,LayoutContainerType,LayoutType,MessageType,NewGridType,IpfCcmBoUIType,EventType,LayoutEventType,LayoutExecType,conditionType,correctType,initValueType,queryType,rangeType,tabBuildType,SearchOperation,buttonStyle,gridEditType,groupTotType,hotkeyType,hotkeyValue,isOrderBy,MessageType,DdLanguage,AutoTestValueType,YesOrNo,ModelTableLayoutType'));
+    this.props.dispatch(createLoadDictsEffect('CellType,GroupWidget,layoutElementType,layoutElementType2,PageType,LayoutContainerType,LayoutType,MessageType,NewGridType,IpfCcmBoUIType,EventType,LayoutEventType,LayoutExecType,conditionType,correctType,initValueType,queryType,rangeType,tabBuildType,SearchOperation,buttonStyle,gridEditType,groupTotType,hotkeyType,hotkeyValue,isOrderBy,MessageType,DdLanguage,AutoTestValueType,YesOrNo,ModelTableLayoutType,DataType'));
     this.props.dispatch(createLoadViewListEffect());
     this.props.dispatch(createWatchSelectionRangeEffect());
     if (!this.props.urlParams.isFromMenuOfPage) {

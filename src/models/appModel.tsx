@@ -962,6 +962,7 @@ export const appModel: IAppModel = {
         }
         console.log('[routerChange] params:', urlParams);
         api.dispatch(createSetParamsAction(history, urlParams));
+        window['__urlParams'] = urlParams;
 
         // 设置标题
         document.title = `${glpaasTitle} - ${title}`;

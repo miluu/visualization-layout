@@ -7,13 +7,15 @@ import { IFormItemOption } from 'src/utils/forms';
 import { IUiDraggableListItem } from 'src/ui/draggableList';
 import { IUiDraggableListGroupItem } from 'src/ui/draggableListGroup';
 import { transformUiType, createId, paramsSerializer } from 'src/utils';
-import { Button, Select } from 'antd';
-import { openUploaderModal, openListSourceEditor } from 'src/utils/modal';
+import { Button, Select, message, Modal } from 'antd';
+import { openUploaderModal, openListSourceEditor, openElementCodeFormModal, closeElementCodeFormModal } from 'src/utils/modal';
 import { UiComponentGroupList } from 'src/ui/componentGroupList';
 import I18N_IDS from 'src/i18n/ids';
 import { t } from 'src/i18n';
-import { IQueryOptions, IQueryResult } from 'src/ui/associate';
+import { dataElementCodeQueryMethodCreator } from './service';
 import { httpGet } from 'src/services';
+import { saveElementCode, getDataElement } from 'src/services/elementCode';
+import { createSetIsLoadingAction } from 'src/models/appActions';
 
 const { Option } = Select;
 
@@ -328,7 +330,6 @@ export const VISUALIZATION_CONFIG = {
                 columnsEditable: false,
                 columnRender: ({
                   field,
-                  text,
                   record,
                   index,
                   instance,
@@ -438,16 +439,66 @@ export const VISUALIZATION_CONFIG = {
         { title: '数据库类型', field: 'dbType' },
       ],
       queryMethodCreator: dataElementCodeQueryMethodCreator,
-      extra(opts, values) {
+      extra(__, values, callback, ___, dispatch) {
         if (!values) {
           return null;
         }
         return (
           <Button.Group size="small" >
-            <Button disabled={!(values && values.dataElementCode)}>
+            <Button
+              disabled={true}
+              onClick={() => modifyDataElement(values, {})}
+            >
               修改
             </Button>
-            <Button>
+            <Button onClick={async () => {
+              let formData: any = {};
+              try {
+                const getResult = await getDataElement({
+                  baseViewId: window['__urlParams']?.baseViewId,
+                  boName: values.layoutBoName,
+                  propertyName: values?.propertyName,
+                });
+                formData = getResult?.ipfDmlElement ?? {};
+              } catch (e) {
+                console.error(e);
+              }
+              formData.elementCode = null;
+              formData.configItemCode = null;
+              formData.ipfDmlElementId = null;
+              formData.rowStatus = 4;
+              formData.baseViewId = window['__urlParams']?.baseViewId ?? '';
+              formData.revisionNumber = 0;
+              openElementCodeFormModal({
+                title: '新增数据元素',
+                formData: { ...formData },
+                async onSubmit(data) {
+                  const postData = {
+                    ...formData,
+                    ...data,
+                  };
+                  let result: any;
+                  dispatch(createSetIsLoadingAction(true, true));
+                  try {
+                    result = await saveElementCode(postData);
+                  } catch (e) {
+                    console.error(e);
+                    Modal.error({ content: e?.errMsg ?? '保存失败。' });
+                    return;
+                  } finally {
+                    dispatch(createSetIsLoadingAction(false, true));
+                  }
+                  console.log(result);
+                  message.success('保存成功。');
+                  callback(
+                    [{ property: 'dataElementCode' }, { property: 'dataElementText' }],
+                    [data?.elementCode, data?.fieldText],
+                    true,
+                  );
+                  closeElementCodeFormModal();
+                },
+              });
+            }}>
               新增
             </Button>
           </Button.Group>
@@ -1443,65 +1494,46 @@ function isGridColumn(values: any): boolean {
   return values && values.__isGridColumn;
 }
 
-function dataElementCodeQueryMethodCreator(urlParams: any) {
-  const baseViewId = urlParams.baseViewId;
-  return async function dataElementCodeQueryMethod(options: IQueryOptions) {
-    let result: IQueryResult;
-    const {
-      currentPage,
-      pageSize,
-      keywords,
-    } = options;
-    const searchColumns: any[] = [{
+async function modifyDataElement(values: any, urlParams: any) {
+  // const userId = _.get(window, '__sessionAttr.loginUser.username');
+  if (!(values && values.dataElementCode)) {
+    message.info('请先选择数据元素。');
+    return;
+  }
+  const params = {
+    queryResultType: 'page',
+    sum: false,
+    searchColumns: [] as any[],
+  };
+  params.searchColumns.push(
+    {
+      propertyName: 'elementCode',
+      columnName: 'ELEMENT_CODE',
+      dataType: 'S',
+      value: values.dataElementCode || '',
+      operation: 'EQ',
+    }, {
       propertyName: 'baseViewId',
       columnName: 'BASE_VIEW_ID',
       dataType: 'S',
-      value: baseViewId,
-      operation:'EQ',
-    }];
-    if (keywords) {
-      searchColumns.push({
-        propertyName: 'elementCode',
-        columnName: 'ELEMENT_CODE',
-        dataType: 'S',
-        junction: 'or',
-        value: keywords,
-        operation:'LIKEIC',
-      }, {
-        propertyName: 'fieldText',
-        columnName: 'FIELD_TEXT',
-        dataType: 'S',
-        junction:'or',
-        value: keywords,
-        operation:'LIKEIC',
-      }, {
-        propertyName: 'dbType',
-        columnName: 'DB_TYPE',
-        dataType: 'S',
-        junction: 'or',
-        value: keywords,
-        operation:'LIKEIC',
-      });
-    }
-    const res = await httpGet('/ipf/ipfDmlElement/query', {
+      value: window['__urlParams'].baseViewId || '',
+      operation: 'EQ',
+    },
+  );
+  let result: any;
+  try {
+    result = await httpGet('/ipf/ipfDmlElement/query', {
+      params,
       paramsSerializer,
-      params: {
-        type: 'S',
-        sourceName: 'IpfDmlElement',
-        searchName: 'ElementCode',
-        baseViewId,
-        currentPage,
-        elementCode: keywords,
-        pageSize,
-        queryResultType: 'page',
-        sum: 'false',
-        searchColumns,
-      },
     });
-    result = {
-      source: res.ipfDmlElements || [],
-      total: res.total,
-    };
-    return result;
-  };
+  } catch (e) {
+    console.error(e);
+    Modal.error({ content: 'ERROR.' });
+    return;
+  }
+  const record = _.get(result, ['ipfDmlElements', 0]);
+  if (!record) {
+    return;
+  }
+  console.log(record);
 }
