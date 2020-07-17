@@ -1469,6 +1469,7 @@ async function modifyDataElement({
   type: 'edit' | 'add';
 }) {
   let formData: any = {};
+  dispatch(createSetIsLoadingAction(true, true));
   try {
     let getResult: any;
     if (type === 'add') {
@@ -1488,6 +1489,8 @@ async function modifyDataElement({
     console.error(e);
     Modal.error({ content: e?.msg ?? '查询数据元素失败。' });
     return;
+  } finally {
+    dispatch(createSetIsLoadingAction(false, true));
   }
   const originElementCode = formData.elementCode;
   if (type === 'edit') {
