@@ -1,20 +1,19 @@
 import * as React from 'react';
 import * as _ from 'lodash';
 import { IIpfCcmPage, IBoPageLayout, IPgLoElement } from 'src/routes/Visualization/types';
-import { PAGE_TYPE, BUILT_IN_STYLE_CLASSES } from '../../config';
+import { PAGE_TYPE, BUILT_IN_STYLE_CLASSES, ROW_STATUS } from '../../config';
 // import { UiAssociate } from 'src/ui/associate';
 import { IFormItemOption } from 'src/utils/forms';
 import { IUiDraggableListItem } from 'src/ui/draggableList';
 import { IUiDraggableListGroupItem } from 'src/ui/draggableListGroup';
-import { transformUiType, createId, paramsSerializer } from 'src/utils';
+import { transformUiType, createId } from 'src/utils';
 import { Button, Select, message, Modal } from 'antd';
 import { openUploaderModal, openListSourceEditor, openElementCodeFormModal, closeElementCodeFormModal } from 'src/utils/modal';
 import { UiComponentGroupList } from 'src/ui/componentGroupList';
 import I18N_IDS from 'src/i18n/ids';
 import { t } from 'src/i18n';
 import { dataElementCodeQueryMethodCreator } from './service';
-import { httpGet } from 'src/services';
-import { saveElementCode, getDataElement } from 'src/services/elementCode';
+import { saveElementCode, getDmlElement, getDmlElementByPropertyName } from 'src/services/elementCode';
 import { createSetIsLoadingAction } from 'src/models/appActions';
 
 const { Option } = Select;
@@ -446,59 +445,22 @@ export const VISUALIZATION_CONFIG = {
         return (
           <Button.Group size="small" >
             <Button
-              disabled={true}
-              onClick={() => modifyDataElement(values, {})}
+              disabled={!values?.dataElementCode}
+              onClick={() => modifyDataElement({
+                dispatch,
+                callback,
+                values,
+                type: 'edit',
+              })}
             >
               修改
             </Button>
-            <Button onClick={async () => {
-              let formData: any = {};
-              try {
-                const getResult = await getDataElement({
-                  baseViewId: window['__urlParams']?.baseViewId,
-                  boName: values.layoutBoName,
-                  propertyName: values?.propertyName,
-                });
-                formData = getResult?.data ?? {};
-              } catch (e) {
-                console.error(e);
-              }
-              formData.elementCode = null;
-              formData.configItemCode = null;
-              formData.ipfDmlElementId = null;
-              formData.rowStatus = 4;
-              formData.baseViewId = window['__urlParams']?.baseViewId ?? '';
-              formData.revisionNumber = 0;
-              openElementCodeFormModal({
-                title: '新增数据元素',
-                formData: { ...formData },
-                async onSubmit(data) {
-                  const postData = {
-                    ...formData,
-                    ...data,
-                  };
-                  let result: any;
-                  dispatch(createSetIsLoadingAction(true, true));
-                  try {
-                    result = await saveElementCode(postData);
-                  } catch (e) {
-                    console.error(e);
-                    Modal.error({ content: e?.msg ?? '保存失败。' });
-                    return;
-                  } finally {
-                    dispatch(createSetIsLoadingAction(false, true));
-                  }
-                  console.log(result);
-                  message.success('保存成功。');
-                  callback(
-                    [{ property: 'dataElementCode' }, { property: 'dataElementText' }],
-                    [data?.elementCode, data?.fieldText],
-                    true,
-                  );
-                  closeElementCodeFormModal();
-                },
-              });
-            }}>
+            <Button onClick={() => modifyDataElement({
+              dispatch,
+              callback,
+              values,
+              type: 'add',
+            })}>
               新增
             </Button>
           </Button.Group>
@@ -1494,46 +1456,79 @@ function isGridColumn(values: any): boolean {
   return values && values.__isGridColumn;
 }
 
-async function modifyDataElement(values: any, urlParams: any) {
-  // const userId = _.get(window, '__sessionAttr.loginUser.username');
-  if (!(values && values.dataElementCode)) {
-    message.info('请先选择数据元素。');
-    return;
-  }
-  const params = {
-    queryResultType: 'page',
-    sum: false,
-    searchColumns: [] as any[],
-  };
-  params.searchColumns.push(
-    {
-      propertyName: 'elementCode',
-      columnName: 'ELEMENT_CODE',
-      dataType: 'S',
-      value: values.dataElementCode || '',
-      operation: 'EQ',
-    }, {
-      propertyName: 'baseViewId',
-      columnName: 'BASE_VIEW_ID',
-      dataType: 'S',
-      value: window['__urlParams'].baseViewId || '',
-      operation: 'EQ',
-    },
-  );
-  let result: any;
+async function modifyDataElement({
+  values,
+  dispatch,
+  callback,
+  type,
+}: {
+  values: any;
+  dispatch: any;
+  callback: any;
+  type: 'edit' | 'add';
+}) {
+  let formData: any = {};
   try {
-    result = await httpGet('/ipf/ipfDmlElement/query', {
-      params,
-      paramsSerializer,
-    });
+    let getResult: any;
+    if (type === 'add') {
+      getResult = await getDmlElementByPropertyName({
+        baseViewId: window['__urlParams']?.baseViewId,
+        boName: values.layoutBoName,
+        propertyName: values?.propertyName,
+      });
+    } else {
+      getResult = await getDmlElement({
+        elementCode: values?.dataElementCode,
+        baseViewId: window['__urlParams']?.baseViewId,
+      });
+    }
+    formData = getResult?.data ?? {};
   } catch (e) {
     console.error(e);
-    Modal.error({ content: 'ERROR.' });
+    Modal.error({ content: e?.msg ?? '查询数据元素失败。' });
     return;
   }
-  const record = _.get(result, ['ipfDmlElements', 0]);
-  if (!record) {
-    return;
+  if (type === 'edit') {
+    formData.rowStatus = ROW_STATUS.MODIFIED;
+  } else {
+    formData.referenceCode = formData.elementCode;
+    formData.elementCode = null;
+    formData.configItemCode = null;
+    formData.ipfDmlElementId = null;
+    formData.rowStatus = ROW_STATUS.ADDED;
+    formData.baseViewId = window['__urlParams']?.baseViewId ?? '';
+    formData.revisionNumber = 0;
   }
-  console.log(record);
+  const typeText = type === 'edit' ? '修改' : '新增';
+  openElementCodeFormModal({
+    title: `${typeText}数据元素`,
+    submitText: `${typeText}并提交`,
+    formData: { ...formData },
+    editType: type,
+    async onSubmit(data) {
+      const postData = {
+        ...formData,
+        ...data,
+      };
+      let result: any;
+      dispatch(createSetIsLoadingAction(true, true));
+      try {
+        result = await saveElementCode(postData);
+      } catch (e) {
+        console.error(e);
+        Modal.error({ content: e?.msg ?? '保存失败。' });
+        return;
+      } finally {
+        dispatch(createSetIsLoadingAction(false, true));
+      }
+      console.log(result);
+      message.success('保存成功。');
+      callback(
+        [{ property: 'dataElementCode' }, { property: 'dataElementText' }],
+        [data?.elementCode, data?.fieldText],
+        true,
+      );
+      closeElementCodeFormModal();
+    },
+  });
 }

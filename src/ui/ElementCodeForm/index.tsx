@@ -28,6 +28,8 @@ interface IElementCodeFormModalProps {
 interface IElementCodeFormModalState {
   visible: boolean;
   title: string;
+  submitText: string;
+  editType: 'edit' | 'add';
   onSubmitHandle?(data: any): any;
 }
 
@@ -44,13 +46,15 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
   state: IElementCodeFormModalState = {
     visible: false,
     title: '',
+    submitText: t(I18N_IDS.TEXT_OK),
     onSubmitHandle: null,
+    editType: null,
   };
 
   formRef = React.createRef<any>();
 
   render() {
-    const { visible, title } = this.state;
+    const { visible, title, submitText, editType } = this.state;
     const { dicts } = this.props;
     return (
       <Modal
@@ -59,12 +63,13 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
         onOk={this._onSubmit}
         onCancel={this._onCancle}
         afterClose={this._afterClose}
-        okText={t(I18N_IDS.TEXT_OK)}
+        okText={submitText}
         cancelText={t(I18N_IDS.TEXT_CANCEL)}
       >
         <ElementCodeForm
           ref={this.formRef}
           dicts={dicts}
+          editType={editType}
         />
       </Modal>
     );
@@ -72,16 +77,22 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
   open(options?: {
     title?: string,
     formData?: any,
+    submitText?: string,
+    editType: 'edit' | 'add';
     onSubmit?(data: any): void,
   }) {
     const {
       title,
       formData,
+      submitText,
+      editType,
       onSubmit,
     } = options ?? {};
     this.setState({
       visible: true,
       title: title ?? '',
+      editType,
+      submitText: submitText ?? t(I18N_IDS.TEXT_OK),
       onSubmitHandle: onSubmit,
     }, () => {
       setTimeout(() => {
@@ -119,20 +130,21 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
 interface IElementCodeFormProps {
   form?: WrappedFormUtils;
   dicts: IDictsMap;
+  editType: 'edit' | 'add';
 }
 
 @(Form.create({ name: 'ElementCodeForm' }) as any)
 class ElementCodeForm extends React.PureComponent<IElementCodeFormProps> {
   render() {
     const { getFieldDecorator } = this.props.form;
-    const { dicts } = this.props;
+    const { dicts, editType } = this.props;
     return (
       <Form autoComplete="off">
         <Row gutter={24}>
           <Col span={12}>
             <FormItem label="数据元素代码" required>
               {
-                getFieldDecorator('elementCode', {
+                getFieldDecorator('elementCode', editType === 'edit' ? {} : {
                   validateFirst: true,
                   rules: [
                     createRequireRule({ label: '数据元素代码' }),
@@ -148,7 +160,7 @@ class ElementCodeForm extends React.PureComponent<IElementCodeFormProps> {
                     }),
                   ],
                 })(
-                  <Input />,
+                  <Input disabled={editType === 'edit'} />,
                 )
               }
             </FormItem>
@@ -173,11 +185,11 @@ class ElementCodeForm extends React.PureComponent<IElementCodeFormProps> {
             <FormItem label="默认语言">
               {
                 getFieldDecorator('ddLanguage', {
-                  rules: [
-                    createRichLengthRule({ label: '默认语言', max: 50 }),
-                  ],
+                  // rules: [
+                  //   createRichLengthRule({ label: '默认语言', max: 50 }),
+                  // ],
                 })(
-                  <Select allowClear={true}>
+                  <Select allowClear={true} disabled >
                     {
                       _.map(dicts['DdLanguage'], d => <Option value={d.key} key={d.key}>{d.value}</Option>)
                     }
@@ -190,11 +202,11 @@ class ElementCodeForm extends React.PureComponent<IElementCodeFormProps> {
             <FormItem label="字段长度">
               {
                 getFieldDecorator('fieldLength', {
-                  rules: [
-                    createRequireRule({ label: '字段长度' }),
-                  ],
+                  // rules: [
+                  //   createRequireRule({ label: '字段长度' }),
+                  // ],
                 })(
-                  <InputNumber style={{ width: '100%' }} />,
+                  <InputNumber style={{ width: '100%' }} disabled />,
                 )
               }
             </FormItem>
@@ -205,12 +217,12 @@ class ElementCodeForm extends React.PureComponent<IElementCodeFormProps> {
             <FormItem label="数据类型" required>
               {
                 getFieldDecorator('dataType', {
-                  rules: [
-                    createRequireRule({ label: '数据类型' }),
-                    createRichLengthRule({ label: '数据类型', max: 50 }),
-                  ],
+                  // rules: [
+                  //   createRequireRule({ label: '数据类型' }),
+                  //   createRichLengthRule({ label: '数据类型', max: 50 }),
+                  // ],
                 })(
-                  <Select allowClear={true}>
+                  <Select allowClear={true} disabled >
                     {
                       _.map(dicts['DataType'], d => <Option value={d.key} key={d.key}>{d.value}</Option>)
                     }
@@ -223,7 +235,7 @@ class ElementCodeForm extends React.PureComponent<IElementCodeFormProps> {
             <FormItem label="小数位">
               {
                 getFieldDecorator('decimals', {})(
-                  <InputNumber style={{ width: '100%' }} />,
+                  <InputNumber style={{ width: '100%' }} disabled />,
                 )
               }
             </FormItem>

@@ -698,9 +698,11 @@ export async function openImportLayoutsJsonModal() {
  * 打开数据元素弹窗
  */
 export function openElementCodeFormModal(options?: {
-  title?: string,
-  formData?: any,
-  onSubmit?(data: any): any,
+  title?: string;
+  formData?: any;
+  submitText?: string;
+  editType: 'edit' | 'add';
+  onSubmit?(data: any): any;
 }) {
   const modal: UiElementCodeFormModal = elementCodeFormModalRef.current['wrappedInstance'];
   modal.open(options);
