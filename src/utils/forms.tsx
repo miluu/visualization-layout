@@ -44,6 +44,7 @@ export interface IFormItemOption {
   ) => React.ReactNode;
   /** 是否禁用 */
   disabled?: boolean;
+  disabledWhen?: (options: any) => boolean;
   /** 下拉列表 */
   list?: any[];
   /** 字典表名称 */
@@ -150,6 +151,7 @@ export function renderControl({
   urlParams,
   onChangeCallback,
   dispatch,
+  info,
 }: IRenderFormItemOptions) {
   let _item = item;
   if (values && values.__isInReference) {
@@ -169,19 +171,19 @@ export function renderControl({
     case 'link':
       return renderLink(_item, values);
     case 'number':
-      return renderNumberInput(_item, onChangeCallback);
+      return renderNumberInput(_item, info, onChangeCallback);
     case 'select':
-      return renderSelect(_item, dicts, onChangeCallback);
+      return renderSelect(_item, dicts, info, onChangeCallback);
     case 'textarea':
-      return renderTextarea(_item, onChangeCallback);
+      return renderTextarea(_item, info, onChangeCallback);
     case 'checkbox':
-      return renderCheckbox(_item, onChangeCallback);
+      return renderCheckbox(_item, info, onChangeCallback);
     case 'multiSelect':
-      return renderMultiSelect(_item, dicts, onChangeCallback);
+      return renderMultiSelect(_item, dicts, info, onChangeCallback);
     case 'associate':
-      return renderAssociate(_item, values, urlParams, onChangeCallback);
+      return renderAssociate(_item, values, info, urlParams, onChangeCallback);
     default:
-      return renderInput(_item, onChangeCallback);
+      return renderInput(_item, info, onChangeCallback);
   }
 }
 
@@ -193,6 +195,7 @@ interface IRenderFormItemOptions {
   urlParams?: any;
   onChangeCallback?: OnChangeCallback;
   dispatch?: Dispatch<AnyAction>;
+  info?: any;
 }
 
 export function renderFormItem({
@@ -203,6 +206,7 @@ export function renderFormItem({
   urlParams,
   onChangeCallback,
   dispatch,
+  info,
 }: IRenderFormItemOptions) {
   const { getFieldDecorator } = form;
   if (item.showWhen && !item.showWhen(values)) {
@@ -238,6 +242,7 @@ export function renderFormItem({
           urlParams,
           onChangeCallback,
           dispatch,
+          info,
         }),
       )}
       {
@@ -247,37 +252,37 @@ export function renderFormItem({
   );
 }
 
-export function renderInput(item: IFormItemOption, onChangeCallback: OnChangeCallback) {
+export function renderInput(item: IFormItemOption, info: any, onChangeCallback: OnChangeCallback) {
   return <WrappedInput
-    disabled={item.disabled}
+    disabled={getDisabledValue({ options: item, info })}
     size="small"
     placeholder={item.placeholder}
     onChange={(value: any) => onChangeCallback(item, value)}
   />;
 }
 
-export function renderCheckbox(item: IFormItemOption, onChangeCallback: OnChangeCallback) {
+export function renderCheckbox(item: IFormItemOption, info: any, onChangeCallback: OnChangeCallback) {
   return (
     <Checkbox
-      disabled={item.disabled}
+      disabled={getDisabledValue({ options: item, info })}
       onChange={() => onChangeCallback(item)}
     />
   );
 }
 
-export function renderTextarea(item: IFormItemOption, onChangeCallback: OnChangeCallback) {
+export function renderTextarea(item: IFormItemOption, info: any, onChangeCallback: OnChangeCallback) {
   return <WrappedTextArea
-    disabled={item.disabled}
+    disabled={getDisabledValue({ options: item, info })}
     autosize={{ minRows: 2, maxRows: 10 }}
     onChange={value => onChangeCallback(item, value)}
     placeholder={item.placeholder}
   />;
 }
 
-export function renderSelect(item: IFormItemOption, dicts: IDictsMap, onChangeCallback: OnChangeCallback) {
+export function renderSelect(item: IFormItemOption, dicts: IDictsMap, info: any, onChangeCallback: OnChangeCallback) {
   return (
     <Select
-      disabled={item.disabled}
+      disabled={getDisabledValue({ options: item, info })}
       size="small"
       allowClear
       onChange={(value: any) => onChangeCallback(item, value)}
@@ -293,7 +298,7 @@ export function renderSelect(item: IFormItemOption, dicts: IDictsMap, onChangeCa
   );
 }
 
-export function renderAssociate(item: IFormItemOption, values: any, urlParams: any, onChangeCallback: OnChangeCallback) {
+export function renderAssociate(item: IFormItemOption, values: any, urlParams: any, info: any, onChangeCallback: OnChangeCallback) {
   const {
     property,
     refProperty,
@@ -306,6 +311,7 @@ export function renderAssociate(item: IFormItemOption, values: any, urlParams: a
   return (
     <>
       <UiAssociate
+        disabled={getDisabledValue({ options: item, info })}
         value={_.get(values, property)}
         valueProp={valueProp}
         labelProp={labelProp}
@@ -320,10 +326,10 @@ export function renderAssociate(item: IFormItemOption, values: any, urlParams: a
   );
 }
 
-export function renderNumberInput(item: IFormItemOption, onChangeCallback: OnChangeCallback) {
+export function renderNumberInput(item: IFormItemOption, info: any, onChangeCallback: OnChangeCallback) {
   return (
     <WrappedInputNumber
-      disabled={item.disabled}
+      disabled={getDisabledValue({ options: item, info })}
       size="small"
       max={item.max || 12}
       min={item.min || 0}
@@ -344,7 +350,7 @@ export function renderLink(item: IFormItemOption, values: any) {
   return <a href="javascript:void(0)" className="ant-form-text">{_.get(values, item.property)}</a>;
 }
 
-export function renderMultiSelect(item: IFormItemOption, dicts: IDictsMap, onChangeCallback: OnChangeCallback) {
+export function renderMultiSelect(item: IFormItemOption, dicts: IDictsMap, info: any, onChangeCallback: OnChangeCallback) {
   return (
     <Select
       mode="tags"
@@ -352,6 +358,7 @@ export function renderMultiSelect(item: IFormItemOption, dicts: IDictsMap, onCha
       onChange={() => onChangeCallback(item)}
       placeholder={item.placeholder}
       {...DROPDOWN_ALIGN_PROPS}
+      disabled={getDisabledValue({ options: item, info })}
     >
       {_.map((item.list || dicts[item.dictName]), listItem => {
         let key: string;
@@ -371,4 +378,11 @@ export function renderMultiSelect(item: IFormItemOption, dicts: IDictsMap, onCha
       })}
     </Select>
   );
+}
+
+function getDisabledValue({ options, values, info }: { options?: any, values?: any, info?: any }) {
+  if (options.disabledWhen) {
+    return options.disabledWhen({ values, info, options });
+  }
+  return options.disabled;
 }

@@ -421,6 +421,7 @@ export const VISUALIZATION_CONFIG = {
     {
       property: 'fieldText',
       label: t(I18N_IDS.LABEL_FIELD_TEXT),
+      disabledWhen: ({ info }) => info?.isMultiLanguage ?? false,
     },
     {
       property: 'dataElementCode',

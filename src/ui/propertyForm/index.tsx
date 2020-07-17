@@ -59,6 +59,7 @@ function createConnector(type: string) {
         isGridColumn,
         isInReference,
         config: LAYOUTS.config,
+        isMultiLanguage: LAYOUTS.defaultSetting?.settings?.isMulLanguage ?? false,
       };
     },
   );
@@ -85,13 +86,14 @@ interface IPropertyFormProps {
   config?: ICreateLayouttsModelOptions;
 
   type?: string;
+  isMultiLanguage?: boolean;
 
   renderLocked?: boolean;
 }
 
 class PropertyForm extends React.Component<IPropertyFormProps> {
   render() {
-    const { selectedItem, dicts, params, formItemsOpts, form, selectedItemType, type, isGridColumn, isInReference, config, dispatch } = this.props;
+    const { selectedItem, dicts, params, formItemsOpts, form, selectedItemType, type, isGridColumn, isInReference, config, dispatch, isMultiLanguage } = this.props;
     const values = selectedItem ? createValues(formItemsOpts, selectedItem, isGridColumn, isInReference) : null;
     if (selectedItem && selectedItem.layoutElementType === 'GRID') {
       values.__gridColumns = selectedItem[config.childrenElementsKey];
@@ -114,6 +116,7 @@ class PropertyForm extends React.Component<IPropertyFormProps> {
             urlParams: params,
             onChangeCallback: this._onValueChange,
             dispatch,
+            info: { isMultiLanguage },
           }))}
         </Form>
       </div>
