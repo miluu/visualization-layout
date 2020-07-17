@@ -1489,10 +1489,11 @@ async function modifyDataElement({
     Modal.error({ content: e?.msg ?? '查询数据元素失败。' });
     return;
   }
+  const originElementCode = formData.elementCode;
   if (type === 'edit') {
     formData.rowStatus = ROW_STATUS.MODIFIED;
   } else {
-    formData.referenceCode = formData.elementCode;
+    formData.referenceCode = originElementCode;
     formData.elementCode = null;
     formData.configItemCode = null;
     formData.ipfDmlElementId = null;
@@ -1506,11 +1507,19 @@ async function modifyDataElement({
     submitText: `${typeText}并提交`,
     formData: { ...formData },
     editType: type,
-    async onSubmit(data) {
+    async onSubmit(data, editType) {
       const postData = {
         ...formData,
         ...data,
       };
+      if (type === 'edit' && editType === 'add') {
+        postData.referenceCode = originElementCode;
+        postData.configItemCode = null;
+        postData.ipfDmlElementId = null;
+        postData.rowStatus = ROW_STATUS.ADDED;
+        postData.baseViewId = window['__urlParams']?.baseViewId ?? '';
+        postData.revisionNumber = 0;
+      }
       let result: any;
       dispatch(createSetIsLoadingAction(true, true));
       try {

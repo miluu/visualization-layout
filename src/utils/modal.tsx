@@ -702,7 +702,7 @@ export function openElementCodeFormModal(options?: {
   formData?: any;
   submitText?: string;
   editType: 'edit' | 'add';
-  onSubmit?(data: any): any;
+  onSubmit?(data: any, editType: string): any;
 }) {
   const modal: UiElementCodeFormModal = elementCodeFormModalRef.current['wrappedInstance'];
   modal.open(options);
