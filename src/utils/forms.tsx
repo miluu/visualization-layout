@@ -68,6 +68,7 @@ export interface IFormItemOption {
   placeholder?: string;
   // 联想控件
   refProperty?: string;
+  otherRefProperties?: string[];
   valueProp?: string;
   labelProp?: string;
   columns?: IAssociateColumn[];
@@ -273,7 +274,7 @@ export function renderCheckbox(item: IFormItemOption, info: any, onChangeCallbac
 export function renderTextarea(item: IFormItemOption, info: any, onChangeCallback: OnChangeCallback) {
   return <WrappedTextArea
     disabled={getDisabledValue({ options: item, info })}
-    autosize={{ minRows: 2, maxRows: 10 }}
+    autoSize={{ minRows: 2, maxRows: 10 }}
     onChange={value => onChangeCallback(item, value)}
     placeholder={item.placeholder}
   />;
@@ -302,6 +303,7 @@ export function renderAssociate(item: IFormItemOption, values: any, urlParams: a
   const {
     property,
     refProperty,
+    otherRefProperties,
     valueProp,
     labelProp,
     columns,
@@ -320,7 +322,9 @@ export function renderAssociate(item: IFormItemOption, values: any, urlParams: a
         labelInit={_.get(values, refProperty)}
         onChange={(v, o) => onChangeCallback([item, {
           property: item.refProperty,
-        }], [v || null, _.get(o, labelProp, null)], true)}
+        }, ...(otherRefProperties ?? []).map(p => ({ property: p }))],
+        [v || null, _.get(o, labelProp, null), ...(otherRefProperties ?? []).map(__ => _.get(o, labelProp, null))],
+        true)}
       />
     </>
   );

@@ -82,6 +82,7 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
       <Modal
         visible={visible}
         title={title}
+        onCancel={this._onCancle}
         maskClosable={false}
         keyboard={false}
         afterClose={this._afterClose}
@@ -136,18 +137,20 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
       onSubmitHandle: onSubmit,
     }, () => {
       setTimeout(() => {
-        this._getForm()?.setFieldsValue(formData ?? {});
+        this._getForm()?.setFieldsValue(_.pick(formData ?? {}, [
+          'elementCode',
+          'fieldText',
+          'ddLanguage',
+          'fieldLength',
+          'dataType',
+          'decimals',
+        ]));
       }, 0);
     });
   }
   close() {
-    this._getForm()?.resetFields();
     this.setState({
       visible: false,
-      title: '',
-      onSubmitHandle: null,
-      step: 0,
-      referenceRecords: [],
     });
   }
   private _getForm = () => {
@@ -191,7 +194,18 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
     return (
       <div>
         <p>当前数据元素存在 {list.length} 条引用记录，点击 “修改并提交” 按钮将提交修改所有引用数据，点击 ”另建数据元素“ 进行新增修改。</p>
-        <Table columns={this._tableColumns} dataSource={list} size="small" scroll={{ x: 1500, y: 200 }} />
+        <Table
+          columns={this._tableColumns}
+          dataSource={list}
+          size="small"
+          scroll={{ x: 1500, y: 200 }}
+          rowKey={(record) => {
+            if (!record.__key) {
+              record.__key = (Math.random() * 10000000).toFixed(0);
+            }
+            return record.__key;
+          }}
+        />
       </div>
     );
   }
@@ -208,13 +222,18 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
       step: 0,
       editType: 'add',
       title: '新增数据元素',
+      submitText: '新增并提交',
     });
   }
   private _onNext = async () => {
     let result: any;
     this.props.dispatch(createSetIsLoadingAction(true, true));
+    const elementCode = this._getForm().getFieldValue('elementCode');
     try {
-      result = await checkElementCode({});
+      result = await checkElementCode({
+        elementCode,
+        baseViewId: window['__urlParams']?.baseViewId,
+      });
     } catch (e) {
       Modal.error({ content: e?.msg ?? '查询失败。' });
       return;
@@ -231,7 +250,13 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
     this.close();
   }
   private _afterClose = () => {
-    //
+    this._getForm()?.resetFields();
+    this.setState({
+      title: '',
+      onSubmitHandle: null,
+      step: 0,
+      referenceRecords: [],
+    });
   }
 }
 

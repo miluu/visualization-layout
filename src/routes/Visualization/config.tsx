@@ -12,7 +12,7 @@ import { openUploaderModal, openListSourceEditor, openElementCodeFormModal, clos
 import { UiComponentGroupList } from 'src/ui/componentGroupList';
 import I18N_IDS from 'src/i18n/ids';
 import { t } from 'src/i18n';
-import { dataElementCodeQueryMethodCreator } from './service';
+import { dataElementCodeQueryMethodCreator, titleMsgCodeQueryMethod } from './service';
 import { saveElementCode, getDmlElement, getDmlElementByPropertyName } from 'src/services/elementCode';
 import { createSetIsLoadingAction } from 'src/models/appActions';
 
@@ -428,6 +428,7 @@ export const VISUALIZATION_CONFIG = {
       label: '数据元素',
       type: 'associate',
       refProperty: 'dataElementText',
+      otherRefProperties: ['columnName', 'fieldText'],
       valueProp: 'elementCode',
       labelProp: 'fieldText',
       columns: [
@@ -478,6 +479,34 @@ export const VISUALIZATION_CONFIG = {
       property: 'dataElementText',
       label: '字段标题',
       refProperty: 'dataElementText_1',
+      disabled: true,
+    },
+    {
+      property: 'titleMsgCode',
+      label: '标题消息',
+      type: 'associate',
+      refProperty: 'titleMsgText',
+      valueProp: 'messageKey',
+      labelProp: 'messageText',
+      columns: [
+        { title: '消息键值', field: 'messageKey' },
+        { title: '创建人', field: 'creator' },
+        { title: '消息内容', field: 'messageText' },
+        { title: '消息类型', field: 'messageType' },
+        { title: '语言名称', field: 'ddLanguage' },
+      ],
+      queryMethod: titleMsgCodeQueryMethod,
+    },
+    {
+      property: 'titleMsgCode',
+      label: '标题消息代码',
+      key: 'titleMsgCode_1',
+      disabled: true,
+    },
+    {
+      property: 'titleMsgText',
+      label: '标题消息文本',
+      key: 'titleMsgText_1',
       disabled: true,
     },
     {
@@ -1537,8 +1566,8 @@ async function modifyDataElement({
       console.log(result);
       message.success('保存成功。');
       callback(
-        [{ property: 'dataElementCode' }, { property: 'dataElementText' }],
-        [data?.elementCode, data?.fieldText],
+        [{ property: 'dataElementCode' }, { property: 'dataElementText' }, { property: 'columnName' }, { property: 'fieldText' }],
+        [data?.elementCode, data?.fieldText, data?.fieldText, data?.fieldText],
         true,
       );
       closeElementCodeFormModal();

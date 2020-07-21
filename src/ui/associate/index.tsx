@@ -109,7 +109,6 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
           className="editor-associate-tr"
           disabled={d.__hidden}
           style={d.__hidden ? { display: 'none' } : null}
-          {...{ dataSource: d }}
         >{text}</Option>
       );
     });
@@ -221,9 +220,11 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
   }
 
   private _triggerChange = (value: string, option: any) => {
-    const onChange = this.props.onChange;
+    const { onChange, valueProp } = this.props;
+    const { source } = this.state;
+    const item = _.find(source, r => r[valueProp] === value);
     if (onChange) {
-      onChange(value, option && option.props && option.props.dataSource);
+      onChange(value, item);
     }
   }
 

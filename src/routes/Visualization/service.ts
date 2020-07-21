@@ -60,7 +60,7 @@ export async function convertToPrototype(params: any): Promise<any> {
 }
 
 export function dataElementCodeQueryMethodCreator(urlParams: any) {
-  const baseViewId = urlParams.baseViewId;
+  const baseViewId = window['__urlParams']?.baseViewId;
   return async function dataElementCodeQueryMethod(options: IQueryOptions) {
     let result: IQueryResult;
     const {
@@ -120,4 +120,71 @@ export function dataElementCodeQueryMethodCreator(urlParams: any) {
     };
     return result;
   };
+}
+
+export async function titleMsgCodeQueryMethod(options: IQueryOptions) {
+  const baseViewId = window['__urlParams']?.baseViewId;
+  let result: IQueryResult;
+  const {
+    currentPage,
+    pageSize,
+    keywords,
+  } = options;
+  const searchColumns: any[] = [{
+    propertyName: 'baseViewId',
+    columnName: 'BASE_VIEW_ID',
+    dataType: 'S',
+    value: baseViewId,
+    operation:'EQ',
+  }];
+  if (keywords) {
+    searchColumns.push({
+      propertyName:'messageKey',
+      columnName:'MESSAGE_KEY',
+      dataType:'S',
+      junction:'or',
+      value: keywords,
+      operation: 'LIKEIC',
+    }, {
+      propertyName:'messageText',
+      columnName:'MESSAGE_TEXT',
+      dataType:'S',
+      junction:'or',
+      value: keywords,
+      operation: 'LIKEIC',
+    });
+  }
+  let res: any;
+  res = await httpGet('/ipf/commonSearchHelp/query', {
+    paramsSerializer,
+    params: {
+      type: 'S',
+      sourceName: 'IpfLanguageMsg',
+      searchName: 'ShlpIpfLanguageMsgCode',
+      baseViewId,
+      currentPage,
+      messageKey: keywords,
+      pageSize,
+      queryResultType: 'page',
+      sum: 'false',
+      searchColumns,
+    },
+  });
+  // res = {
+  //   ipfLanguageMsgs: [
+  //     { messageKey: 'Hello', messageText: 'World' },
+  //     { messageKey: 'Hello2', messageText: 'World2' },
+  //     { messageKey: 'Hello3', messageText: 'World3' },
+  //     { messageKey: 'Hello4', messageText: 'World4' },
+  //   ],
+  //   msg: '操作成功！',
+  //   success: true,
+  //   total: 4,
+  //   type: 'info',
+  // };
+  result = {
+    source: res.ipfLanguageMsgs || [],
+    total: res.total,
+  };
+  return result;
 }
