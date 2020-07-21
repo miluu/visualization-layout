@@ -52,7 +52,7 @@ import { createSetLayoutAndElementPropertyFormOptionsAction, createSetActiveForm
 import { IFormsState } from 'src/models/formsModel';
 import { UiTransferModal } from 'src/ui/transferModal';
 import { UiFormSettingsModal } from 'src/ui/formSettingsModal';
-import { transferModalRef, formSettingsModalRef, uploaderRef, listSourceEditorModalRef, importLayoutsJsonModal, elementCodeFormModalRef } from 'src/utils/modal';
+import { transferModalRef, formSettingsModalRef, uploaderRef, listSourceEditorModalRef, importLayoutsJsonModal, elementCodeFormModalRef, languageMsgFormModalRef } from 'src/utils/modal';
 import { UiPropertyMehodListTabs } from 'src/ui/draggableTree/propertyMethodListTabs';
 import { UiUploader } from 'src/ui/uploaderModal';
 import { UiListSourceEditorModal } from 'src/ui/listSourceEditor';
@@ -66,6 +66,7 @@ import I18N_IDS from 'src/i18n/ids';
 import { UiSaveAsPrototypeForm } from 'src/ui/saveAsPrototypeForm';
 import { cellNameManager } from 'src/utils/cellName';
 import { UiElementCodeFormModal } from 'src/ui/ElementCodeForm';
+import { UiLanguageMsgFormModal } from 'src/ui/LanguageMsgForm';
 
 const { Panel } = Collapse;
 const { TabPane } = Tabs;
@@ -290,6 +291,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
             onCancle={this._onSaveAsPrototypeCancle}
           />
           <UiElementCodeFormModal ref={elementCodeFormModalRef} />
+          <UiLanguageMsgFormModal ref={languageMsgFormModalRef} />
         </>,
 
         {/* 原型列表 */}

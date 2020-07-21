@@ -8,12 +8,12 @@ import { IUiDraggableListItem } from 'src/ui/draggableList';
 import { IUiDraggableListGroupItem } from 'src/ui/draggableListGroup';
 import { transformUiType, createId } from 'src/utils';
 import { Button, Select, message, Modal } from 'antd';
-import { openUploaderModal, openListSourceEditor, openElementCodeFormModal, closeElementCodeFormModal } from 'src/utils/modal';
+import { openUploaderModal, openListSourceEditor, openElementCodeFormModal, closeElementCodeFormModal, closeLanguageMsgFormModal, openLanguageMsgFormModal } from 'src/utils/modal';
 import { UiComponentGroupList } from 'src/ui/componentGroupList';
 import I18N_IDS from 'src/i18n/ids';
 import { t } from 'src/i18n';
 import { dataElementCodeQueryMethodCreator, titleMsgCodeQueryMethod } from './service';
-import { saveElementCode, getDmlElement, getDmlElementByPropertyName } from 'src/services/elementCode';
+import { saveElementCode, getDmlElement, getDmlElementByPropertyName, saveLanguageMsg } from 'src/services/elementCode';
 import { createSetIsLoadingAction } from 'src/models/appActions';
 
 const { Option } = Select;
@@ -139,6 +139,12 @@ export const VISUALIZATION_CONFIG = {
       disabled: true,
     },
     {
+      property: 'ipfCcmBoPageLayoutId',
+      disabled: true,
+      label: 'ipfCcmBoPageLayoutId',
+      hidden: true,
+    },
+    {
       property: 'parentCellName',
       label: t(I18N_IDS.LABEL_PARENT_CELL_NAME),
       disabled: true,
@@ -201,8 +207,66 @@ export const VISUALIZATION_CONFIG = {
       type: 'checkbox',
     },
     {
+      property: 'groupMsgCode',
+      label: '分组标题',
+      type: 'associate',
+      refProperty: 'groupTitle',
+      valueProp: 'messageKey',
+      labelProp: 'messageText',
+      columns: [
+        { title: '消息键值', field: 'messageKey' },
+        { title: '创建人', field: 'creator' },
+        { title: '消息内容', field: 'messageText' },
+        { title: '消息类型', field: 'messageType' },
+        { title: '语言名称', field: 'ddLanguage' },
+      ],
+      queryMethod: titleMsgCodeQueryMethod,
+      extra(__, values, callback, ___, dispatch) {
+        if (!values) {
+          return null;
+        }
+        return (
+          <Button.Group size="small" >
+            <Button
+              disabled={!values?.groupMsgCode}
+              onClick={() => modifyLanguageMsg({
+                dispatch,
+                callback,
+                values,
+                type: 'edit',
+                layoutType: 'layout',
+                codeKey: 'groupMsgCode',
+                textKey: 'groupTitle',
+              })}
+            >
+              修改
+            </Button>
+            <Button onClick={() => modifyLanguageMsg({
+              dispatch,
+              callback,
+              values,
+              type: 'add',
+              layoutType: 'layout',
+              codeKey: 'groupMsgCode',
+              textKey: 'groupTitle',
+            })}>
+              新增
+            </Button>
+          </Button.Group>
+        );
+      },
+    },
+    {
+      property: 'groupMsgCode',
+      key: 'groupMsgCode_1',
+      label: t(I18N_IDS.LABEL_GROUP_MSG_CODE),
+      disabled: true,
+    },
+    {
       property: 'groupTitle',
+      key: 'groupTitle_1',
       label: t(I18N_IDS.LABEL_GROUP_TITLE),
+      disabled: true,
     },
     {
       property: 'groupWidget',
@@ -214,16 +278,6 @@ export const VISUALIZATION_CONFIG = {
       property: 'isShowGroup',
       label: t(I18N_IDS.LABEL_IS_SHOW_GROUP),
       type: 'checkbox',
-    },
-    {
-      property: 'groupMsgCode',
-      label: t(I18N_IDS.LABEL_GROUP_MSG_CODE),
-      // type: 'select',
-      // render: (__: any, ___: any, callback: (opts: IFormItemOption) => void) => (
-      //   <UiAssociate
-      //     onChange={() => callback({ property: 'groupMsgCode' })}
-      //   />
-      // ),
     },
     {
       property: 'labelUnitCount',
@@ -419,6 +473,12 @@ export const VISUALIZATION_CONFIG = {
       type: 'link',
     },
     {
+      property: 'ipfCcmBoPgLoElementId',
+      disabled: true,
+      label: 'ipfCcmBoPgLoElementId',
+      hidden: true,
+    },
+    {
       property: 'fieldText',
       label: t(I18N_IDS.LABEL_FIELD_TEXT),
       disabledWhen: ({ info }) => info?.isMultiLanguage ?? false,
@@ -496,6 +556,40 @@ export const VISUALIZATION_CONFIG = {
         { title: '语言名称', field: 'ddLanguage' },
       ],
       queryMethod: titleMsgCodeQueryMethod,
+      extra(__, values, callback, ___, dispatch) {
+        if (!values) {
+          return null;
+        }
+        return (
+          <Button.Group size="small" >
+            <Button
+              disabled={!values?.titleMsgCode}
+              onClick={() => modifyLanguageMsg({
+                dispatch,
+                callback,
+                values,
+                type: 'edit',
+                layoutType: 'element',
+                codeKey: 'titleMsgCode',
+                textKey: 'titleMsgText',
+              })}
+            >
+              修改
+            </Button>
+            <Button onClick={() => modifyLanguageMsg({
+              dispatch,
+              callback,
+              values,
+              type: 'add',
+              layoutType: 'element',
+              codeKey: 'titleMsgCode',
+              textKey: 'titleMsgText',
+            })}>
+              新增
+            </Button>
+          </Button.Group>
+        );
+      },
     },
     {
       property: 'titleMsgCode',
@@ -1571,6 +1665,74 @@ async function modifyDataElement({
         true,
       );
       closeElementCodeFormModal();
+    },
+  });
+}
+
+async function modifyLanguageMsg({
+  values,
+  dispatch,
+  callback,
+  type,
+  codeKey,
+  textKey,
+  layoutType,
+}: {
+  values: any;
+  dispatch: any;
+  callback: any;
+  type: 'edit' | 'add';
+  codeKey: string,
+  textKey: string,
+  layoutType: 'layout' | 'element',
+}) {
+  const formData: any = {};
+  // const originMessageKey = formData.messageKey;
+  if (type === 'edit') {
+    formData.rowStatus = ROW_STATUS.MODIFIED;
+    formData.baseViewId = window['__urlParams']?.baseViewId ?? '';
+    formData.messageKey = values[codeKey];
+    formData.messageText = values[textKey];
+  } else {
+    formData.rowStatus = ROW_STATUS.ADDED;
+    formData.baseViewId = window['__urlParams']?.baseViewId ?? '';
+  }
+  openLanguageMsgFormModal({
+    formData: { ...formData },
+    editType: type,
+    async onSubmit(data, editType) {
+      const postData = {
+        ...formData,
+        ...data,
+        metaDataType: layoutType === 'element' ? 'IpfCcmBoPgLoElement' : 'IpfCcmBoPageLayout',
+        businessId: layoutType === 'element' ? values?.ipfCcmBoPgLoElementId : values?.ipfCcmBoPageLayoutId,
+      };
+      if (type === 'edit' && editType === 'add') {
+        postData.rowStatus = ROW_STATUS.ADDED;
+        postData.baseViewId = window['__urlParams']?.baseViewId ?? '';
+      }
+      if (postData.businessId?.indexOf?.('NEW_') >= 0) {
+        postData.businessId = null;
+      }
+      let result: any;
+      dispatch(createSetIsLoadingAction(true, true));
+      try {
+        result = await saveLanguageMsg(postData);
+      } catch (e) {
+        console.error(e);
+        Modal.error({ content: e?.msg ?? '保存失败。' });
+        return;
+      } finally {
+        dispatch(createSetIsLoadingAction(false, true));
+      }
+      console.log(result);
+      message.success('保存成功。');
+      callback(
+        [{ property: 'titleMsgCode' }, { property: 'titleMsgText' }],
+        [data?.messageKey, data?.messageText],
+        true,
+      );
+      closeLanguageMsgFormModal();
     },
   });
 }

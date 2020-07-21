@@ -75,3 +75,35 @@ function makeRecords(fields: string[], length: number = 20) {
   }
   return list;
 }
+
+export async function saveLanguageMsg(data: any) {
+  console.log('[saveLanguageMsg]', data);
+  if (debug) {
+    await delay(500);
+    return { succss: true };
+  }
+  return httpPost('/ipf/ipfLanguageMsg/custom/saveOrUpdateAndCommit', data);
+}
+
+export async function checkLanguageMsg(data: any) {
+  if (debug) {
+    await delay(500);
+    // return Promise.reject({ msg: 'hehe' });
+    return {
+      records: makeRecords([
+        'sourceType',
+        'pageType',
+        'pageName',
+        'layoutBoName',
+        'propertyName',
+        'description',
+        'fieldText',
+        'messageKey',
+        'messageText',
+      ], 14),
+    };
+  }
+  return httpGet('/ipf/ipfLanguageMsg/custom/getAllUseingLanguageMsgVos', {
+    params: data,
+  });
+}

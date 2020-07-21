@@ -4,7 +4,6 @@ import {
   Modal,
   Form,
   Input,
-  InputNumber,
   Select,
   Row,
   Col,
@@ -17,22 +16,20 @@ import I18N_IDS from 'src/i18n/ids';
 import { t } from 'src/i18n';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { IAppState, IDictsMap } from 'src/models/appModel';
-import { createRequireRule, createEnUcNumUlStringRule, createRichLengthRule, createUniqGlRules } from 'src/utils/validateRules';
-import { checkElementCode } from 'src/services/elementCode';
+import { createRequireRule, createRichLengthRule } from 'src/utils/validateRules';
+import { checkLanguageMsg } from 'src/services/elementCode';
 import { createSetIsLoadingAction } from 'src/models/appActions';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
 
-interface IElementCodeFormModalProps {
+interface IUiLanguageMsgFormModalProp {
   dispatch?: Dispatch<AnyAction>;
   dicts?: IDictsMap;
 }
 
-interface IElementCodeFormModalState {
+interface IUiLanguageMsgFormModalState {
   visible: boolean;
-  title: string;
-  submitText: string;
   editType: 'edit' | 'add';
   step: number;
   referenceRecords: any[];
@@ -47,8 +44,8 @@ const tableColumns: any = [
   { dataIndex: 'propertyName', title: 'propertyName' },
   { dataIndex: 'description', title: 'description' },
   { dataIndex: 'fieldText', title: 'fieldText' },
-  { dataIndex: 'dataElementCode', title: 'dataElementCode' },
-  { dataIndex: 'dataElementText', title: 'dataElementText' },
+  { dataIndex: 'messageKey', title: 'messageKey' },
+  { dataIndex: 'messageText', title: 'messageText' },
 ];
 
 @connect(
@@ -60,11 +57,9 @@ const tableColumns: any = [
     withRef: true,
   },
 )
-export class UiElementCodeFormModal extends React.PureComponent<IElementCodeFormModalProps, IElementCodeFormModalState> {
-  state: IElementCodeFormModalState = {
+export class UiLanguageMsgFormModal extends React.PureComponent<IUiLanguageMsgFormModalProp, IUiLanguageMsgFormModalState> {
+  state: IUiLanguageMsgFormModalState = {
     visible: false,
-    title: '',
-    submitText: t(I18N_IDS.TEXT_OK),
     onSubmitHandle: null,
     editType: null,
     step: 0,
@@ -76,12 +71,12 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
   private _tableColumns: any[] = tableColumns;
 
   render() {
-    const { visible, title, submitText, editType, step } = this.state;
+    const { visible, editType, step } = this.state;
     const { dicts } = this.props;
     return (
       <Modal
         visible={visible}
-        title={title}
+        title={this.getTitle()}
         onCancel={this._onCancle}
         maskClosable={false}
         keyboard={false}
@@ -94,14 +89,14 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
             下一步
           </Button> : null,
           this.showSubmitButton() ? <Button key="submit" type="primary" onClick={this._onSubmit}>
-            {submitText}
+            {this.getSubmitText()}
           </Button> : null,
           this.showJumptoAddButton() ? <Button key="toAdd" type="primary" onClick={this._onJumpToAdd}>
-            另建数据元素
+            另建国际化消息
           </Button> : null,
         ]}
       >
-        <ElementCodeForm
+        <LanguageMsgForm
           ref={this.formRef}
           dicts={dicts}
           editType={editType}
@@ -115,35 +110,40 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
       </Modal>
     );
   }
+  getEditText() {
+    const { editType } = this.state;
+    const editText: string = editType === 'add' ? '新增' : '编辑';
+    return editText;
+  }
+  getTitle() {
+    const editText = this.getEditText();
+    return `${editText}国际化消息`;
+  }
+  getSubmitText() {
+    const editText = this.getEditText();
+    return `${editText}并提交`;
+  }
   open(options?: {
-    title?: string,
     formData?: any,
-    submitText?: string,
     editType: 'edit' | 'add';
     onSubmit?(data: any, editType?: string): void,
   }) {
     const {
-      title,
       formData,
-      submitText,
       editType,
       onSubmit,
     } = options ?? {};
     this.setState({
       visible: true,
-      title: title ?? '',
       editType,
-      submitText: submitText ?? t(I18N_IDS.TEXT_OK),
       onSubmitHandle: onSubmit,
     }, () => {
       setTimeout(() => {
         this._getForm()?.setFieldsValue(_.pick(formData ?? {}, [
-          'elementCode',
-          'fieldText',
+          'messageKey',
+          'messageText',
+          'MessageType',
           'ddLanguage',
-          'fieldLength',
-          'dataType',
-          'decimals',
         ]));
       }, 0);
     });
@@ -188,12 +188,12 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
     const list = this.state.referenceRecords ?? [];
     if (!list.length) {
       return (
-        <p>当前数据元素无引用记录，点击 “修改并提交” 按钮提交修改。</p>
+        <p>当前国际化消息无引用记录，点击 “修改并提交” 按钮提交修改。</p>
       );
     }
     return (
       <div>
-        <p>当前数据元素存在 {list.length} 条引用记录，点击 “修改并提交” 按钮将提交修改所有引用数据，点击 ”另建数据元素“ 进行新增修改。</p>
+        <p>当前国际化消息存在 {list.length} 条引用记录，点击 “修改并提交” 按钮将提交修改所有引用数据，点击 ”另建国际化消息“ 进行新增修改。</p>
         <Table
           columns={this._tableColumns}
           dataSource={list}
@@ -221,8 +221,6 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
     this.setState({
       step: 0,
       editType: 'add',
-      title: '新增数据元素',
-      submitText: '新增并提交',
     });
   }
   private _onNext = async () => {
@@ -230,12 +228,12 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
       if (err) {
         return;
       }
+      const messageKey = values?.messageKey;
       this.props.dispatch(createSetIsLoadingAction(true, true));
-      const elementCode = values?.elementCode;
       let result: any;
       try {
-        result = await checkElementCode({
-          elementCode,
+        result = await checkLanguageMsg({
+          messageKey,
           baseViewId: window['__urlParams']?.baseViewId,
         });
       } catch (e) {
@@ -257,7 +255,6 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
   private _afterClose = () => {
     this._getForm()?.resetFields();
     this.setState({
-      title: '',
       onSubmitHandle: null,
       step: 0,
       referenceRecords: [],
@@ -265,15 +262,15 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
   }
 }
 
-interface IElementCodeFormProps {
+interface ILanguageMsgFormProps {
   form?: WrappedFormUtils;
   dicts: IDictsMap;
   editType: 'edit' | 'add';
   show: boolean;
 }
 
-@(Form.create({ name: 'ElementCodeForm' }) as any)
-class ElementCodeForm extends React.PureComponent<IElementCodeFormProps> {
+@(Form.create({ name: 'LanguageMsgForm' }) as any)
+class LanguageMsgForm extends React.PureComponent<ILanguageMsgFormProps> {
   render() {
     const { getFieldDecorator } = this.props.form;
     const { dicts, editType, show } = this.props;
@@ -281,22 +278,13 @@ class ElementCodeForm extends React.PureComponent<IElementCodeFormProps> {
       <Form autoComplete="off" style={ show ? null : { display: 'none' } }>
         <Row gutter={24}>
           <Col span={12}>
-            <FormItem label="数据元素代码" required>
+            <FormItem label="消息键值" required>
               {
-                getFieldDecorator('elementCode', editType === 'edit' ? {} : {
+                getFieldDecorator('messageKey', editType === 'edit' ? {} : {
                   validateFirst: true,
                   rules: [
-                    createRequireRule({ label: '数据元素代码' }),
-                    createEnUcNumUlStringRule({ label: '数据元素代码' }),
-                    createRichLengthRule({ label: '数据元素代码', max: 50 }),
-                    createUniqGlRules({
-                      label: '数据元素代码',
-                      boName: 'IpfDmlElement',
-                      entityName: 'com.gillion.platform.implement.dml.domain.IpfDmlElement',
-                      fields: ['elementCode'],
-                      form: this.props.form,
-                      property: 'elementCode',
-                    }),
+                    createRequireRule({ label: '消息键值' }),
+                    createRichLengthRule({ label: '消息键值', max: 50 }),
                   ],
                 })(
                   <Input disabled={editType === 'edit'} />,
@@ -305,12 +293,12 @@ class ElementCodeForm extends React.PureComponent<IElementCodeFormProps> {
             </FormItem>
           </Col>
           <Col span={12}>
-            <FormItem label="显示文本" required>
+            <FormItem label="消息内容" required>
               {
-                getFieldDecorator('fieldText', {
+                getFieldDecorator('messageText', {
                   rules: [
-                    createRequireRule({ label: '显示文本' }),
-                    createRichLengthRule({ label: '显示文本', max: 200 }),
+                    createRequireRule({ label: '消息内容' }),
+                    createRichLengthRule({ label: '消息内容', max: 4000 }),
                   ],
                 })(
                   <Input />,
@@ -321,60 +309,37 @@ class ElementCodeForm extends React.PureComponent<IElementCodeFormProps> {
         </Row>
         <Row gutter={24}>
           <Col span={12}>
-            <FormItem label="默认语言">
+            <FormItem label="消息类型" required>
+              {
+                getFieldDecorator('messageType', {
+                  rules: editType === 'edit' ? [] : [
+                    createRequireRule({ label: '消息类型' }),
+                    createRichLengthRule({ label: '消息类型', max: 50 }),
+                  ],
+                })(
+                  <Select allowClear={true} disabled={editType === 'edit'} >
+                    {
+                      _.map(dicts['MessageType'], d => <Option value={d.key} key={d.key}>{d.value}</Option>)
+                    }
+                  </Select>,
+                )
+              }
+            </FormItem>
+          </Col>
+          <Col span={12}>
+            <FormItem label="语言名称" required>
               {
                 getFieldDecorator('ddLanguage', {
-                  // rules: [
-                  //   createRichLengthRule({ label: '默认语言', max: 50 }),
-                  // ],
+                  rules: editType === 'edit' ? [] : [
+                    createRequireRule({ label: '语言名称' }),
+                    createRichLengthRule({ label: '语言名称', max: 50 }),
+                  ],
                 })(
-                  <Select allowClear={true} disabled >
+                  <Select allowClear={true} disabled={editType === 'edit'} >
                     {
                       _.map(dicts['DdLanguage'], d => <Option value={d.key} key={d.key}>{d.value}</Option>)
                     }
                   </Select>,
-                )
-              }
-            </FormItem>
-          </Col>
-          <Col span={12}>
-            <FormItem label="字段长度">
-              {
-                getFieldDecorator('fieldLength', {
-                  // rules: [
-                  //   createRequireRule({ label: '字段长度' }),
-                  // ],
-                })(
-                  <InputNumber style={{ width: '100%' }} disabled />,
-                )
-              }
-            </FormItem>
-          </Col>
-        </Row>
-        <Row gutter={24}>
-          <Col span={12}>
-            <FormItem label="数据类型" required>
-              {
-                getFieldDecorator('dataType', {
-                  // rules: [
-                  //   createRequireRule({ label: '数据类型' }),
-                  //   createRichLengthRule({ label: '数据类型', max: 50 }),
-                  // ],
-                })(
-                  <Select allowClear={true} disabled >
-                    {
-                      _.map(dicts['DataType'], d => <Option value={d.key} key={d.key}>{d.value}</Option>)
-                    }
-                  </Select>,
-                )
-              }
-            </FormItem>
-          </Col>
-          <Col span={12}>
-            <FormItem label="小数位">
-              {
-                getFieldDecorator('decimals', {})(
-                  <InputNumber style={{ width: '100%' }} disabled />,
                 )
               }
             </FormItem>

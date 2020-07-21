@@ -19,6 +19,7 @@ import { UiImportLayoutsJsonModal } from 'src/ui/importLayoutsJsonModal';
 import { UiElementCodeFormModal } from 'src/ui/ElementCodeForm';
 import { t } from 'src/i18n';
 import I18N_IDS from 'src/i18n/ids';
+import { UiLanguageMsgFormModal } from 'src/ui/LanguageMsgForm';
 
 export const uploaderRef = React.createRef<UiUploader>();
 export const transferModalRef = React.createRef<UiTransferModal>();
@@ -30,6 +31,7 @@ export const jumpByGridSettingsModal = React.createRef<UiJumpByGridSettingsModal
 export const disabledExpreeModal = React.createRef<UiDisabledExpreeModal>();
 export const importLayoutsJsonModal = React.createRef<UiImportLayoutsJsonModal>();
 export const elementCodeFormModalRef = React.createRef<UiElementCodeFormModal>();
+export const languageMsgFormModalRef = React.createRef<UiLanguageMsgFormModal>();
 
 const propertyListProp = {
   keyProp: 'propertyName',
@@ -713,5 +715,25 @@ export function openElementCodeFormModal(options?: {
  */
 export function closeElementCodeFormModal() {
   const modal: UiElementCodeFormModal = elementCodeFormModalRef.current['wrappedInstance'];
+  modal.close();
+}
+
+/**
+ * 打开国际化消息弹窗
+ */
+export function openLanguageMsgFormModal(options?: {
+  formData?: any;
+  editType: 'edit' | 'add';
+  onSubmit?(data: any, editType: string): any;
+}) {
+  const modal: UiLanguageMsgFormModal = languageMsgFormModalRef.current['wrappedInstance'];
+  modal.open(options);
+}
+
+/**
+ * 关闭国际化消息弹窗
+ */
+export function closeLanguageMsgFormModal() {
+  const modal: UiLanguageMsgFormModal = languageMsgFormModalRef.current['wrappedInstance'];
   modal.close();
 }
