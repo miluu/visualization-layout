@@ -2,9 +2,11 @@ import * as React from 'react';
 import { Select, Icon } from 'antd';
 import * as _ from 'lodash';
 
-import { delay } from '../../utils';
+import { delay, getDictDisplay } from '../../utils';
 import { DROPDOWN_ALIGN_PROPS } from 'src/config';
 import './style.less';
+import { connect } from 'dva';
+import { IAppState, IDictsMap } from 'src/models/appModel';
 
 const { Option, OptGroup } = Select;
 
@@ -24,6 +26,7 @@ export interface IAssociateColumn {
   title: string;
   width?: number;
   format?: (value: any) => string;
+  dictName?: string;
 }
 
 export interface IUiAssociateProps {
@@ -35,6 +38,7 @@ export interface IUiAssociateProps {
   labelInit?: string;
   disabled?: boolean;
   onChange?: (value: any, option: any) => any;
+  dicts?: IDictsMap;
 }
 
 export interface IUiAssociateState {
@@ -48,6 +52,15 @@ export interface IUiAssociateState {
   isLoading: boolean;
 }
 
+@connect(
+  ({ APP }: {
+    APP: IAppState,
+  }) => ({
+    dicts: APP.dicts,
+  }), null, null, {
+    withRef: true,
+  },
+)
 export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssociateState> {
 
   private _debounceHandleSearch: (keywords: string) => void;
@@ -98,7 +111,8 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
     const options = renderSource.map(d => {
       const text = columns.map(c => (
         <span className="editor-associate-td" key={c.field}>
-          {d[c.field] || ''}
+          {/* {d[c.field] || ''} */}
+          {this._getColumnDisplay(d, c)}
         </span>
       ));
       return (
@@ -175,6 +189,22 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
         </OptGroup>
       </Select>
     );
+  }
+
+  private _getColumnDisplay = (record: any, column: IAssociateColumn) => {
+    const { dicts } = this.props;
+    let display = record[column.field];
+    if (column.format) {
+      display = column.format(display);
+    } else if (column.dictName) {
+      // const dictList = dicts[column.dictName] ?? [];
+      // const dict = _.find(dictList, d => d.key === display);
+      // if (dict) {
+      //   display = dict.value;
+      // }
+      display = getDictDisplay(display, column.dictName, dicts);
+    }
+    return display ?? '';
   }
 
   private _createQueryOptions = (keywords: string = ''): IQueryOptions => {

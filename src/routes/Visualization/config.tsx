@@ -13,7 +13,7 @@ import { UiComponentGroupList } from 'src/ui/componentGroupList';
 import I18N_IDS from 'src/i18n/ids';
 import { t } from 'src/i18n';
 import { dataElementCodeQueryMethodCreator, titleMsgCodeQueryMethod } from './service';
-import { saveElementCode, getDmlElement, getDmlElementByPropertyName, saveLanguageMsg } from 'src/services/elementCode';
+import { saveElementCode, getDmlElement, getDmlElementByPropertyName, saveLanguageMsg, getLanguageMsg } from 'src/services/elementCode';
 import { createSetIsLoadingAction } from 'src/models/appActions';
 
 const { Option } = Select;
@@ -217,8 +217,8 @@ export const VISUALIZATION_CONFIG = {
         { title: '消息键值', field: 'messageKey' },
         { title: '创建人', field: 'creator' },
         { title: '消息内容', field: 'messageText' },
-        { title: '消息类型', field: 'messageType' },
-        { title: '语言名称', field: 'ddLanguage' },
+        { title: '消息类型', field: 'messageType', dictName: 'MessageType' },
+        { title: '语言名称', field: 'ddLanguage', dictName: 'DdLanguage' },
       ],
       queryMethod: titleMsgCodeQueryMethod,
       extra(__, values, callback, ___, dispatch) {
@@ -543,17 +543,18 @@ export const VISUALIZATION_CONFIG = {
     },
     {
       property: 'titleMsgCode',
-      label: '标题消息',
+      label: '页面标题消息',
       type: 'associate',
       refProperty: 'titleMsgText',
       valueProp: 'messageKey',
       labelProp: 'messageText',
+      showWhen: values => values?.methodName,
       columns: [
         { title: '消息键值', field: 'messageKey' },
         { title: '创建人', field: 'creator' },
         { title: '消息内容', field: 'messageText' },
-        { title: '消息类型', field: 'messageType' },
-        { title: '语言名称', field: 'ddLanguage' },
+        { title: '消息类型', field: 'messageType', dictName: 'MessageType' },
+        { title: '语言名称', field: 'ddLanguage', dictName: 'DdLanguage' },
       ],
       queryMethod: titleMsgCodeQueryMethod,
       extra(__, values, callback, ___, dispatch) {
@@ -596,12 +597,14 @@ export const VISUALIZATION_CONFIG = {
       label: '标题消息代码',
       key: 'titleMsgCode_1',
       disabled: true,
+      showWhen: values => values?.methodName,
     },
     {
       property: 'titleMsgText',
       label: '标题消息文本',
       key: 'titleMsgText_1',
       disabled: true,
+      showWhen: values => values?.methodName,
     },
     {
       property: 'layoutElementType',
@@ -1686,16 +1689,38 @@ async function modifyLanguageMsg({
   textKey: string,
   layoutType: 'layout' | 'element',
 }) {
-  const formData: any = {};
-  // const originMessageKey = formData.messageKey;
+  let formData: any = {};
+  dispatch(createSetIsLoadingAction(true, true));
+  try {
+    let getResult: any;
+    if (type === 'add') {
+      getResult = {};
+    } else {
+      getResult = await getLanguageMsg({
+        messageKey: values[codeKey],
+        baseViewId: window['__urlParams']?.baseViewId,
+      });
+    }
+    formData = getResult?.data ?? {};
+  } catch (e) {
+    console.error(e);
+    Modal.error({ content: e?.msg ?? '查询多语言消息失败。' });
+    return;
+  } finally {
+    dispatch(createSetIsLoadingAction(false, true));
+  }
+  // formData = {};
+  // console.log(getLanguageMsg);
   if (type === 'edit') {
     formData.rowStatus = ROW_STATUS.MODIFIED;
     formData.baseViewId = window['__urlParams']?.baseViewId ?? '';
-    formData.messageKey = values[codeKey];
-    formData.messageText = values[textKey];
+    // formData.messageKey = values[codeKey];
+    // formData.messageText = values[textKey];
   } else {
     formData.rowStatus = ROW_STATUS.ADDED;
     formData.baseViewId = window['__urlParams']?.baseViewId ?? '';
+    formData.messageType = '2';
+    formData.ddLanguage = 'zh';
   }
   openLanguageMsgFormModal({
     formData: { ...formData },
@@ -1728,7 +1753,7 @@ async function modifyLanguageMsg({
       console.log(result);
       message.success('保存成功。');
       callback(
-        [{ property: 'titleMsgCode' }, { property: 'titleMsgText' }],
+        [{ property: codeKey }, { property: textKey }],
         [data?.messageKey, data?.messageText],
         true,
       );

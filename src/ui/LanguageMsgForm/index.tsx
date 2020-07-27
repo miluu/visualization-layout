@@ -8,7 +8,7 @@ import {
   Row,
   Col,
   Button,
-  Table,
+  // Table,
 } from 'antd';
 import { connect } from 'dva';
 import { Dispatch, AnyAction } from 'redux';
@@ -16,9 +16,10 @@ import I18N_IDS from 'src/i18n/ids';
 import { t } from 'src/i18n';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { IAppState, IDictsMap } from 'src/models/appModel';
-import { createRequireRule, createRichLengthRule } from 'src/utils/validateRules';
+import { createRequireRule, createRichLengthRule, createEnUcNumUlStringRule } from 'src/utils/validateRules';
 import { checkLanguageMsg } from 'src/services/elementCode';
 import { createSetIsLoadingAction } from 'src/models/appActions';
+import { getDictDisplay } from 'src/utils';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -35,18 +36,6 @@ interface IUiLanguageMsgFormModalState {
   referenceRecords: any[];
   onSubmitHandle?(data: any, editType?: string): any;
 }
-
-const tableColumns: any = [
-  { dataIndex: 'sourceType', title: 'sourceType' },
-  { dataIndex: 'pageType', title: 'pageType' },
-  { dataIndex: 'pageName', title: 'pageName' },
-  { dataIndex: 'layoutBoName', title: 'layoutBoName' },
-  { dataIndex: 'propertyName', title: 'propertyName' },
-  { dataIndex: 'description', title: 'description' },
-  { dataIndex: 'fieldText', title: 'fieldText' },
-  { dataIndex: 'messageKey', title: 'messageKey' },
-  { dataIndex: 'messageText', title: 'messageText' },
-];
 
 @connect(
   ({ APP }: {
@@ -68,7 +57,7 @@ export class UiLanguageMsgFormModal extends React.PureComponent<IUiLanguageMsgFo
 
   formRef = React.createRef<any>();
 
-  private _tableColumns: any[] = tableColumns;
+  private _tableColumns: any[] = null;
 
   render() {
     const { visible, editType, step } = this.state;
@@ -85,6 +74,9 @@ export class UiLanguageMsgFormModal extends React.PureComponent<IUiLanguageMsgFo
           <Button key="cancel" onClick={this._onCancle}>
             {t(I18N_IDS.TEXT_CANCEL)}
           </Button>,
+          this.showPrevButton() ? <Button key="next" onClick={this._onPrev}>
+            上一步
+          </Button> : null,
           this.showNextButton() ? <Button key="next" onClick={this._onNext}>
             下一步
           </Button> : null,
@@ -109,6 +101,25 @@ export class UiLanguageMsgFormModal extends React.PureComponent<IUiLanguageMsgFo
         }
       </Modal>
     );
+  }
+  getTableColumns() {
+    const { dicts } = this.props;
+    if (!this._tableColumns) {
+      this._tableColumns = [
+        { title: '类型', dataIndex: 'sourceType', width: 60 },
+        { title: '业务对象名称', dataIndex: 'pageBoName', width: 150 },
+        {
+          width: 200,
+          title: '页面类型',
+          dataIndex: 'pageType',
+          render(text: any) {
+            return getDictDisplay(text, 'PageType', dicts);
+          },
+        },
+        { title: '业务类型', dataIndex: 'businessType', width: 150 },
+      ];
+    }
+    return this._tableColumns;
   }
   getEditText() {
     const { editType } = this.state;
@@ -142,7 +153,7 @@ export class UiLanguageMsgFormModal extends React.PureComponent<IUiLanguageMsgFo
         this._getForm()?.setFieldsValue(_.pick(formData ?? {}, [
           'messageKey',
           'messageText',
-          'MessageType',
+          'messageType',
           'ddLanguage',
         ]));
       }, 0);
@@ -155,6 +166,13 @@ export class UiLanguageMsgFormModal extends React.PureComponent<IUiLanguageMsgFo
   }
   private _getForm = () => {
     return this.formRef.current as WrappedFormUtils;
+  }
+  private showPrevButton = () => {
+    const { step, editType } = this.state;
+    if (step === 1 && editType === 'edit') {
+      return true;
+    }
+    return false;
   }
   private showNextButton = () => {
     const { step, editType } = this.state;
@@ -194,18 +212,34 @@ export class UiLanguageMsgFormModal extends React.PureComponent<IUiLanguageMsgFo
     return (
       <div>
         <p>当前国际化消息存在 {list.length} 条引用记录，点击 “修改并提交” 按钮将提交修改所有引用数据，点击 ”另建国际化消息“ 进行新增修改。</p>
-        <Table
-          columns={this._tableColumns}
+        {/* <Table
+          columns={this.getTableColumns()}
           dataSource={list}
           size="small"
-          scroll={{ x: 1500, y: 200 }}
+          scroll={{ x: true, y: 200 }}
           rowKey={(record) => {
             if (!record.__key) {
               record.__key = (Math.random() * 10000000).toFixed(0);
             }
             return record.__key;
           }}
-        />
+        /> */}
+        <ul className="editor-ref-list">
+          {
+            _.map(list, (item, i) => {
+              return <li key={i}>
+                {
+                  _.compact([
+                    `【${item.sourceType ?? ''}】`,
+                    item.pageBoName ? `${item.pageBoName}对象` : null,
+                    getDictDisplay(item.pageType, 'PageType', this.props.dicts),
+                    item.businessType ? `${item.businessType}业务类型` : null,
+                  ]).join(' - ')
+                }
+              </li>;
+            })
+          }
+        </ul>
       </div>
     );
   }
@@ -221,6 +255,11 @@ export class UiLanguageMsgFormModal extends React.PureComponent<IUiLanguageMsgFo
     this.setState({
       step: 0,
       editType: 'add',
+    });
+  }
+  private _onPrev = () => {
+    this.setState({
+      step: 0,
     });
   }
   private _onNext = async () => {
@@ -254,6 +293,7 @@ export class UiLanguageMsgFormModal extends React.PureComponent<IUiLanguageMsgFo
   }
   private _afterClose = () => {
     this._getForm()?.resetFields();
+    this._tableColumns = null;
     this.setState({
       onSubmitHandle: null,
       step: 0,
@@ -285,6 +325,7 @@ class LanguageMsgForm extends React.PureComponent<ILanguageMsgFormProps> {
                   rules: [
                     createRequireRule({ label: '消息键值' }),
                     createRichLengthRule({ label: '消息键值', max: 50 }),
+                    createEnUcNumUlStringRule({ label: '数据元素代码' }),
                   ],
                 })(
                   <Input disabled={editType === 'edit'} />,

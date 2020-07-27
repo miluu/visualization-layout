@@ -9,7 +9,7 @@ import {
   Row,
   Col,
   Button,
-  Table,
+  // Table,
 } from 'antd';
 import { connect } from 'dva';
 import { Dispatch, AnyAction } from 'redux';
@@ -20,6 +20,7 @@ import { IAppState, IDictsMap } from 'src/models/appModel';
 import { createRequireRule, createEnUcNumUlStringRule, createRichLengthRule, createUniqGlRules } from 'src/utils/validateRules';
 import { checkElementCode } from 'src/services/elementCode';
 import { createSetIsLoadingAction } from 'src/models/appActions';
+import { getDictDisplay } from 'src/utils';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -38,18 +39,6 @@ interface IElementCodeFormModalState {
   referenceRecords: any[];
   onSubmitHandle?(data: any, editType?: string): any;
 }
-
-const tableColumns: any = [
-  { dataIndex: 'sourceType', title: 'sourceType' },
-  { dataIndex: 'pageType', title: 'pageType' },
-  { dataIndex: 'pageName', title: 'pageName' },
-  { dataIndex: 'layoutBoName', title: 'layoutBoName' },
-  { dataIndex: 'propertyName', title: 'propertyName' },
-  { dataIndex: 'description', title: 'description' },
-  { dataIndex: 'fieldText', title: 'fieldText' },
-  { dataIndex: 'dataElementCode', title: 'dataElementCode' },
-  { dataIndex: 'dataElementText', title: 'dataElementText' },
-];
 
 @connect(
   ({ APP }: {
@@ -73,7 +62,7 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
 
   formRef = React.createRef<any>();
 
-  private _tableColumns: any[] = tableColumns;
+  private _tableColumns: any[];
 
   render() {
     const { visible, title, submitText, editType, step } = this.state;
@@ -90,6 +79,9 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
           <Button key="cancel" onClick={this._onCancle}>
             {t(I18N_IDS.TEXT_CANCEL)}
           </Button>,
+          this.showPrevButton() ? <Button key="next" onClick={this._onPrev}>
+            上一步
+          </Button> : null,
           this.showNextButton() ? <Button key="next" onClick={this._onNext}>
             下一步
           </Button> : null,
@@ -114,6 +106,22 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
         }
       </Modal>
     );
+  }
+  getTableColumns() {
+    if (!this._tableColumns) {
+      this._tableColumns = [
+        { dataIndex: 'sourceType', title: 'sourceType' },
+        { dataIndex: 'pageType', title: 'pageType' },
+        { dataIndex: 'pageName', title: 'pageName' },
+        { dataIndex: 'layoutBoName', title: 'layoutBoName' },
+        { dataIndex: 'propertyName', title: 'propertyName' },
+        { dataIndex: 'description', title: 'description' },
+        { dataIndex: 'fieldText', title: 'fieldText' },
+        { dataIndex: 'dataElementCode', title: 'dataElementCode' },
+        { dataIndex: 'dataElementText', title: 'dataElementText' },
+      ];
+    }
+    return this._tableColumns;
   }
   open(options?: {
     title?: string,
@@ -163,6 +171,13 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
     }
     return false;
   }
+  private showPrevButton = () => {
+    const { step, editType } = this.state;
+    if (step === 1 && editType === 'edit') {
+      return true;
+    }
+    return false;
+  }
   private showSubmitButton = () => {
     const { step, editType } = this.state;
     if (step === 0 && editType === 'edit') {
@@ -194,8 +209,8 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
     return (
       <div>
         <p>当前数据元素存在 {list.length} 条引用记录，点击 “修改并提交” 按钮将提交修改所有引用数据，点击 ”另建数据元素“ 进行新增修改。</p>
-        <Table
-          columns={this._tableColumns}
+        {/* <Table
+          columns={this.getTableColumns()}
           dataSource={list}
           size="small"
           scroll={{ x: 1500, y: 200 }}
@@ -205,7 +220,26 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
             }
             return record.__key;
           }}
-        />
+        /> */}
+        <ul className="editor-ref-list">
+          {
+            _.map(list, (item, i) => {
+              return <li key={i}>
+                {
+                  _.compact([
+                    `【${item.sourceType ?? ''}】`,
+                    item.pageBoName ? `${item.pageBoName}对象` : null,
+                    getDictDisplay(item.pageType, 'PageType', this.props.dicts),
+                    item.businessType ? `${item.businessType}业务类型` : null,
+                    item.layoutBoName ? `${item.layoutBoName}布局业务对象` : null,
+                    item.propertyName ? `${item.propertyName}属性` : null,
+                  ]).join(' - ')
+                }
+              </li>;
+            })
+          }
+        </ul>
+
       </div>
     );
   }
@@ -223,6 +257,11 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
       editType: 'add',
       title: '新增数据元素',
       submitText: '新增并提交',
+    });
+  }
+  private _onPrev = () => {
+    this.setState({
+      step: 0,
     });
   }
   private _onNext = async () => {
@@ -256,6 +295,7 @@ export class UiElementCodeFormModal extends React.PureComponent<IElementCodeForm
   }
   private _afterClose = () => {
     this._getForm()?.resetFields();
+    this._tableColumns = null;
     this.setState({
       title: '',
       onSubmitHandle: null,

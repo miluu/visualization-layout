@@ -99,7 +99,7 @@ export function dataElementCodeQueryMethodCreator(urlParams: any) {
         operation:'LIKEIC',
       });
     }
-    const res = await httpGet('/ipf/ipfDmlElement/query', {
+    const res = await httpGet('/ipf/ipfDmlElement/custom/query', {
       paramsSerializer,
       params: {
         type: 'S',
@@ -155,7 +155,7 @@ export async function titleMsgCodeQueryMethod(options: IQueryOptions) {
     });
   }
   let res: any;
-  res = await httpGet('/ipf/commonSearchHelp/query', {
+  res = await httpGet('/ipf/commonSearchHelp/custom/query', {
     paramsSerializer,
     params: {
       type: 'S',

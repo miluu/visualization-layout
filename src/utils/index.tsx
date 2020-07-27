@@ -14,6 +14,7 @@ import { IDatasource, ID_KEY } from 'src/models/datasourceModel';
 import { RcFile } from 'antd/lib/upload';
 import { t } from 'src/i18n';
 import I18N_IDS from 'src/i18n/ids';
+import { IDictsMap } from 'src/models/appModel';
 
 const GROUPABLE_UI_TYPES = [
   'input',
@@ -1311,4 +1312,14 @@ export async function readerJsonFile(file: RcFile) {
     };
     reader.readAsText(file, 'utf8');
   });
+}
+
+export function getDictDisplay(value: any, dictName: string, dicts: IDictsMap) {
+  let display = value;
+  const dictList = dicts[dictName] ?? [];
+  const dict = _.find(dictList, d => d.key === display);
+  if (dict) {
+    display = dict.value;
+  }
+  return display ?? '';
 }

@@ -107,3 +107,21 @@ export async function checkLanguageMsg(data: any) {
     params: data,
   });
 }
+
+export async function getLanguageMsg(options?: any) {
+  console.log('getLanguageMsg:', options);
+  if (debug) {
+    await delay(500);
+    return {
+      data: {
+        messageKey: 'messageKey111',
+        messageText: 'messageText111',
+        messageType: 'messageType111',
+        ddLanguage: 'ddLanguage111',
+      },
+    };
+  }
+  return httpGet('/ipf/ipfLanguageMsg/custom/getIpfLanguageMsg', {
+    params: options,
+  });
+}
