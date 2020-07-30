@@ -155,7 +155,7 @@ export async function titleMsgCodeQueryMethod(options: IQueryOptions) {
     });
   }
   let res: any;
-  res = await httpGet('/ipf/commonSearchHelp/custom/query', {
+  res = await httpGet('/ipf/ipfLanguageMsg/custom/query', {
     paramsSerializer,
     params: {
       type: 'S',

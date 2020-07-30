@@ -208,7 +208,13 @@ export const VISUALIZATION_CONFIG = {
     },
     {
       property: 'groupMsgCode',
-      label: '分组标题',
+      // label: '分组标题',
+      label(values) {
+        if (isGrid(values)) {
+          return '表格双击跳转标题';
+        }
+        return '分组标题';
+      },
       type: 'associate',
       refProperty: 'groupTitle',
       valueProp: 'messageKey',
@@ -259,7 +265,12 @@ export const VISUALIZATION_CONFIG = {
     {
       property: 'groupMsgCode',
       key: 'groupMsgCode_1',
-      label: t(I18N_IDS.LABEL_GROUP_MSG_CODE),
+      label(values) {
+        if (isGrid(values)) {
+          return '表格双击跳转标题代码';
+        }
+        return t(I18N_IDS.LABEL_GROUP_MSG_CODE);
+      },
       disabled: true,
     },
     {
@@ -267,6 +278,7 @@ export const VISUALIZATION_CONFIG = {
       key: 'groupTitle_1',
       label: t(I18N_IDS.LABEL_GROUP_TITLE),
       disabled: true,
+      // hidden: true,
     },
     {
       property: 'groupWidget',
@@ -481,7 +493,7 @@ export const VISUALIZATION_CONFIG = {
     {
       property: 'fieldText',
       label: t(I18N_IDS.LABEL_FIELD_TEXT),
-      disabledWhen: ({ info }) => info?.isMultiLanguage ?? false,
+      disabled: true,
     },
     {
       property: 'dataElementCode',
@@ -540,6 +552,7 @@ export const VISUALIZATION_CONFIG = {
       label: '字段标题',
       refProperty: 'dataElementText_1',
       disabled: true,
+      hidden: true,
     },
     {
       property: 'titleMsgCode',
@@ -604,7 +617,7 @@ export const VISUALIZATION_CONFIG = {
       label: '标题消息文本',
       key: 'titleMsgText_1',
       disabled: true,
-      showWhen: values => values?.methodName,
+      hidden: true,
     },
     {
       property: 'layoutElementType',
@@ -1581,6 +1594,10 @@ function isButton(values: any) {
 
 function isGridColumn(values: any): boolean {
   return values && values.__isGridColumn;
+}
+
+function isGrid(values: any): boolean {
+  return values?.layoutElementType === 'GRID';
 }
 
 async function modifyDataElement({

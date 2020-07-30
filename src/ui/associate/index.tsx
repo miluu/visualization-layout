@@ -98,12 +98,22 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
     } = this.props;
     const { total, pageSize, currentPage, isLoading, source } = this.state;
     let renderSource = source;
-    if (!_.find(renderSource, item => item[valueProp] === value) && labelInit) {
+    const valueItem = _.find(renderSource, item => item[valueProp] === value);
+    if (!valueItem && labelInit) {
       renderSource = [
         {
           [valueProp]: value,
           [labelProp]: labelInit,
           __hidden: true,
+        },
+        ...renderSource,
+      ];
+    } else if (valueItem && valueItem[labelProp] !== labelInit) {
+      renderSource = _.filter(renderSource, r => r !== valueItem);
+      renderSource = [
+        {
+          ...valueItem,
+          [labelProp]: labelInit,
         },
         ...renderSource,
       ];
