@@ -15,6 +15,7 @@ import { t } from 'src/i18n';
 import { dataElementCodeQueryMethodCreator, titleMsgCodeQueryMethod } from './service';
 import { saveElementCode, getDmlElement, getDmlElementByPropertyName, saveLanguageMsg, getLanguageMsg } from 'src/services/elementCode';
 import { createSetIsLoadingAction } from 'src/models/appActions';
+import { UiAssociate } from 'src/ui/associate';
 
 const { Option } = Select;
 
@@ -353,7 +354,7 @@ export const VISUALIZATION_CONFIG = {
       property: 'isEnabledDoubleToEdit',
       label: t(I18N_IDS.LABEL_IS_ENABLED_DOUBLE_TO_EDIT),
       type: 'checkbox',
-      extra: (__, values, callback, dicts) => {
+      extra: (__, values, callback, dicts, dispatch) => {
         if (!_.get(values, 'isEnabledDoubleToEdit')) {
           return null;
         }
@@ -366,6 +367,7 @@ export const VISUALIZATION_CONFIG = {
             pageType: string;
             businessType: string;
             pageTitle: string;
+            pageMsgCode: string;
           }>;
         };
         try {
@@ -374,7 +376,7 @@ export const VISUALIZATION_CONFIG = {
           pageLayoutAttr = {};
         }
         const pages = pageLayoutAttr.pages || [];
-        const sourceTitle = ['属性名', '属性值', '业务对象名称', '页面类型', '业务类型', '页面标题'];
+        const sourceTitle = ['属性名', '属性值', '业务对象名称', '页面类型', '业务类型', '页面标题', '页面标题代码'];
         const source = _.map(pages, p => [
           p.propertyName,
           p.propertyValue,
@@ -382,6 +384,7 @@ export const VISUALIZATION_CONFIG = {
           p.pageType,
           p.businessType,
           p.pageTitle,
+          p.pageMsgCode,
         ]);
         return (
           <Button
@@ -402,34 +405,62 @@ export const VISUALIZATION_CONFIG = {
                 }) => {
                   const { editingRowId } = instance.state;
                   const dict = dicts['PageType'] || [];
-                  if (field !== '页面类型') {
-                    return null;
+                  const isEditingRow = editingRowId === record.__id;
+                  if (field === '页面类型') {
+                    if (!isEditingRow) {
+                      const currentDictItem = _.find(dict, dictItem => dictItem.key === record[field]);
+                      return currentDictItem ? currentDictItem.value : record[field];
+                    }
+                    return (
+                      <Select
+                        size="small"
+                        style={{ width: '100%' }}
+                        allowClear
+                        value={record[field]}
+                        onChange={(value: any) => onChange(index, field, value)}
+                      >
+                        {_.map(dicts['PageType'], dictItem => {
+                          return (
+                            <Option
+                              title={dictItem.value}
+                              key={dictItem.key}
+                              value={dictItem.key}
+                            >
+                              {dictItem.value}
+                            </Option>
+                          );
+                        })}
+                      </Select>
+                    );
                   }
-                  if (editingRowId !== record.__id) {
-                    const currentDictItem = _.find(dict, dictItem => dictItem.key === record[field]);
-                    return currentDictItem ? currentDictItem.value : record[field];
+                  if (field === '页面标题') {
+                    if (!isEditingRow) {
+                      return <span>{record[field]}</span>;
+                    }
+                    return (
+                      <UiAssociate
+                        value={record['页面标题代码']}
+                        valueProp="messageKey"
+                        labelProp="messageText"
+                        columns={[
+                          { title: '消息键值', field: 'messageKey' },
+                          { title: '创建人', field: 'creator' },
+                          { title: '消息内容', field: 'messageText' },
+                          { title: '消息类型', field: 'messageType', dictName: 'MessageType' },
+                          { title: '语言名称', field: 'ddLanguage', dictName: 'DdLanguage' },
+                        ]}
+                        queryMethod={titleMsgCodeQueryMethod}
+                        labelInit={record['页面标题']}
+                        onChange={(value, option) => {
+                          onChange(index, '页面标题', option?.messageText, '页面标题代码', option?.messageKey);
+                        }}
+                      />
+                    );
                   }
-                  return (
-                    <Select
-                      size="small"
-                      style={{ width: '100%' }}
-                      allowClear
-                      value={record[field]}
-                      onChange={(value: any) => onChange(index, field, value)}
-                    >
-                      {_.map(dicts['PageType'], dictItem => {
-                        return (
-                          <Option
-                            title={dictItem.value}
-                            key={dictItem.key}
-                            value={dictItem.key}
-                          >
-                            {dictItem.value}
-                          </Option>
-                        );
-                      })}
-                    </Select>
-                  );
+                  if (field === '页面标题代码') {
+                    return <span>{record[field]}</span>;
+                  }
+                  return null;
                 },
                 onSubmit: editor => {
                   const obj = editor.getListSourceObj();
@@ -441,6 +472,7 @@ export const VISUALIZATION_CONFIG = {
                       pageType: item[3],
                       businessType: item[4],
                       pageTitle: item[5],
+                      pageMsgCode: item[6],
                     };
                   });
                   if (newPages && newPages.length) {
@@ -450,6 +482,88 @@ export const VISUALIZATION_CONFIG = {
                   }
                   const data = JSON.stringify(pageLayoutAttr);
                   callback({ property: 'pageLayoutAttr' }, data, true);
+                },
+                extraButtons(instance) {
+                  const { sourceObj, editingRowId } = instance.state;
+                  return (
+                    <>
+                      {' '}
+                      <Button
+                        disabled={!editingRowId}
+                        size="small"
+                        onClick={() => {
+                          const modifyItemIndex =  _.findIndex(sourceObj, r => r.__id === editingRowId);
+                          const modifyItem = sourceObj[modifyItemIndex];
+                          if (!modifyItem) {
+                            Modal.warn({
+                              content: '没有编辑数据。',
+                            });
+                            return;
+                          }
+                          if (!modifyItem['页面标题代码']) {
+                            Modal.warn({
+                              content: '请先配置页面标题代码',
+                            });
+                            return;
+                          }
+                          modifyLanguageMsg({
+                            dispatch,
+                            callback(items: any[], vals: any[]) {
+                              instance.onChange(
+                                modifyItemIndex,
+                                items[0].property,
+                                vals[0],
+                                items[1].property,
+                                vals[1],
+                              );
+                            },
+                            values: {
+                              ...modifyItem,
+                              ipfCcmBoPageLayoutId: values?.ipfCcmBoPageLayoutId,
+                            },
+                            type: 'edit',
+                            layoutType: 'layout',
+                            codeKey: '页面标题代码',
+                            textKey: '页面标题',
+                          });
+                        }}
+                      > 编辑页面标题</Button>
+                      {' '}
+                      <Button
+                        size="small"
+                        disabled={!editingRowId}
+                        onClick={() => {
+                          const modifyItemIndex =  _.findIndex(sourceObj, r => r.__id === editingRowId);
+                          const modifyItem = sourceObj[modifyItemIndex];
+                          if (!modifyItem) {
+                            Modal.warn({
+                              content: '没有编辑数据。',
+                            });
+                            return;
+                          }
+                          modifyLanguageMsg({
+                            dispatch,
+                            callback(items: any[], vals: any[]) {
+                              instance.onChange(
+                                modifyItemIndex,
+                                items[0].property,
+                                vals[0],
+                                items[1].property,
+                                vals[1],
+                              );
+                            },
+                            values: {
+                              ipfCcmBoPageLayoutId: values?.ipfCcmBoPageLayoutId,
+                            },
+                            type: 'add',
+                            layoutType: 'layout',
+                            codeKey: '页面标题代码',
+                            textKey: '页面标题',
+                          });
+                        }}
+                      >新增多语言消息</Button>
+                    </>
+                  );
                 },
               });
             }}
@@ -525,6 +639,9 @@ export const VISUALIZATION_CONFIG = {
                 callback,
                 values,
                 type: 'edit',
+                codeKey: 'dataElementCode',
+                textKey: 'dataElementText',
+                otherTextKeys: ['columnName', 'fieldText'],
               })}
             >
               修改
@@ -534,6 +651,9 @@ export const VISUALIZATION_CONFIG = {
               callback,
               values,
               type: 'add',
+              codeKey: 'dataElementCode',
+              textKey: 'dataElementText',
+              otherTextKeys: ['columnName', 'fieldText'],
             })}>
               新增
             </Button>
@@ -616,6 +736,68 @@ export const VISUALIZATION_CONFIG = {
       property: 'titleMsgText',
       label: '标题消息文本',
       key: 'titleMsgText_1',
+      disabled: true,
+      hidden: true,
+    },
+    {
+      property: 'elementMsgCode',
+      label: '多语言消息描述',
+      type: 'associate',
+      refProperty: 'elementMsgText',
+      valueProp: 'elementCode',
+      labelProp: 'fieldText',
+      columns: [
+        { title: '数据元素代码', field: 'elementCode' },
+        { title: '显示文本', field: 'fieldText' },
+        { title: '数据类型', field: 'dataType' },
+        { title: '字段长度', field: 'fieldLength' },
+        { title: '小数位', field: 'decimals' },
+        { title: '数据库类型', field: 'dbType' },
+      ],
+      queryMethodCreator: dataElementCodeQueryMethodCreator,
+      extra(__, values, callback, ___, dispatch) {
+        if (!values) {
+          return null;
+        }
+        return (
+          <Button.Group size="small" >
+            <Button
+              disabled={!values?.elementMsgCode}
+              onClick={() => modifyDataElement({
+                dispatch,
+                callback,
+                values,
+                type: 'edit',
+                codeKey: 'elementMsgCode',
+                textKey: 'elementMsgText',
+              })}
+            >
+              修改
+            </Button>
+            <Button onClick={() => modifyDataElement({
+              dispatch,
+              callback,
+              values,
+              type: 'add',
+              codeKey: 'elementMsgCode',
+              textKey: 'elementMsgText',
+            })}>
+              新增
+            </Button>
+          </Button.Group>
+        );
+      },
+    },
+    {
+      property: 'elementMsgCode',
+      label: '多语言消息编码',
+      key: 'elementMsgCode_1',
+      disabled: true,
+    },
+    {
+      property: 'elementMsgText',
+      label: '多语言消息描述',
+      key: 'elementMsgText_1',
       disabled: true,
       hidden: true,
     },
@@ -1605,11 +1787,17 @@ async function modifyDataElement({
   dispatch,
   callback,
   type,
+  codeKey,
+  textKey,
+  otherTextKeys,
 }: {
   values: any;
   dispatch: any;
   callback: any;
   type: 'edit' | 'add';
+  codeKey: string;
+  textKey: string;
+  otherTextKeys?: string[];
 }) {
   let formData: any = {};
   dispatch(createSetIsLoadingAction(true, true));
@@ -1623,7 +1811,7 @@ async function modifyDataElement({
       });
     } else {
       getResult = await getDmlElement({
-        elementCode: values?.dataElementCode,
+        elementCode: values && values[codeKey],
         baseViewId: window['__urlParams']?.baseViewId,
       });
     }
@@ -1680,8 +1868,10 @@ async function modifyDataElement({
       console.log(result);
       message.success('保存成功。');
       callback(
-        [{ property: 'dataElementCode' }, { property: 'dataElementText' }, { property: 'columnName' }, { property: 'fieldText' }],
-        [data?.elementCode, data?.fieldText, data?.fieldText, data?.fieldText],
+        [{ property: codeKey }, { property: textKey }, ..._.map(otherTextKeys, key => ({
+          property: key,
+        }))],
+        [data?.elementCode, data?.fieldText, ..._.map(otherTextKeys, () => data?.fieldText)],
         true,
       );
       closeElementCodeFormModal();

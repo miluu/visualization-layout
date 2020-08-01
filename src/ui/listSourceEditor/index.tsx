@@ -36,8 +36,9 @@ export interface IUiListSourceEditorModalState {
     record?: any;
     index?: number;
     instance?: UiListSourceEditorModal;
-    onChange?: (index: number, field: string, value: any) => any;
+    onChange?: (index: number, field: string, value: any, field2?: string, value2?: any) => any;
   }) => any;
+  extraButtons?: (instance?: UiListSourceEditorModal) => any;
 }
 
 const initState: IUiListSourceEditorModalState = {
@@ -52,6 +53,7 @@ const initState: IUiListSourceEditorModalState = {
   columnsEditable: true,
   selectedRows: [],
   columnRender: null,
+  extraButtons: null,
 };
 
 export class UiListSourceEditorModal extends React.Component<any, IUiListSourceEditorModalState> {
@@ -60,7 +62,7 @@ export class UiListSourceEditorModal extends React.Component<any, IUiListSourceE
   tableWrapRef = React.createRef<HTMLDivElement>();
 
   render() {
-    const { visible, sourceObj, columns, isEditingColumn, columnsEditable, selectedRows } = this.state;
+    const { visible, sourceObj, columns, isEditingColumn, columnsEditable, selectedRows, extraButtons } = this.state;
     return (
       <UiSettingsModal
         visible={visible}
@@ -109,9 +111,10 @@ export class UiListSourceEditorModal extends React.Component<any, IUiListSourceE
               }
               <Button size="small" onClick={this._addRow} >{t(I18N_IDS.TEXT_ADD_DATA)}</Button>
               {' '}
-              <Button size="small" onClick={this._copyRows} >{t(I18N_IDS.TEXT_COPY_DATA)}</Button>
+              <Button size="small" disabled={!selectedRows?.length} onClick={this._copyRows} >{t(I18N_IDS.TEXT_COPY_DATA)}</Button>
               {' '}
-              <Button size="small" onClick={this._removeRows} >{t(I18N_IDS.DELETE)}</Button>
+              <Button size="small" disabled={!selectedRows?.length} onClick={this._removeRows} >{t(I18N_IDS.DELETE)}</Button>
+              { extraButtons?.(this) }
             </div>
             <div className="editor-list-source-editor-table" ref={this.tableWrapRef} >
               <div className="editor-list-source-editor-table-inner">
@@ -197,6 +200,19 @@ export class UiListSourceEditorModal extends React.Component<any, IUiListSourceE
       console.warn('[getListSourceJson] error:', e);
       return '';
     }
+  }
+
+  onChange = (index: number, field: string, value: any, field2?: string, value2?: string) => {
+    const { sourceObj } = this.state;
+    const newSourceObj = produce(sourceObj, draft => {
+      sourceObj[index][field] = value;
+      if (field2) {
+        sourceObj[index][field2] = value2;
+      }
+    });
+    this.setState({
+      sourceObj: newSourceObj,
+    });
   }
 
   private _addField = () => {
@@ -304,7 +320,7 @@ export class UiListSourceEditorModal extends React.Component<any, IUiListSourceE
         record,
         index,
         instance: this,
-        onChange: this._onChange,
+        onChange: this.onChange,
       });
     }
     return (
@@ -317,21 +333,11 @@ export class UiListSourceEditorModal extends React.Component<any, IUiListSourceE
             return record[field];
           }
           return (
-            <Input size="small" value={record[field]} onChange={e => this._onChange(index, field, e.target.value)} />
+            <Input size="small" value={record[field]} onChange={e => this.onChange(index, field, e.target.value)} />
           );
         })()}
       </div>
     );
-  }
-
-  private _onChange = (index: number, field: string, value: any) => {
-    const { sourceObj } = this.state;
-    const newSourceObj = produce(sourceObj, draft => {
-      sourceObj[index][field] = value;
-    });
-    this.setState({
-      sourceObj: newSourceObj,
-    });
   }
 
   private _startEdit(rowId: string) {

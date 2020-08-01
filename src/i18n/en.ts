@@ -48,6 +48,8 @@ export default {
   [ids.SIGN_PARENT]: 'PARENT',
   [ids.SIGN_NON_PARENT]: 'NON-PARENT',
 
+  [ids.DELETE]: 'Delete',
+
   [ids.LABEL_CELL_NAME]: 'Cell Name',
   [ids.LABEL_PARENT_CELL_NAME]: 'Parent Cell Name',
   [ids.LABEL_IS_VISUALIZATION_MAX_HEIGHT_OPEN]: 'Max Height',

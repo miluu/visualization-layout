@@ -106,6 +106,8 @@ const emptyElement: any = {
     isZeroFill: null,
     dataElementCode: null,
     dataElementText: null,
+    elementMsgCode: null,
+    elementMsgText: null,
     titleMsgCode: null,
     titleMsgText: null,
     layoutElementAttr: null,
@@ -779,6 +781,8 @@ function formatPostElementData(initElementData: any, modifyedElementData: any) {
       NewElement[elementKey1].isZeroFill = element.isZeroFill;
       NewElement[elementKey1].dataElementCode = element.dataElementCode;
       NewElement[elementKey1].dataElementText = element.dataElementText;
+      NewElement[elementKey1].elementMsgCode = element.elementMsgCode;
+      NewElement[elementKey1].elementMsgText = element.elementMsgText;
       NewElement[elementKey1].titleMsgCode = element.titleMsgCode;
       NewElement[elementKey1].titleMsgText = element.titleMsgText;
       NewElement[elementKey1].layoutElementAttr = element.layoutElementAttr;
@@ -904,6 +908,8 @@ function formatPostElementData(initElementData: any, modifyedElementData: any) {
     initElement[elementKey].isZeroFill = element.isZeroFill;
     initElement[elementKey].dataElementCode = element.dataElementCode;
     initElement[elementKey].dataElementText = element.dataElementText;
+    initElement[elementKey].elementMsgCode = element.elementMsgCode;
+    initElement[elementKey].elementMsgText = element.elementMsgText;
     initElement[elementKey].titleMsgCode = element.titleMsgCode;
     initElement[elementKey].titleMsgText = element.titleMsgText;
     initElement[elementKey].layoutElementAttr = element.layoutElementAttr;

@@ -48,6 +48,8 @@ export default {
   [ids.SIGN_PARENT]: '父栅格',
   [ids.SIGN_NON_PARENT]: '非父栅格',
 
+  [ids.DELETE]: '删除',
+
   [ids.LABEL_CELL_NAME]: '栅格名称',
   [ids.LABEL_PARENT_CELL_NAME]: '父栅格',
   [ids.LABEL_IS_PARENT]: '是否父栅格',
