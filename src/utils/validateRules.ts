@@ -77,13 +77,43 @@ export function createEnUcNumUlStringRule({ label }: { label: string }): Validat
   };
 }
 
-export function createUniqGlRules({ label, boName, entityName, fields, form }: {
+export function createEnNumStringRule({ label }: { label: string }): ValidationRule {
+  return {
+    validator(rule: any, value: string, callback: (message?: string) => void) {
+      const message = `【${label}】由必须英文字母和数字组成。`;
+      if (!value) {
+        return callback();
+      }
+      const obj = value.split('');
+      for (let i = 0; i < obj.length; i++) {
+        if (i === 0) {
+          if (!/[A-Za-z]/.test(obj[i])) {
+            return callback(message);
+          }
+        } else {
+          if (!/[A-Za-z0-9]/.test(obj[i])) {
+            return callback(message);
+          }
+          if (/[\s]/.test(obj[i])) {
+            return callback(message);
+          }
+        }
+      }
+      return callback();
+    },
+  };
+}
+
+export function createUniqGlRules({ label, boName, entityName, fields, form, configItemCode, url, baseViewId }: {
   label: string;
   boName: string;
   entityName: string;
   fields: string[];
   form: WrappedFormUtils;
   property?: string;
+  configItemCode?: string;
+  url?: string;
+  baseViewId?: string;
 }) {
   const message = `【${label}】必须唯一。`;
   return {
@@ -93,9 +123,10 @@ export function createUniqGlRules({ label, boName, entityName, fields, form }: {
         callback();
       }
       try {
-        result = await httpPost('/ipf/validation/uniqueGl', {
+        result = await httpPost(url ?? '/ipf/validation/uniqueGl', {
           boName,
-          configItemCode: '',
+          configItemCode: configItemCode ?? '',
+          baseViewId,
           entityName,
           fieldNames: _.map(fields, f => `${_.camelCase(boName)}.${f}`),
           fieldValues: _.map(fields, f => form.getFieldValue(f) || ''),

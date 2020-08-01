@@ -127,6 +127,8 @@ export const dndModel: IDndModel = {
         if (target.layoutElementType !== 'BUTTON') {
           values.columnName = dragSource.fieldText;
           values.fieldText = dragSource.fieldText;
+          values.dataElementCode = dragSource.elementCode;
+          values.dataElementText = dragSource.fieldText;
         }
         yield put(createUpdateElementFieldsEffect(
           target[config.elementIdKey],

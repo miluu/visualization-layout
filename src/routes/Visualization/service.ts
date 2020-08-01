@@ -59,7 +59,7 @@ export async function convertToPrototype(params: any): Promise<any> {
   return httpPost(VISUALIZATION_CONFIG.convertPrototypeUrl, params);
 }
 
-export function dataElementCodeQueryMethodCreator(urlParams: any) {
+export function dataElementCodeQueryMethodCreator(urlParams: {urlParams: any}) {
   const baseViewId = window['__urlParams']?.baseViewId;
   return async function dataElementCodeQueryMethod(options: IQueryOptions) {
     let result: IQueryResult;

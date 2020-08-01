@@ -1076,6 +1076,8 @@ export function createLayoutsModel<L = any, E = any>({
                 if (property) {
                   e.layoutBoName = property.layoutBoName;
                   e.propertyName = property.propertyName;
+                  e.dataElementCode = property.elementCode;
+                  e.dataElementText = property.fieldText;
                   result.property = property;
                 }
                 results.push(result);

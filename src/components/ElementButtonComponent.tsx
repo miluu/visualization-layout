@@ -21,7 +21,7 @@ export class ElementButtonComponent extends BaseElementComponent {
         type="button"
         {...this._createRootProps(['editor-element-button', this._getButtonStyle()])}
       >
-        {element['methodDesc'] || element['fieldText'] || element['columnName']}
+        { element['elementMsgText'] || element['methodDesc'] || element['fieldText'] || element['columnName']}
 
         {this._renderHitArea(['right'])}
 

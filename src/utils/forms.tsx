@@ -12,6 +12,7 @@ import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { Dispatch, AnyAction } from 'redux';
 import { DROPDOWN_ALIGN_PROPS } from 'src/config';
 import { IAssociateColumn, IQueryOptions, IQueryResult, UiAssociate } from 'src/ui/associate';
+import { IPropertiesMap, IMehtodsMap } from 'src/models/layoutsModel';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -152,6 +153,8 @@ export function renderControl({
   urlParams,
   onChangeCallback,
   dispatch,
+  propertiesMap,
+  methodsMap,
   info,
 }: IRenderFormItemOptions) {
   let _item = item;
@@ -182,7 +185,7 @@ export function renderControl({
     case 'multiSelect':
       return renderMultiSelect(_item, dicts, info, onChangeCallback);
     case 'associate':
-      return renderAssociate(_item, values, info, urlParams, onChangeCallback);
+      return renderAssociate(_item, values, info, urlParams, propertiesMap, methodsMap, onChangeCallback);
     default:
       return renderInput(_item, info, onChangeCallback);
   }
@@ -193,6 +196,8 @@ interface IRenderFormItemOptions {
   item?: IFormItemOption;
   values?: any;
   dicts?: IDictsMap;
+  propertiesMap?: IPropertiesMap;
+  methodsMap?: IMehtodsMap;
   urlParams?: any;
   onChangeCallback?: OnChangeCallback;
   dispatch?: Dispatch<AnyAction>;
@@ -205,6 +210,8 @@ export function renderFormItem({
   values,
   dicts,
   urlParams,
+  propertiesMap,
+  methodsMap,
   onChangeCallback,
   dispatch,
   info,
@@ -244,6 +251,8 @@ export function renderFormItem({
           onChangeCallback,
           dispatch,
           info,
+          propertiesMap,
+          methodsMap,
         }),
       )}
       {
@@ -299,7 +308,7 @@ export function renderSelect(item: IFormItemOption, dicts: IDictsMap, info: any,
   );
 }
 
-export function renderAssociate(item: IFormItemOption, values: any, urlParams: any, info: any, onChangeCallback: OnChangeCallback) {
+export function renderAssociate(item: IFormItemOption, values: any, urlParams: any, info: any, propertiesMap: IPropertiesMap, methodsMap: IMehtodsMap, onChangeCallback: OnChangeCallback) {
   const {
     property,
     refProperty,
@@ -318,7 +327,12 @@ export function renderAssociate(item: IFormItemOption, values: any, urlParams: a
         valueProp={valueProp}
         labelProp={labelProp}
         columns={columns}
-        queryMethod={queryMethod || queryMethodCreator(urlParams)}
+        queryMethod={queryMethod || queryMethodCreator({
+          urlParams,
+          values,
+          propertiesMap,
+          methodsMap,
+        })}
         labelInit={_.get(values, refProperty)}
         onChange={(v, o) => onChangeCallback([item, {
           property: item.refProperty,

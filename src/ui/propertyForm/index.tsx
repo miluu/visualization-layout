@@ -9,7 +9,7 @@ import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { connect } from 'dva';
 import { IDictsMap, IAppState } from 'src/models/appModel';
 import { IFormsState } from 'src/models/formsModel';
-import { ILayoutsState, ICreateLayouttsModelOptions } from 'src/models/layoutsModel';
+import { ILayoutsState, ICreateLayouttsModelOptions, IPropertiesMap, IMehtodsMap } from 'src/models/layoutsModel';
 import { findElementById, findLayoutByCellName, delay } from 'src/utils';
 import { Dispatch, AnyAction } from 'redux';
 import { createDoUpdateSelectedLayoutFieldsEffect, createDoUpdateSelectedElementFieldsEffect } from 'src/models/layoutsActions';
@@ -30,6 +30,10 @@ function createConnector(type: string) {
       const formItemsOpts = FORMS && FORMS[`${type}PropertyFormOptions`] || [];
       const dicts =  APP && APP.dicts || {};
       const params = APP.params;
+      const {
+        properties,
+        methods,
+      } = LAYOUTS;
       const selectedItemType = LAYOUTS.selectedElement ? 'element' : (LAYOUTS.selectedLayout ? 'layout' : null);
       const isInReference = _.get(LAYOUTS, 'selectionOptions.isInReference');
       let isGridColumn = false;
@@ -58,6 +62,8 @@ function createConnector(type: string) {
         selectedItem,
         isGridColumn,
         isInReference,
+        propertiesMap: properties,
+        methodsMap: methods,
         config: LAYOUTS.config,
         isMultiLanguage: LAYOUTS.defaultSetting?.settings?.isMulLanguage ?? false,
       };
@@ -84,6 +90,8 @@ interface IPropertyFormProps {
   isGridColumn?: boolean;
   isInReference?: boolean;
   config?: ICreateLayouttsModelOptions;
+  propertiesMap?: IPropertiesMap;
+  methodsMap?: IMehtodsMap;
 
   type?: string;
   isMultiLanguage?: boolean;
@@ -93,7 +101,7 @@ interface IPropertyFormProps {
 
 class PropertyForm extends React.Component<IPropertyFormProps> {
   render() {
-    const { selectedItem, dicts, params, formItemsOpts, form, selectedItemType, type, isGridColumn, isInReference, config, dispatch, isMultiLanguage } = this.props;
+    const { selectedItem, dicts, params, formItemsOpts, form, selectedItemType, type, isGridColumn, isInReference, config, dispatch, isMultiLanguage, propertiesMap, methodsMap } = this.props;
     const values = selectedItem ? createValues(formItemsOpts, selectedItem, isGridColumn, isInReference) : null;
     if (selectedItem && selectedItem.layoutElementType === 'GRID') {
       values.__gridColumns = selectedItem[config.childrenElementsKey];
@@ -114,6 +122,8 @@ class PropertyForm extends React.Component<IPropertyFormProps> {
             values,
             dicts,
             urlParams: params,
+            propertiesMap,
+            methodsMap,
             onChangeCallback: this._onValueChange,
             dispatch,
             info: { isMultiLanguage },

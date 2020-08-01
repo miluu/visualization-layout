@@ -16,6 +16,7 @@ import { dataElementCodeQueryMethodCreator, titleMsgCodeQueryMethod } from './se
 import { saveElementCode, getDmlElement, getDmlElementByPropertyName, saveLanguageMsg, getLanguageMsg } from 'src/services/elementCode';
 import { createSetIsLoadingAction } from 'src/models/appActions';
 import { UiAssociate } from 'src/ui/associate';
+import { queryBoName, queryDictMethod, queryShlpMethod } from 'src/services/bo';
 
 const { Option } = Select;
 
@@ -158,6 +159,14 @@ export const VISUALIZATION_CONFIG = {
     {
       property: 'layoutBoName',
       label: t(I18N_IDS.LABEL_LAYOUT_BO_NAME),
+      type: 'associate',
+      refProperty: 'layoutBoName',
+      valueProp: 'boName',
+      labelProp: 'boName',
+      columns: [
+        { title: '业务对象名称', field: 'boName' },
+      ],
+      queryMethod: queryBoName,
     },
     {
       property: 'unitCount',
@@ -214,7 +223,10 @@ export const VISUALIZATION_CONFIG = {
         if (isGrid(values)) {
           return '表格双击跳转标题';
         }
-        return '分组标题';
+        if (isTemplate(values)) {
+          return '多语言消息描述';
+        }
+        return t(I18N_IDS.LABEL_GROUP_TITLE);
       },
       type: 'associate',
       refProperty: 'groupTitle',
@@ -270,16 +282,20 @@ export const VISUALIZATION_CONFIG = {
         if (isGrid(values)) {
           return '表格双击跳转标题代码';
         }
+        if (isTemplate(values)) {
+          return '多语言消息编码';
+        }
         return t(I18N_IDS.LABEL_GROUP_MSG_CODE);
       },
       disabled: true,
+      hidden: true,
     },
     {
       property: 'groupTitle',
       key: 'groupTitle_1',
       label: t(I18N_IDS.LABEL_GROUP_TITLE),
       disabled: true,
-      // hidden: true,
+      hidden: true,
     },
     {
       property: 'groupWidget',
@@ -660,12 +676,18 @@ export const VISUALIZATION_CONFIG = {
           </Button.Group>
         );
       },
+      showWhen(values) {
+        return values?.uiType !== '33' && !isButton(values);
+      },
     },
     {
       property: 'dataElementCode',
       label: '数据元素编码',
       key: 'dataElementCode_1',
       disabled: true,
+      showWhen(values) {
+        return values?.uiType !== '33' && !isButton(values);
+      },
     },
     {
       property: 'dataElementText',
@@ -676,7 +698,13 @@ export const VISUALIZATION_CONFIG = {
     },
     {
       property: 'titleMsgCode',
-      label: '页面标题消息',
+      // label: '页面标题消息',
+      label(values) {
+        if (values?.uiType === '33') {
+          return '多语音消息描述';
+        }
+        return '页面标题消息';
+      },
       type: 'associate',
       refProperty: 'titleMsgText',
       valueProp: 'messageKey',
@@ -727,7 +755,13 @@ export const VISUALIZATION_CONFIG = {
     },
     {
       property: 'titleMsgCode',
-      label: '标题消息代码',
+      // label: '标题消息代码',
+      label(values) {
+        if (values?.uiType === '33') {
+          return '多语音消息编码';
+        }
+        return '标题消息代码';
+      },
       key: 'titleMsgCode_1',
       disabled: true,
       showWhen: values => values?.methodName,
@@ -744,17 +778,16 @@ export const VISUALIZATION_CONFIG = {
       label: '多语言消息描述',
       type: 'associate',
       refProperty: 'elementMsgText',
-      valueProp: 'elementCode',
-      labelProp: 'fieldText',
+      valueProp: 'messageKey',
+      labelProp: 'messageText',
       columns: [
-        { title: '数据元素代码', field: 'elementCode' },
-        { title: '显示文本', field: 'fieldText' },
-        { title: '数据类型', field: 'dataType' },
-        { title: '字段长度', field: 'fieldLength' },
-        { title: '小数位', field: 'decimals' },
-        { title: '数据库类型', field: 'dbType' },
+        { title: '消息键值', field: 'messageKey' },
+        { title: '创建人', field: 'creator' },
+        { title: '消息内容', field: 'messageText' },
+        { title: '消息类型', field: 'messageType', dictName: 'MessageType' },
+        { title: '语言名称', field: 'ddLanguage', dictName: 'DdLanguage' },
       ],
-      queryMethodCreator: dataElementCodeQueryMethodCreator,
+      queryMethod: titleMsgCodeQueryMethod,
       extra(__, values, callback, ___, dispatch) {
         if (!values) {
           return null;
@@ -763,22 +796,24 @@ export const VISUALIZATION_CONFIG = {
           <Button.Group size="small" >
             <Button
               disabled={!values?.elementMsgCode}
-              onClick={() => modifyDataElement({
+              onClick={() => modifyLanguageMsg({
                 dispatch,
                 callback,
                 values,
                 type: 'edit',
+                layoutType: 'element',
                 codeKey: 'elementMsgCode',
                 textKey: 'elementMsgText',
               })}
             >
               修改
             </Button>
-            <Button onClick={() => modifyDataElement({
+            <Button onClick={() => modifyLanguageMsg({
               dispatch,
               callback,
               values,
               type: 'add',
+              layoutType: 'element',
               codeKey: 'elementMsgCode',
               textKey: 'elementMsgText',
             })}>
@@ -787,12 +822,16 @@ export const VISUALIZATION_CONFIG = {
           </Button.Group>
         );
       },
+      showWhen(values) {
+        return values?.uiType === '33' || isButton(values);
+      },
     },
     {
       property: 'elementMsgCode',
       label: '多语言消息编码',
       key: 'elementMsgCode_1',
       disabled: true,
+      hidden: true,
     },
     {
       property: 'elementMsgText',
@@ -810,10 +849,30 @@ export const VISUALIZATION_CONFIG = {
     {
       property: 'layoutBoName',
       label: t(I18N_IDS.LABEL_LAYOUT_BO_NAME),
+      type: 'associate',
+      refProperty: 'layoutBoName',
+      valueProp: 'boName',
+      labelProp: 'boName',
+      columns: [
+        { title: '业务对象名称', field: 'boName' },
+      ],
+      queryMethod: queryBoName,
     },
     {
       property: 'propertyName',
       label: t(I18N_IDS.LABEL_PROPERTY_NAME),
+      // type: 'associate',
+      // refProperty: 'propertyName',
+      // valueProp: 'propertyName',
+      // labelProp: 'propertyName',
+      // columns: [
+      //   { title: '属性名称', field: 'propertyName' },
+      //   { title: '字段名', field: 'columnName' },
+      //   { title: '显示文本', field: 'fieldText' },
+      //   { title: '数据类型', field: 'dataType' },
+      //   { title: '业务对象名称', field: 'boName' },
+      // ],
+      // queryMethodCreator: queryPropertyMehodCreator,
     },
     {
       property: 'methodName',
@@ -883,6 +942,14 @@ export const VISUALIZATION_CONFIG = {
     {
       property: 'searchHelp',
       label: t(I18N_IDS.LABEL_SEARCH_HELP),
+      type: 'associate',
+      refProperty: 'searchHelp',
+      valueProp: 'shlpName',
+      labelProp: 'shlpName',
+      columns: [
+        { title: '搜索帮助名称', field: 'shlpName' },
+      ],
+      queryMethod: queryShlpMethod,
     },
     {
       property: 'refProName',
@@ -891,6 +958,15 @@ export const VISUALIZATION_CONFIG = {
     {
       property: 'dictTableName',
       label: t(I18N_IDS.LABEL_DICT_TABLE_NAME),
+      type: 'associate',
+      refProperty: 'dictTableName',
+      valueProp: 'dictCode',
+      labelProp: 'dictCode',
+      columns: [
+        { title: '数据字典代码', field: 'dictCode' },
+        { title: '数据字典名称', field: 'dictName' },
+      ],
+      queryMethod: queryDictMethod,
     },
     {
       property: 'dictGroupValue',
@@ -1780,6 +1856,10 @@ function isGridColumn(values: any): boolean {
 
 function isGrid(values: any): boolean {
   return values?.layoutElementType === 'GRID';
+}
+
+function isTemplate(values: any): boolean {
+  return values?.layoutElementType === 'TEMPLATE';
 }
 
 async function modifyDataElement({

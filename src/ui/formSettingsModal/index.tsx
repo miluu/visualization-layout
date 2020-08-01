@@ -427,6 +427,9 @@ export class UiFormSettingsModal extends React.PureComponent<IUiFormSettingsModa
             layoutElementType: layout.layoutElementType,
             propertyName: p.propertyName,
             uiType: p.uiType,
+            dataElementCode: p.elementCode,
+            dataElementText: p.fieldText,
+            fieldText: p.fieldText,
             rangeType,
           });
         });
