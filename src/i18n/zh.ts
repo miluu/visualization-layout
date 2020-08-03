@@ -239,6 +239,8 @@ export default {
   [ids.CONTROL_FILE_UPLOADER]: '上传控件',
   [ids.CONTROL_BUTTON_GROUP]: '按钮组',
   [ids.CONTROL_TEXT_EXACT_MATCHING]: '精确匹配',
+  [ids.CONTROL_QUERY_FILTER]: '单选筛选',
+  [ids.CONTROL_MULTIPLE_QUERY_FILTER]: '多选筛选',
 
   [ids.MESSAGE_NO_LAYOUT]: '当前页面无布局数据，是否导入原型界面布局?',
   [ids.MESSAGE_SELECT_PROTOTYPE]: '请双击选择一个原型页面',

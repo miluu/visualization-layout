@@ -240,6 +240,8 @@ export default {
   [ids.CONTROL_FILE_UPLOADER]: 'File Uploader',
   [ids.CONTROL_BUTTON_GROUP]: 'Button Group',
   [ids.CONTROL_TEXT_EXACT_MATCHING]: 'Exact Matching',
+  [ids.CONTROL_QUERY_FILTER]: 'Query Filter',
+  [ids.CONTROL_MULTIPLE_QUERY_FILTER]: 'Multiple Query Filter',
 
   [ids.MESSAGE_NO_LAYOUT]: 'There is no layout data on the current page. Is the prototype interface layout imported?',
   [ids.MESSAGE_SELECT_PROTOTYPE]: 'Please double click to select a prototype page',
