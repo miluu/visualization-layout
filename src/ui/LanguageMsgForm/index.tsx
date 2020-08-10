@@ -16,7 +16,7 @@ import I18N_IDS from 'src/i18n/ids';
 import { t } from 'src/i18n';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { IAppState, IDictsMap } from 'src/models/appModel';
-import { createRequireRule, createRichLengthRule, createEnNumStringRule } from 'src/utils/validateRules';
+import { createRequireRule, createRichLengthRule, createEnNumUlStringRule } from 'src/utils/validateRules';
 import { checkLanguageMsg } from 'src/services/elementCode';
 import { createSetIsLoadingAction } from 'src/models/appActions';
 import { getDictDisplay } from 'src/utils';
@@ -325,7 +325,7 @@ class LanguageMsgForm extends React.PureComponent<ILanguageMsgFormProps> {
                   rules: [
                     createRequireRule({ label: '消息键值' }),
                     createRichLengthRule({ label: '消息键值', max: 50 }),
-                    createEnNumStringRule({ label: '消息键值' }),
+                    createEnNumUlStringRule({ label: '消息键值' }),
                     // createUniqGlRules({
                     //   label: '消息键值',
                     //   boName: 'IpfLanguageMsg',

@@ -218,7 +218,6 @@ export const VISUALIZATION_CONFIG = {
     },
     {
       property: 'groupMsgCode',
-      // label: '分组标题',
       label(values) {
         if (isGrid(values)) {
           return '表格双击跳转标题';
@@ -288,7 +287,7 @@ export const VISUALIZATION_CONFIG = {
         return t(I18N_IDS.LABEL_GROUP_MSG_CODE);
       },
       disabled: true,
-      hidden: true,
+      // hidden: true,
     },
     {
       property: 'groupTitle',
@@ -692,7 +691,7 @@ export const VISUALIZATION_CONFIG = {
     {
       property: 'dataElementText',
       label: '字段标题',
-      refProperty: 'dataElementText_1',
+      key: 'dataElementText_1',
       disabled: true,
       hidden: true,
     },
@@ -755,7 +754,6 @@ export const VISUALIZATION_CONFIG = {
     },
     {
       property: 'titleMsgCode',
-      // label: '标题消息代码',
       label(values) {
         if (values?.uiType === '33') {
           return '多语音消息编码';
@@ -823,7 +821,7 @@ export const VISUALIZATION_CONFIG = {
         );
       },
       showWhen(values) {
-        return values?.uiType === '33' || isButton(values);
+        return values?.uiType === '33' || isButton(values) || isGridOperationColumn(values);
       },
     },
     {
@@ -831,7 +829,9 @@ export const VISUALIZATION_CONFIG = {
       label: '多语言消息编码',
       key: 'elementMsgCode_1',
       disabled: true,
-      hidden: true,
+      showWhen(values) {
+        return values?.uiType === '33' || isButton(values) || isGridOperationColumn(values);
+      },
     },
     {
       property: 'elementMsgText',
@@ -1852,6 +1852,10 @@ function isButton(values: any) {
 
 function isGridColumn(values: any): boolean {
   return values && values.__isGridColumn;
+}
+
+function isGridOperationColumn(values: any) {
+  return isGridColumn(values) && values.methodName;
 }
 
 function isGrid(values: any): boolean {

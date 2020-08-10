@@ -11,6 +11,7 @@ export async function queryBoName(options: IQueryOptions) {
     currentPage,
     pageSize,
     keywords,
+    isExactQuery,
   } = options;
   const searchColumns: any[] = [{
     propertyName: 'baseViewId',
@@ -19,7 +20,15 @@ export async function queryBoName(options: IQueryOptions) {
     value: baseViewId,
     operation:'EQ',
   }];
-  if (keywords) {
+  if (isExactQuery && keywords) {
+    searchColumns.push({
+      propertyName:'boName',
+      columnName:'BO_NAME',
+      dataType:'S',
+      value: keywords,
+      operation: 'EQ',
+    });
+  } else if (keywords) {
     searchColumns.push({
       propertyName:'boName',
       columnName:'BO_NAME',
@@ -81,6 +90,7 @@ export async function queryDictMethod(options: IQueryOptions) {
     currentPage,
     pageSize,
     keywords,
+    isExactQuery,
   } = options;
   const searchColumns: any[] = [{
     propertyName: 'baseViewId',
@@ -89,7 +99,15 @@ export async function queryDictMethod(options: IQueryOptions) {
     value: baseViewId,
     operation:'EQ',
   }];
-  if (keywords) {
+  if (isExactQuery && keywords) {
+    searchColumns.push({
+      propertyName:'dictCode',
+      columnName:'DICT_CODE',
+      dataType:'S',
+      value: keywords,
+      operation: 'EQ',
+    });
+  } else if (keywords) {
     searchColumns.push({
       propertyName:'dictCode',
       columnName:'DICT_CODE',
@@ -136,6 +154,7 @@ export async function queryShlpMethod(options: IQueryOptions) {
     currentPage,
     pageSize,
     keywords,
+    isExactQuery,
   } = options;
   const searchColumns: any[] = [{
     propertyName: 'baseViewId',
@@ -144,7 +163,15 @@ export async function queryShlpMethod(options: IQueryOptions) {
     value: baseViewId,
     operation:'EQ',
   }];
-  if (keywords) {
+  if (keywords && isExactQuery) {
+    searchColumns.push({
+      propertyName:'shlpName',
+      columnName:'SHLP_NAME',
+      dataType:'S',
+      value: keywords,
+      operation: 'EQ',
+    });
+  } else if (keywords) {
     searchColumns.push({
       propertyName:'shlpName',
       columnName:'SHLP_NAME',

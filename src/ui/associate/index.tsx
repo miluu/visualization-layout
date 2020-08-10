@@ -14,6 +14,7 @@ export interface IQueryOptions {
   keywords: string;
   pageSize: number;
   currentPage: number;
+  isExactQuery?: boolean;
 }
 
 export interface IQueryResult {
@@ -50,6 +51,7 @@ export interface IUiAssociateState {
   keywords: string;
   prevSearchKeywords: string;
   isLoading: boolean;
+  open: boolean;
 }
 
 @connect(
@@ -77,6 +79,7 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
       keywords: null,
       prevSearchKeywords: null,
       isLoading: false,
+      open: false,
     };
 
     this._debounceHandleSearch = _.debounce((keywords: string = '') => {
@@ -96,7 +99,7 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
       columns,
       disabled,
     } = this.props;
-    const { total, pageSize, currentPage, isLoading, source } = this.state;
+    const { total, pageSize, currentPage, isLoading, source, open } = this.state;
     let renderSource = source;
     const valueItem = _.find(renderSource, item => item[valueProp] === value);
     if (!valueItem && labelInit) {
@@ -108,7 +111,7 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
         },
         ...renderSource,
       ];
-    } else if (valueItem && valueItem[labelProp] !== labelInit) {
+    } else if (valueItem && valueItem[labelProp] !== labelInit && !open) {
       renderSource = _.filter(renderSource, r => r !== valueItem);
       renderSource = [
         {
@@ -146,6 +149,7 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
         style={{ width: '100%' }}
         onSearch={this._debounceHandleSearch}
         onChange={this._handleChange}
+        onSelect={this._onSelect}
         onDropdownVisibleChange={this._onDropdownVisibleChange}
         defaultActiveFirstOption={true}
         optionLabelProp="label"
@@ -157,6 +161,7 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
         {...DROPDOWN_ALIGN_PROPS}
         dropdownClassName="editor-associate-dropdown"
         className="editor-associate"
+        placeholder={this._getPlaceholder()}
       >
         <OptGroup key="1" label={
           <div style={{
@@ -201,6 +206,17 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
     );
   }
 
+  private _getPlaceholder = () => {
+    const {
+      // value,
+      labelInit,
+    } = this.props;
+    if (labelInit) {
+      return labelInit;
+    }
+    return '';
+  }
+
   private _getColumnDisplay = (record: any, column: IAssociateColumn) => {
     const { dicts } = this.props;
     let display = record[column.field];
@@ -217,20 +233,21 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
     return display ?? '';
   }
 
-  private _createQueryOptions = (keywords: string = ''): IQueryOptions => {
+  private _createQueryOptions = (keywords: string = '', isExactQuery = false): IQueryOptions => {
     return {
       keywords,
       pageSize: this.state.pageSize,
       currentPage: this.state.currentPage,
+      isExactQuery,
     };
   }
 
-  private _handleSearch = async (keywords: string = '') => {
+  private _handleSearch = async (keywords: string = '', isExactQuery = false) => {
     await delay(0);
     this.setState({
       isLoading: true,
     });
-    const options = this._createQueryOptions(keywords);
+    const options = this._createQueryOptions(keywords, isExactQuery);
     try {
       const result = await this.props.queryMethod(options);
       const source = result.source || [];
@@ -255,6 +272,15 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
     }
   }
 
+  private _onSelect = (value: string, option: any) => {
+    const { valueProp, labelProp, labelInit } = this.props;
+    const { source } = this.state;
+    const item = _.find(source, r => r[valueProp] === value);
+    if (item && item[labelProp] !== labelInit) {
+      this._triggerChange(value, option);
+    }
+  }
+
   private _handleChange = (value: string, option: any) => {
     this._triggerChange(value, option);
   }
@@ -269,11 +295,14 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
   }
 
   private _onDropdownVisibleChange = (open: boolean) => {
+    this.setState({
+      open,
+    });
     if (open) {
       this.setState({
         currentPage: 1,
       });
-      this._handleSearch(this.props.value);
+      this._handleSearch(this.props.value, true);
     }
   }
 

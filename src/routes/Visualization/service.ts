@@ -67,6 +67,7 @@ export function dataElementCodeQueryMethodCreator(urlParams: {urlParams: any}) {
       currentPage,
       pageSize,
       keywords,
+      isExactQuery,
     } = options;
     const searchColumns: any[] = [{
       propertyName: 'baseViewId',
@@ -75,7 +76,15 @@ export function dataElementCodeQueryMethodCreator(urlParams: {urlParams: any}) {
       value: baseViewId,
       operation:'EQ',
     }];
-    if (keywords) {
+    if (isExactQuery && keywords) {
+      searchColumns.push({
+        propertyName: 'elementCode',
+        columnName: 'ELEMENT_CODE',
+        dataType: 'S',
+        value: keywords,
+        operation:'EQ',
+      });
+    } else if (keywords) {
       searchColumns.push({
         propertyName: 'elementCode',
         columnName: 'ELEMENT_CODE',
@@ -129,6 +138,7 @@ export async function titleMsgCodeQueryMethod(options: IQueryOptions) {
     currentPage,
     pageSize,
     keywords,
+    isExactQuery,
   } = options;
   const searchColumns: any[] = [{
     propertyName: 'baseViewId',
@@ -137,7 +147,15 @@ export async function titleMsgCodeQueryMethod(options: IQueryOptions) {
     value: baseViewId,
     operation:'EQ',
   }];
-  if (keywords) {
+  if (isExactQuery && keywords) {
+    searchColumns.push({
+      propertyName:'messageKey',
+      columnName:'MESSAGE_KEY',
+      dataType:'S',
+      value: keywords,
+      operation: 'EQ',
+    });
+  } else if (keywords) {
     searchColumns.push({
       propertyName:'messageKey',
       columnName:'MESSAGE_KEY',

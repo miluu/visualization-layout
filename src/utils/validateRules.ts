@@ -77,10 +77,10 @@ export function createEnUcNumUlStringRule({ label }: { label: string }): Validat
   };
 }
 
-export function createEnNumStringRule({ label }: { label: string }): ValidationRule {
+export function createEnNumUlStringRule({ label }: { label: string }): ValidationRule {
   return {
     validator(rule: any, value: string, callback: (message?: string) => void) {
-      const message = `【${label}】由必须英文字母和数字组成。`;
+      const message = `【${label}】由必须英文字母、数字、下划线组成。`;
       if (!value) {
         return callback();
       }
@@ -91,7 +91,7 @@ export function createEnNumStringRule({ label }: { label: string }): ValidationR
             return callback(message);
           }
         } else {
-          if (!/[A-Za-z0-9]/.test(obj[i])) {
+          if (!/[A-Za-z0-9_]/.test(obj[i])) {
             return callback(message);
           }
           if (/[\s]/.test(obj[i])) {
