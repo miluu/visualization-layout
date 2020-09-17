@@ -151,7 +151,7 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
         onChange={this._handleChange}
         onSelect={this._onSelect}
         onDropdownVisibleChange={this._onDropdownVisibleChange}
-        defaultActiveFirstOption={true}
+        defaultActiveFirstOption={false}
         optionLabelProp="label"
         filterOption={false}
         allowClear={true}
@@ -162,6 +162,7 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
         dropdownClassName="editor-associate-dropdown"
         className="editor-associate"
         placeholder={this._getPlaceholder()}
+        onBlur={this._onBlur}
       >
         <OptGroup key="1" label={
           <div style={{
@@ -226,7 +227,7 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
       // const dictList = dicts[column.dictName] ?? [];
       // const dict = _.find(dictList, d => d.key === display);
       // if (dict) {
-      //   display = dict.value;
+      //   display = dict.value;\
       // }
       display = getDictDisplay(display, column.dictName, dicts);
     }
@@ -282,6 +283,15 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
   }
 
   private _handleChange = (value: string, option: any) => {
+    if (!value) {
+      this.setState({
+        source: [],
+        originSource: [],
+        total: 0,
+        isLoading: false,
+        currentPage: 1,
+      });
+    }
     this._triggerChange(value, option);
   }
 
@@ -291,6 +301,18 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
     const item = _.find(source, r => r[valueProp] === value);
     if (onChange) {
       onChange(value, item);
+    }
+  }
+
+  private _onBlur = (value: any) => {
+    console.log('.... _onBlur', value);
+    const { valueProp } = this.props;
+    const {
+      isLoading,
+      source,
+    } = this.state;
+    if (!isLoading && source.length === 1 && source[0][valueProp] !== value) {
+      this._handleChange(source[0][valueProp], source[0]);
     }
   }
 
