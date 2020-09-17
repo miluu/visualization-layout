@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as _ from 'lodash';
+import classnames from 'classnames';
 import { Button, Table, Input, message } from 'antd';
 
 import { UiSettingsModal } from '../settingsModal';
@@ -116,7 +117,7 @@ export class UiListSourceEditorModal extends React.Component<any, IUiListSourceE
               <Button size="small" disabled={!selectedRows?.length} onClick={this._removeRows} >{t(I18N_IDS.DELETE)}</Button>
               { extraButtons?.(this) }
             </div>
-            <div className="editor-list-source-editor-table" ref={this.tableWrapRef} >
+            <div className={classnames('editor-list-source-editor-table', { 'editor-is-empty': !sourceObj?.length })} ref={this.tableWrapRef} >
               <div className="editor-list-source-editor-table-inner">
                 <Table
                   bordered
