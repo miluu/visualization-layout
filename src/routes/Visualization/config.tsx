@@ -246,7 +246,7 @@ export const VISUALIZATION_CONFIG = {
         return (
           <Button.Group size="small" >
             <Button
-              disabled={!values?.groupMsgCode}
+              disabled={!values?.groupMsgCode || values?.__isInReference}
               onClick={() => modifyLanguageMsg({
                 dispatch,
                 callback,
@@ -259,15 +259,18 @@ export const VISUALIZATION_CONFIG = {
             >
               修改
             </Button>
-            <Button onClick={() => modifyLanguageMsg({
-              dispatch,
-              callback,
-              values,
-              type: 'add',
-              layoutType: 'layout',
-              codeKey: 'groupMsgCode',
-              textKey: 'groupTitle',
-            })}>
+            <Button
+              disabled={values?.__isInReference}
+              onClick={() => modifyLanguageMsg({
+                dispatch,
+                callback,
+                values,
+                type: 'add',
+                layoutType: 'layout',
+                codeKey: 'groupMsgCode',
+                textKey: 'groupTitle',
+              })}
+            >
               新增
             </Button>
           </Button.Group>
@@ -648,7 +651,7 @@ export const VISUALIZATION_CONFIG = {
         return (
           <Button.Group size="small" >
             <Button
-              disabled={!values?.dataElementCode}
+              disabled={!values?.dataElementCode || values?.__isInReference}
               onClick={() => modifyDataElement({
                 dispatch,
                 callback,
@@ -661,15 +664,18 @@ export const VISUALIZATION_CONFIG = {
             >
               修改
             </Button>
-            <Button onClick={() => modifyDataElement({
-              dispatch,
-              callback,
-              values,
-              type: 'add',
-              codeKey: 'dataElementCode',
-              textKey: 'dataElementText',
-              otherTextKeys: ['columnName', 'fieldText'],
-            })}>
+            <Button
+              disabled={values?.__isInReference}
+              onClick={() => modifyDataElement({
+                dispatch,
+                callback,
+                values,
+                type: 'add',
+                codeKey: 'dataElementCode',
+                textKey: 'dataElementText',
+                otherTextKeys: ['columnName', 'fieldText'],
+              })}
+            >
               新增
             </Button>
           </Button.Group>
@@ -724,7 +730,7 @@ export const VISUALIZATION_CONFIG = {
         return (
           <Button.Group size="small" >
             <Button
-              disabled={!values?.titleMsgCode}
+              disabled={!values?.titleMsgCode || values?.__isInReference}
               onClick={() => modifyLanguageMsg({
                 dispatch,
                 callback,
@@ -737,15 +743,18 @@ export const VISUALIZATION_CONFIG = {
             >
               修改
             </Button>
-            <Button onClick={() => modifyLanguageMsg({
-              dispatch,
-              callback,
-              values,
-              type: 'add',
-              layoutType: 'element',
-              codeKey: 'titleMsgCode',
-              textKey: 'titleMsgText',
-            })}>
+            <Button
+              disabled={values?.__isInReference}
+              onClick={() => modifyLanguageMsg({
+                dispatch,
+                callback,
+                values,
+                type: 'add',
+                layoutType: 'element',
+                codeKey: 'titleMsgCode',
+                textKey: 'titleMsgText',
+              })}
+            >
               新增
             </Button>
           </Button.Group>
@@ -793,7 +802,7 @@ export const VISUALIZATION_CONFIG = {
         return (
           <Button.Group size="small" >
             <Button
-              disabled={!values?.elementMsgCode}
+              disabled={!values?.elementMsgCode || values?.__isInReference}
               onClick={() => modifyLanguageMsg({
                 dispatch,
                 callback,
@@ -806,15 +815,18 @@ export const VISUALIZATION_CONFIG = {
             >
               修改
             </Button>
-            <Button onClick={() => modifyLanguageMsg({
-              dispatch,
-              callback,
-              values,
-              type: 'add',
-              layoutType: 'element',
-              codeKey: 'elementMsgCode',
-              textKey: 'elementMsgText',
-            })}>
+            <Button
+              disabled={values?.__isInReference}
+              onClick={() => modifyLanguageMsg({
+                dispatch,
+                callback,
+                values,
+                type: 'add',
+                layoutType: 'element',
+                codeKey: 'elementMsgCode',
+                textKey: 'elementMsgText',
+              })}
+            >
               新增
             </Button>
           </Button.Group>
