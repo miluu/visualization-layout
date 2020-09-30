@@ -266,6 +266,7 @@ export default class DatasourceBinding extends React.PureComponent<IDatasourceBi
       getBoList: this._getBoList,
       validLayouts: this._validLayouts,
       refreshPropertiesAndMethods: this._refreshPropertiesAndMethods,
+      refreshPageLayouts: this._init,
     };
     window['jQuery'] = window['$'] = function () {
       return {
