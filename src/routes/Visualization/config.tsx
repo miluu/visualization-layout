@@ -163,10 +163,26 @@ export const VISUALIZATION_CONFIG = {
       refProperty: 'layoutBoName',
       valueProp: 'boName',
       labelProp: 'boName',
+      otherRefPropertiesPair: [
+        ['layoutBoViewName', 'baseViewDesc'],
+        ['layoutBoViewId', 'baseViewId'],
+      ],
       columns: [
         { title: '业务对象名称', field: 'boName' },
+        { title: '视图名称', field: 'baseViewDesc' },
+        { title: '视图ID', field: 'baseViewId' },
       ],
       queryMethod: queryBoName,
+    },
+    {
+      property: 'layoutBoViewName',
+      label: '业务对象视图',
+      disabled: true,
+    },
+    {
+      property: 'layoutBoViewId',
+      label: '业务对象视图ID',
+      disabled: true,
     },
     {
       property: 'unitCount',
@@ -865,10 +881,26 @@ export const VISUALIZATION_CONFIG = {
       refProperty: 'layoutBoName',
       valueProp: 'boName',
       labelProp: 'boName',
+      otherRefPropertiesPair: [
+        ['layoutBoViewName', 'baseViewDesc'],
+        ['layoutBoViewId', 'baseViewId'],
+      ],
       columns: [
         { title: '业务对象名称', field: 'boName' },
+        { title: '视图名称', field: 'baseViewDesc' },
+        { title: '视图ID', field: 'baseViewId' },
       ],
       queryMethod: queryBoName,
+    },
+    {
+      property: 'layoutBoViewName',
+      label: '业务对象视图',
+      disabled: true,
+    },
+    {
+      property: 'layoutBoViewId',
+      label: '业务对象视图ID',
+      disabled: true,
     },
     {
       property: 'propertyName',
@@ -958,10 +990,26 @@ export const VISUALIZATION_CONFIG = {
       refProperty: 'searchHelp',
       valueProp: 'shlpName',
       labelProp: 'shlpName',
+      otherRefPropertiesPair: [
+        ['searchHelpViewName', 'baseViewDesc'],
+        ['searchHelpViewId', 'baseViewId'],
+      ],
       columns: [
         { title: '搜索帮助名称', field: 'shlpName' },
+        { title: '视图名称', field: 'baseViewDesc' },
+        { title: '视图ID', field: 'baseViewId' },
       ],
       queryMethod: queryShlpMethod,
+    },
+    {
+      property: 'searchHelpViewName',
+      label: '搜索帮助视图',
+      disabled: true,
+    },
+    {
+      property: 'searchHelpViewId',
+      label: '搜索帮助视图ID',
+      disabled: true,
     },
     {
       property: 'refProName',

@@ -70,6 +70,7 @@ export interface IFormItemOption {
   // 联想控件
   refProperty?: string;
   otherRefProperties?: string[];
+  otherRefPropertiesPair?: string[][];
   valueProp?: string;
   labelProp?: string;
   columns?: IAssociateColumn[];
@@ -318,6 +319,7 @@ export function renderAssociate(item: IFormItemOption, values: any, urlParams: a
     columns,
     queryMethod,
     queryMethodCreator,
+    otherRefPropertiesPair = [],
   } = item;
   return (
     <>
@@ -334,11 +336,19 @@ export function renderAssociate(item: IFormItemOption, values: any, urlParams: a
           methodsMap,
         })}
         labelInit={_.get(values, refProperty)}
-        onChange={(v, o) => onChangeCallback([item, {
-          property: item.refProperty,
-        }, ...(otherRefProperties ?? []).map(p => ({ property: p }))],
-        [v || null, _.get(o, labelProp, null), ...(otherRefProperties ?? []).map(__ => _.get(o, labelProp, null))],
-        true)}
+        onChange={(v, o) => {
+          console.log('......', v, o);
+          onChangeCallback([item, {
+            property: item.refProperty,
+          }, ...(otherRefProperties ?? []).map(p => ({ property: p })), ...otherRefPropertiesPair.map(pair => ({ property: pair[0] }))],
+            [
+              v || null,
+              _.get(o, labelProp, null),
+              ...(otherRefProperties ?? []).map(__ => _.get(o, labelProp, null)),
+              ...otherRefPropertiesPair.map(pair => (_.get(o, pair[1], null))),
+            ],
+          true);
+        }}
       />
     </>
   );

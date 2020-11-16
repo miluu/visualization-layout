@@ -90,6 +90,8 @@ function formatBoPageLayout(boPageLayoutIn: any) {
           _fromKey: _fromKey
       }),
       layoutBoName: layout.layoutBoName,
+      layoutBoViewName: layout.layoutBoViewName,
+      layoutBoViewId: layout.layoutBoViewId,
       cellButtons: cellButtons,
       cellGrids: cellGrids,
       formHeaders: formHeaders
@@ -118,6 +120,8 @@ function formatBoPgLoElement(boPgLoElementIn: any) {
       baseViewId: _ipfCcmBoPgLoElement.baseViewId,
       layoutElementType: _ipfCcmBoPgLoElement.layoutElementType,
       layoutBoName: _ipfCcmBoPgLoElement.layoutBoName,
+      layoutBoViewName: _ipfCcmBoPgLoElement.layoutBoViewName,
+      layoutBoViewId: _ipfCcmBoPgLoElement.layoutBoViewId,
       propertyName: _ipfCcmBoPgLoElement.propertyName || (elementFormData ? elementFormData.propertyName : null),
       propertyType: _ipfCcmBoPgLoElement.propertyType || (elementFormData ? elementFormData.propertyType : null),
       queryType: _ipfCcmBoPgLoElement.queryType,
@@ -147,6 +151,8 @@ function formatBoPgLoElement(boPgLoElementIn: any) {
       atValueType: _ipfCcmBoPgLoElement.atValueType || (elementFormData ? elementFormData.atValueType : null),
       atResultValue: _ipfCcmBoPgLoElement.atResultValue || (elementFormData ? elementFormData.atResultValue : null),
       searchHelp: _ipfCcmBoPgLoElement.searchHelp || (elementFormData ? elementFormData.searchHelp : null),
+      searchHelpViewName: _ipfCcmBoPgLoElement.searchHelpViewName || (elementFormData ? elementFormData.searchHelpViewName : null),
+      searchHelpViewId: _ipfCcmBoPgLoElement.searchHelpViewId || (elementFormData ? elementFormData.searchHelpViewId : null),
       refProName: _ipfCcmBoPgLoElement.refProName || (elementFormData ? elementFormData.refProName : null),
       dictTableName: _ipfCcmBoPgLoElement.dictTableName || (elementFormData ? elementFormData.dictTableName : null),
       dictGroupValue: _ipfCcmBoPgLoElement.dictGroupValue || (elementFormData ? elementFormData.dictGroupValue : null),
