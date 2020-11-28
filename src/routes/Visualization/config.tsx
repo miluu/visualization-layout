@@ -1,20 +1,19 @@
 import * as React from 'react';
 import * as _ from 'lodash';
 import { IIpfCcmPage, IBoPageLayout, IPgLoElement } from 'src/routes/Visualization/types';
-import { PAGE_TYPE, BUILT_IN_STYLE_CLASSES, ROW_STATUS } from '../../config';
+import { PAGE_TYPE, BUILT_IN_STYLE_CLASSES } from '../../config';
 // import { UiAssociate } from 'src/ui/associate';
 import { IFormItemOption } from 'src/utils/forms';
 import { IUiDraggableListItem } from 'src/ui/draggableList';
 import { IUiDraggableListGroupItem } from 'src/ui/draggableListGroup';
 import { transformUiType, createId } from 'src/utils';
-import { Button, Select, message, Modal } from 'antd';
-import { openUploaderModal, openListSourceEditor, openElementCodeFormModal, closeElementCodeFormModal, closeLanguageMsgFormModal, openLanguageMsgFormModal } from 'src/utils/modal';
+import { Button, Select, Modal } from 'antd';
+import { openUploaderModal, openListSourceEditor } from 'src/utils/modal';
 import { UiComponentGroupList } from 'src/ui/componentGroupList';
 import I18N_IDS from 'src/i18n/ids';
 import { t } from 'src/i18n';
 import { dataElementCodeQueryMethodCreator, titleMsgCodeQueryMethod } from './service';
-import { saveElementCode, getDmlElement, getDmlElementByPropertyName, saveLanguageMsg, getLanguageMsg } from 'src/services/elementCode';
-import { createSetIsLoadingAction } from 'src/models/appActions';
+import { modifyLanguageMsg, modifyDataElement } from 'src/services/elementCode';
 import { UiAssociate } from 'src/ui/associate';
 import { queryBoName, queryDictMethod, queryShlpMethod } from 'src/services/bo';
 
@@ -1924,191 +1923,4 @@ function isGrid(values: any): boolean {
 
 function isTemplate(values: any): boolean {
   return values?.layoutElementType === 'TEMPLATE';
-}
-
-async function modifyDataElement({
-  values,
-  dispatch,
-  callback,
-  type,
-  codeKey,
-  textKey,
-  otherTextKeys,
-}: {
-  values: any;
-  dispatch: any;
-  callback: any;
-  type: 'edit' | 'add';
-  codeKey: string;
-  textKey: string;
-  otherTextKeys?: string[];
-}) {
-  let formData: any = {};
-  dispatch(createSetIsLoadingAction(true, true));
-  try {
-    let getResult: any;
-    if (type === 'add') {
-      getResult = await getDmlElementByPropertyName({
-        baseViewId: window['__urlParams']?.baseViewId,
-        boName: values.layoutBoName,
-        propertyName: values?.propertyName,
-      });
-    } else {
-      getResult = await getDmlElement({
-        elementCode: values && values[codeKey],
-        baseViewId: window['__urlParams']?.baseViewId,
-      });
-    }
-    formData = getResult?.data ?? {};
-  } catch (e) {
-    console.error(e);
-    Modal.error({ content: e?.msg ?? '查询数据元素失败。' });
-    return;
-  } finally {
-    dispatch(createSetIsLoadingAction(false, true));
-  }
-  const originElementCode = formData.elementCode;
-  if (type === 'edit') {
-    formData.rowStatus = ROW_STATUS.MODIFIED;
-  } else {
-    formData.referenceCode = originElementCode;
-    formData.elementCode = null;
-    formData.configItemCode = null;
-    formData.ipfDmlElementId = null;
-    formData.rowStatus = ROW_STATUS.ADDED;
-    formData.baseViewId = window['__urlParams']?.baseViewId ?? '';
-    formData.revisionNumber = 0;
-  }
-  const typeText = type === 'edit' ? '修改' : '新增';
-  openElementCodeFormModal({
-    title: `${typeText}数据元素`,
-    submitText: `${typeText}并提交`,
-    formData: { ...formData },
-    editType: type,
-    async onSubmit(data, editType) {
-      const postData = {
-        ...formData,
-        ...data,
-      };
-      if (type === 'edit' && editType === 'add') {
-        postData.referenceCode = originElementCode;
-        postData.configItemCode = null;
-        postData.ipfDmlElementId = null;
-        postData.rowStatus = ROW_STATUS.ADDED;
-        postData.baseViewId = window['__urlParams']?.baseViewId ?? '';
-        postData.revisionNumber = 0;
-      }
-      let result: any;
-      dispatch(createSetIsLoadingAction(true, true));
-      try {
-        result = await saveElementCode(postData);
-      } catch (e) {
-        console.error(e);
-        Modal.error({ content: e?.msg ?? '保存失败。' });
-        return;
-      } finally {
-        dispatch(createSetIsLoadingAction(false, true));
-      }
-      console.log(result);
-      message.success('保存成功。');
-      callback(
-        [{ property: codeKey }, { property: textKey }, ..._.map(otherTextKeys, key => ({
-          property: key,
-        }))],
-        [data?.elementCode, data?.fieldText, ..._.map(otherTextKeys, () => data?.fieldText)],
-        true,
-      );
-      closeElementCodeFormModal();
-    },
-  });
-}
-
-async function modifyLanguageMsg({
-  values,
-  dispatch,
-  callback,
-  type,
-  codeKey,
-  textKey,
-  layoutType,
-}: {
-  values: any;
-  dispatch: any;
-  callback: any;
-  type: 'edit' | 'add';
-  codeKey: string,
-  textKey: string,
-  layoutType: 'layout' | 'element',
-}) {
-  let formData: any = {};
-  dispatch(createSetIsLoadingAction(true, true));
-  try {
-    let getResult: any;
-    if (type === 'add') {
-      getResult = {};
-    } else {
-      getResult = await getLanguageMsg({
-        messageKey: values[codeKey],
-        baseViewId: window['__urlParams']?.baseViewId,
-      });
-    }
-    formData = getResult?.data ?? {};
-  } catch (e) {
-    console.error(e);
-    Modal.error({ content: e?.msg ?? '查询多语言消息失败。' });
-    return;
-  } finally {
-    dispatch(createSetIsLoadingAction(false, true));
-  }
-  // formData = {};
-  // console.log(getLanguageMsg);
-  if (type === 'edit') {
-    formData.rowStatus = ROW_STATUS.MODIFIED;
-    formData.baseViewId = window['__urlParams']?.baseViewId ?? '';
-    // formData.messageKey = values[codeKey];
-    // formData.messageText = values[textKey];
-  } else {
-    formData.rowStatus = ROW_STATUS.ADDED;
-    formData.baseViewId = window['__urlParams']?.baseViewId ?? '';
-    formData.messageType = '2';
-    formData.ddLanguage = 'zh';
-  }
-  openLanguageMsgFormModal({
-    formData: { ...formData },
-    editType: type,
-    async onSubmit(data, editType) {
-      const postData = {
-        ...formData,
-        ...data,
-        metaDataType: layoutType === 'element' ? 'IpfCcmBoPgLoElement' : 'IpfCcmBoPageLayout',
-        businessId: layoutType === 'element' ? values?.ipfCcmBoPgLoElementId : values?.ipfCcmBoPageLayoutId,
-      };
-      if (type === 'edit' && editType === 'add') {
-        postData.rowStatus = ROW_STATUS.ADDED;
-        postData.baseViewId = window['__urlParams']?.baseViewId ?? '';
-      }
-      if (postData.businessId?.indexOf?.('NEW_') >= 0) {
-        postData.businessId = null;
-      }
-      let result: any;
-      dispatch(createSetIsLoadingAction(true, true));
-      try {
-        result = await saveLanguageMsg(postData);
-      } catch (e) {
-        console.error(e);
-        Modal.error({ content: e?.msg ?? '保存失败。' });
-        return;
-      } finally {
-        dispatch(createSetIsLoadingAction(false, true));
-      }
-      console.log(result);
-      message.success('保存成功。');
-      callback(
-        [{ property: codeKey }, { property: textKey }],
-        [data?.messageKey, data?.messageText],
-        true,
-      );
-      closeLanguageMsgFormModal();
-    },
-  });
 }
