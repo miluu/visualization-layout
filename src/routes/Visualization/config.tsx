@@ -15,7 +15,7 @@ import { t } from 'src/i18n';
 import { dataElementCodeQueryMethodCreator, titleMsgCodeQueryMethod } from './service';
 import { modifyLanguageMsg, modifyDataElement } from 'src/services/elementCode';
 import { UiAssociate } from 'src/ui/associate';
-import { queryBoName, queryDictMethod, queryShlpMethod } from 'src/services/bo';
+import { queryBoName, queryDictMethod, queryPropertyCreator, queryMethodCreator, queryShlpMethod } from 'src/services/bo';
 
 const { Option } = Select;
 
@@ -904,22 +904,33 @@ export const VISUALIZATION_CONFIG = {
     {
       property: 'propertyName',
       label: t(I18N_IDS.LABEL_PROPERTY_NAME),
-      // type: 'associate',
-      // refProperty: 'propertyName',
-      // valueProp: 'propertyName',
-      // labelProp: 'propertyName',
-      // columns: [
-      //   { title: '属性名称', field: 'propertyName' },
-      //   { title: '字段名', field: 'columnName' },
-      //   { title: '显示文本', field: 'fieldText' },
-      //   { title: '数据类型', field: 'dataType' },
-      //   { title: '业务对象名称', field: 'boName' },
-      // ],
-      // queryMethodCreator: queryPropertyMehodCreator,
+      type: 'associate',
+      refProperty: 'propertyName',
+      valueProp: 'propertyName',
+      labelProp: 'propertyName',
+      columns: [
+        { title: '属性名称', field: 'propertyName' },
+        { title: '字段名', field: 'columnName' },
+        { title: '显示文本', field: 'fieldText' },
+        { title: '数据类型', field: 'dataType' },
+        { title: '业务对象名称', field: 'boName' },
+      ],
+      queryMethodCreator: queryPropertyCreator,
     },
     {
       property: 'methodName',
       label: t(I18N_IDS.LABEL_METHOD_NAME),
+      type: 'associate',
+      refProperty: 'methodName',
+      valueProp: 'methodName',
+      labelProp: 'methodName',
+      columns: [
+        { title: '调用方法名', field: 'methodName' },
+        { title: '调用方法描述', field: 'methodDesc' },
+        { title: '显示文本', field: 'fieldText' },
+        { title: '业务对象名称', field: 'boName' },
+      ],
+      queryMethodCreator,
     },
     {
       property: 'queryType',

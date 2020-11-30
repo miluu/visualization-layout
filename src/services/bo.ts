@@ -1,8 +1,6 @@
 import { httpGet } from '.';
-import * as _ from 'lodash';
 import { IQueryOptions, IQueryResult } from 'src/ui/associate';
 import { paramsSerializer } from 'src/utils';
-import { IPropertiesMap } from 'src/models/layoutsModel';
 
 export async function queryBoName(options: IQueryOptions) {
   const baseViewId = window['__urlParams']?.baseViewId;
@@ -61,25 +59,133 @@ export async function queryBoName(options: IQueryOptions) {
   return result;
 }
 
-export function queryPropertyMehodCreator({ values, propertiesMap }: {values: any, propertiesMap: IPropertiesMap}) {
-  const boName = values?.layoutBoName;
-  const properties = propertiesMap?.[boName] ?? [];
+export function queryPropertyCreator({ values }: {values: any}) {
   return async function queryProperty(options: IQueryOptions) {
+    let result: IQueryResult;
+    const baseViewId = window['__urlParams']?.baseViewId;
     const {
       currentPage,
       pageSize,
       keywords,
+      isExactQuery,
     } = options;
-    const _keywords = (keywords ?? '').toLowerCase();
-    const filterProperties = _.filter(properties, p => {
-      return p.propertyName?.toLowerCase().indexOf(_keywords) >= 0;
+    const searchColumns: any[] = [{
+      propertyName: 'baseViewId',
+      columnName: 'BASE_VIEW_ID',
+      dataType: 'S',
+      value: baseViewId,
+      operation:'EQ',
+    }, {
+      propertyName: 'boName',
+      columnName: 'BO_NAME',
+      dataType: 'S',
+      value: values.layoutBoName || '',
+      operation:'EQ',
+    }];
+    if (isExactQuery && keywords) {
+      searchColumns.push({
+        propertyName:'propertyName',
+        columnName:'PROPERTY_NAME',
+        dataType:'S',
+        value: keywords,
+        operation: 'EQ',
+      });
+    } else if (keywords) {
+      searchColumns.push({
+        propertyName:'propertyName',
+        columnName:'PROPERTY_NAME',
+        dataType:'S',
+        junction:'or',
+        value: keywords,
+        operation: 'LIKEIC',
+      });
+    }
+    let res: any;
+    res = await httpGet('/ipf/commonSearchHelp/query', {
+      paramsSerializer,
+      params: {
+        type: 'S',
+        sourceName: 'VwIpfCcmBoProperty',
+        searchName: 'IpfCcmBoProperty',
+        baseViewId,
+        currentPage,
+        boName: keywords,
+        pageSize,
+        queryResultType: 'page',
+        sum: 'false',
+        searchColumns,
+      },
     });
-    const total = filterProperties.length;
-    const source = filterProperties.slice(pageSize * (currentPage - 1), pageSize * currentPage);
-    return {
-      total,
-      source,
+    result = {
+      source: res.vwIpfCcmBoPropertys || [],
+      total: res.total,
     };
+    return result;
+  };
+}
+
+export function queryMethodCreator({ values }: {values: any}) {
+  return async function queryProperty(options: IQueryOptions) {
+    let result: IQueryResult;
+    const baseViewId = window['__urlParams']?.baseViewId;
+    const {
+      currentPage,
+      pageSize,
+      keywords,
+      isExactQuery,
+    } = options;
+    const searchColumns: any[] = [{
+      propertyName: 'baseViewId',
+      columnName: 'BASE_VIEW_ID',
+      dataType: 'S',
+      value: baseViewId,
+      operation:'EQ',
+    }, {
+      propertyName: 'boName',
+      columnName: 'BO_NAME',
+      dataType: 'S',
+      value: values.layoutBoName || '',
+      operation:'EQ',
+    }];
+    if (isExactQuery && keywords) {
+      searchColumns.push({
+        propertyName:'methodName',
+        columnName:'METHOD_NAME',
+        dataType:'S',
+        value: keywords,
+        operation: 'EQ',
+      });
+    } else if (keywords) {
+      searchColumns.push({
+        propertyName:'methodName',
+        columnName:'METHOD_NAME',
+        dataType:'S',
+        junction:'or',
+        value: keywords,
+        operation: 'LIKEIC',
+      });
+    }
+    let res: any;
+    res = await httpGet('/ipf/commonSearchHelp/query', {
+      paramsSerializer,
+      params: {
+        type: 'S',
+        sourceName: 'VwIpfCcmBoMethod',
+        searchName: 'IpfCcmBoFormColumnMethod',
+        baseViewId,
+        currentPage,
+        boName: keywords,
+        pageSize,
+        queryResultType: 'page',
+        sum: 'false',
+        searchColumns,
+      },
+    });
+    result = {
+      source: res.vwIpfCcmBoMethods || [],
+      total: res.total,
+    };
+    return result;
   };
 }
 
