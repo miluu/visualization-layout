@@ -27,7 +27,7 @@ import { UiEditor } from 'src/ui/editor';
 import { IPagesState } from 'src/models/pagesModel';
 import { createSetPageListAction, createSelectCachePageEffect } from 'src/models/pagesActions';
 import { queryPage as queryPrototypePage } from '../Prototype/service';
-import { IAppState, IDictItem } from 'src/models/appModel';
+import { IAppState, IDictItem, IDictsMap } from 'src/models/appModel';
 import { DATASOURCE_BINDING_CONFIG } from './config';
 import { IIpfCcmPage } from './types';
 import { createLoadDictsEffect, createWatchSelectionRangeEffect, createSetIsLoadingAction } from 'src/models/appActions';
@@ -409,23 +409,44 @@ export default class DatasourceBinding extends React.PureComponent<IDatasourceBi
       return {
         key: bo.boName,
         value: bo.boName,
+        data: bo,
       };
     });
+    const {
+      properties,
+      methods,
+    } = this._getPropertiesAndMethods(data);
+    const extDictsMap: IDictsMap = {};
+    _.forEach(properties, (v, k) => {
+      extDictsMap[`property#${k}`] = _.map(v, item => {
+        return {
+          value: item.propertyName,
+          key: item.propertyName,
+          data: item,
+        };
+      });
+    });
+    _.forEach(methods, (v, k) => {
+      extDictsMap[`method#${k}`] = _.map(v, item => {
+        return {
+          value: item.methodName,
+          key: item.methodName,
+          data: item,
+        };
+      });
+    });
+    extDictsMap['BoName'] = extDict;
     this.props.dispatch(createLoadDictsEffect(
       // tslint:disable-next-line:max-line-length
       'CellType,GroupWidget,layoutElementType,layoutElementType2,PageType,LayoutContainerType,LayoutType,MessageType,NewGridType,IpfCcmBoUIType,EventType,LayoutEventType,LayoutExecType,conditionType,correctType,initValueType,queryType,rangeType,tabBuildType,SearchOperation,buttonStyle,gridEditType,groupTotType,hotkeyType,hotkeyValue,isOrderBy,MessageType,DdLanguage,YesOrNo',
       {
-        BoName: extDict,
+        ...extDictsMap,
       },
     ));
     // _.forEach(data, bo => {
     //   properties[bo.boName] = bo.ipfCcmBoProperties;
     //   methods[bo.boName] = bo.ipfCcmBoMethods;
     // });
-    const {
-      properties,
-      methods,
-    } = this._getPropertiesAndMethods(data);
     this.props.dispatch(createSetStateValueAction({
       originData: data,
       properties,

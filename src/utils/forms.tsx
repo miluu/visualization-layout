@@ -49,7 +49,9 @@ export interface IFormItemOption {
   /** 下拉列表 */
   list?: any[];
   /** 字典表名称 */
-  dictName?: string;
+  dictName?: string | ((values: any) => string);
+  /** 下拉框可搜索 */
+  filterable?: boolean;
   /** 控件值输入转换 */
   inputTransform?: (value: any) => any;
   /** 控件值输出转换 */
@@ -178,13 +180,13 @@ export function renderControl({
     case 'number':
       return renderNumberInput(_item, info, onChangeCallback);
     case 'select':
-      return renderSelect(_item, dicts, info, onChangeCallback);
+      return renderSelect(_item, dicts, info, values, onChangeCallback);
     case 'textarea':
       return renderTextarea(_item, info, onChangeCallback);
     case 'checkbox':
       return renderCheckbox(_item, info, onChangeCallback);
     case 'multiSelect':
-      return renderMultiSelect(_item, dicts, info, onChangeCallback);
+      return renderMultiSelect(_item, dicts, info, values, onChangeCallback);
     case 'associate':
       return renderAssociate(_item, values, info, urlParams, propertiesMap, methodsMap, onChangeCallback);
     default:
@@ -290,17 +292,44 @@ export function renderTextarea(item: IFormItemOption, info: any, onChangeCallbac
   />;
 }
 
-export function renderSelect(item: IFormItemOption, dicts: IDictsMap, info: any, onChangeCallback: OnChangeCallback) {
+export function renderSelect(item: IFormItemOption, dicts: IDictsMap, info: any, values: any, onChangeCallback: OnChangeCallback) {
+  const list = item.list || dicts[getDictName(item.dictName, values)];
+  const filterProps = item.filterable ? {
+    showSearch: true,
+    filterOption: (input: string, option: React.ReactElement) =>
+    (option.props.children as string).toLowerCase().indexOf(input.toLowerCase()) >= 0,
+  } : {};
   return (
     <Select
       disabled={getDisabledValue({ options: item, info })}
       size="small"
       allowClear
-      onChange={(value: any) => onChangeCallback(item, value)}
+      {...filterProps}
+      onChange={(value: any) => {
+        const items = [item];
+        const _values = [value];
+        if (item.otherRefPropertiesPair?.length) {
+          const selectItem = _.find(list, listItem => listItem.key === value) || {};
+          console.log('...... selectItem', selectItem);
+          items.push(
+            ..._.map(item.otherRefPropertiesPair, pair => {
+              return {
+                property: pair[0],
+              };
+            }),
+          );
+          _values.push(
+            ..._.map(item.otherRefPropertiesPair, pair => {
+              return selectItem?.data?.[pair[1]] || null;
+            }),
+          );
+        }
+        onChangeCallback(items, _values);
+      }}
       placeholder={item.placeholder}
       {...DROPDOWN_ALIGN_PROPS}
     >
-        {_.map((item.list || dicts[item.dictName]), listItem => (
+        {_.map((list), listItem => (
           <Option title={listItem.value} key={listItem.key} value={listItem.key}>
             {listItem.value}
           </Option>
@@ -378,7 +407,7 @@ export function renderLink(item: IFormItemOption, values: any) {
   return <a href="javascript:void(0)" className="ant-form-text">{_.get(values, item.property)}</a>;
 }
 
-export function renderMultiSelect(item: IFormItemOption, dicts: IDictsMap, info: any, onChangeCallback: OnChangeCallback) {
+export function renderMultiSelect(item: IFormItemOption, dicts: IDictsMap, info: any, values: any, onChangeCallback: OnChangeCallback) {
   return (
     <Select
       mode="tags"
@@ -388,7 +417,7 @@ export function renderMultiSelect(item: IFormItemOption, dicts: IDictsMap, info:
       {...DROPDOWN_ALIGN_PROPS}
       disabled={getDisabledValue({ options: item, info })}
     >
-      {_.map((item.list || dicts[item.dictName]), listItem => {
+      {_.map((item.list || dicts[getDictName(item.dictName, values)]), listItem => {
         let key: string;
         let value: string;
         if (_.isString(listItem)) {
@@ -413,4 +442,11 @@ function getDisabledValue({ options, values, info }: { options?: any, values?: a
     return options.disabledWhen({ values, info, options });
   }
   return options.disabled;
+}
+
+function getDictName(input: string | ((values: any) => string), values: any): string {
+  if (_.isString(input)) {
+    return input;
+  }
+  return input(values);
 }

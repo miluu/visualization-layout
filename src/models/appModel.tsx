@@ -84,6 +84,7 @@ import I18N_IDS from 'src/i18n/ids';
 export interface IDictItem {
   key: string;
   value: string;
+  [key: string]: any;
 }
 
 export interface IDictsMap {
@@ -213,6 +214,7 @@ export const appModel: IAppModel = {
     },
 
     [ActionTypes.SetDicts](state, { dicts }: ISetDictsAction) {
+      console.log('..... SetDicts', dicts);
       return produce(state, draft => {
         draft.dicts = _.assign({}, state.dicts, dicts);
       });

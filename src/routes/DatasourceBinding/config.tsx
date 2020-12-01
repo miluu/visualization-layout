@@ -11,6 +11,7 @@ import { Button } from 'antd';
 import { openUploaderModal } from 'src/utils/modal';
 import { t } from 'src/i18n';
 import I18N_IDS from 'src/i18n/ids';
+import { queryShlpMethod } from 'src/services/bo';
 
 const INIT_LAYOUT_DATA: IBoPageLayout = {
   baseViewId: null,
@@ -144,6 +145,20 @@ export const DATASOURCE_BINDING_CONFIG = {
       label: t(I18N_IDS.LABEL_LAYOUT_BO_NAME),
       type: 'select',
       dictName: 'BoName',
+      otherRefPropertiesPair: [
+        ['layoutBoViewName', 'baseViewDesc'],
+        ['layoutBoViewId', 'baseViewId'],
+      ],
+    },
+    {
+      property: 'layoutBoViewName',
+      label: '业务对象视图',
+      disabled: true,
+    },
+    {
+      property: 'layoutBoViewId',
+      label: '业务对象视图ID',
+      disabled: true,
     },
     {
       property: 'unitCount',
@@ -316,14 +331,34 @@ export const DATASOURCE_BINDING_CONFIG = {
       label: t(I18N_IDS.LABEL_LAYOUT_BO_NAME),
       type: 'select',
       dictName: 'BoName',
+      otherRefPropertiesPair: [
+        ['layoutBoViewName', 'baseViewDesc'],
+        ['layoutBoViewId', 'baseViewId'],
+      ],
+    },
+    {
+      property: 'layoutBoViewName',
+      label: '业务对象视图',
+      disabled: true,
+    },
+    {
+      property: 'layoutBoViewId',
+      label: '业务对象视图ID',
+      disabled: true,
     },
     {
       property: 'propertyName',
       label: t(I18N_IDS.LABEL_PROPERTY_NAME),
+      type: 'select',
+      dictName: (values: any) => `property#${values?.layoutBoName}`,
+      filterable: true,
     },
     {
       property: 'methodName',
       label: t(I18N_IDS.LABEL_METHOD_NAME),
+      type: 'select',
+      filterable: true,
+      dictName: (values: any) => `method#${values?.layoutBoName}`,
     },
     {
       property: 'queryType',
@@ -389,6 +424,30 @@ export const DATASOURCE_BINDING_CONFIG = {
     {
       property: 'searchHelp',
       label: t(I18N_IDS.LABEL_SEARCH_HELP),
+      type: 'associate',
+      refProperty: 'searchHelp',
+      valueProp: 'shlpName',
+      labelProp: 'shlpName',
+      otherRefPropertiesPair: [
+        ['searchHelpViewName', 'baseViewDesc'],
+        ['searchHelpViewId', 'baseViewId'],
+      ],
+      columns: [
+        { title: '搜索帮助名称', field: 'shlpName' },
+        { title: '视图名称', field: 'baseViewDesc' },
+        { title: '视图ID', field: 'baseViewId' },
+      ],
+      queryMethod: queryShlpMethod,
+    },
+    {
+      property: 'searchHelpViewName',
+      label: '搜索帮助视图',
+      disabled: true,
+    },
+    {
+      property: 'searchHelpViewId',
+      label: '搜索帮助视图ID',
+      disabled: true,
     },
     {
       property: 'refProName',
