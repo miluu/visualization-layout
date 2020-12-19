@@ -146,8 +146,8 @@ export const DATASOURCE_BINDING_CONFIG = {
       type: 'select',
       dictName: 'BoName',
       otherRefPropertiesPair: [
-        ['layoutBoViewName', 'baseViewDesc'],
-        ['layoutBoViewId', 'baseViewId'],
+        ['layoutBoViewName', 'ownSourceViewDesc'],
+        ['layoutBoViewId', 'ownSourceViewId'],
       ],
     },
     {
@@ -332,8 +332,8 @@ export const DATASOURCE_BINDING_CONFIG = {
       type: 'select',
       dictName: 'BoName',
       otherRefPropertiesPair: [
-        ['layoutBoViewName', 'baseViewDesc'],
-        ['layoutBoViewId', 'baseViewId'],
+        ['layoutBoViewName', 'ownSourceViewDesc'],
+        ['layoutBoViewId', 'ownSourceViewId'],
       ],
     },
     {
@@ -429,13 +429,13 @@ export const DATASOURCE_BINDING_CONFIG = {
       valueProp: 'shlpName',
       labelProp: 'shlpName',
       otherRefPropertiesPair: [
-        ['searchHelpViewName', 'baseViewDesc'],
-        ['searchHelpViewId', 'baseViewId'],
+        ['searchHelpViewName', 'ownSourceViewDesc'],
+        ['searchHelpViewId', 'ownSourceViewId'],
       ],
       columns: [
         { title: '搜索帮助名称', field: 'shlpName' },
-        { title: '视图名称', field: 'baseViewDesc' },
-        { title: '视图ID', field: 'baseViewId' },
+        { title: '视图名称', field: 'ownSourceViewDesc' },
+        // { title: '视图ID', field: 'ownSourceViewId' },
       ],
       queryMethod: queryShlpMethod,
     },
