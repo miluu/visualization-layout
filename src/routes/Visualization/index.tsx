@@ -67,6 +67,7 @@ import { UiSaveAsPrototypeForm } from 'src/ui/saveAsPrototypeForm';
 import { cellNameManager } from 'src/utils/cellName';
 import { UiElementCodeFormModal } from 'src/ui/ElementCodeForm';
 import { UiLanguageMsgFormModal } from 'src/ui/LanguageMsgForm';
+import { createLoadDataSourceEffect } from 'src/models/relationsAction';
 
 const { Panel } = Collapse;
 const { TabPane } = Tabs;
@@ -336,6 +337,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
     this.props.dispatch(createLoadDictsEffect('CellType,GroupWidget,layoutElementType,layoutElementType2,PageType,LayoutContainerType,LayoutType,MessageType,NewGridType,IpfCcmBoUIType,EventType,LayoutEventType,LayoutExecType,conditionType,correctType,initValueType,queryType,rangeType,tabBuildType,SearchOperation,buttonStyle,gridEditType,groupTotType,hotkeyType,hotkeyValue,isOrderBy,MessageType,DdLanguage,AutoTestValueType,YesOrNo,ModelTableLayoutType,DataType'));
     this.props.dispatch(createLoadViewListEffect());
     this.props.dispatch(createWatchSelectionRangeEffect());
+    this.props.dispatch(createLoadDataSourceEffect());
     if (!this.props.urlParams.isFromMenuOfPage) {
       this.props.dispatch(
         createLoadPageListEffect(queryPageList, [{
