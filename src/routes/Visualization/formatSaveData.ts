@@ -163,7 +163,7 @@ const emptyElement: any = {
     atValueType: null,
     atResultValue: null,
     searchHelp: null,
-    searchHelpViewName: null,
+    searchHelpViewDesc: null,
     searchHelpViewId: null,
     refProName: null,
     dictTableName: null,
@@ -782,7 +782,7 @@ function formatPostElementData(initElementData: any, modifyedElementData: any) {
       NewElement[elementKey1].atValueType = element.atValueType;
       NewElement[elementKey1].atResultValue = element.atResultValue;
       NewElement[elementKey1].searchHelp = element.searchHelp;
-      NewElement[elementKey1].searchHelpViewName = element.searchHelpViewName;
+      NewElement[elementKey1].searchHelpViewDesc = element.searchHelpViewDesc;
       NewElement[elementKey1].searchHelpViewId = element.searchHelpViewId;
       NewElement[elementKey1].refProName = element.refProName;
       NewElement[elementKey1].dictTableName = element.dictTableName;
@@ -913,7 +913,7 @@ function formatPostElementData(initElementData: any, modifyedElementData: any) {
     initElement[elementKey].atValueType = element.atValueType;
     initElement[elementKey].atResultValue = element.atResultValue;
     initElement[elementKey].searchHelp = element.searchHelp;
-    initElement[elementKey].searchHelpViewName = element.searchHelpViewName;
+    initElement[elementKey].searchHelpViewDesc = element.searchHelpViewDesc;
     initElement[elementKey].searchHelpViewId = element.searchHelpViewId;
     initElement[elementKey].refProName = element.refProName;
     initElement[elementKey].dictTableName = element.dictTableName;

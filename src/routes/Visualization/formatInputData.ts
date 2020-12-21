@@ -151,7 +151,7 @@ function formatBoPgLoElement(boPgLoElementIn: any) {
       atValueType: _ipfCcmBoPgLoElement.atValueType || (elementFormData ? elementFormData.atValueType : null),
       atResultValue: _ipfCcmBoPgLoElement.atResultValue || (elementFormData ? elementFormData.atResultValue : null),
       searchHelp: _ipfCcmBoPgLoElement.searchHelp || (elementFormData ? elementFormData.searchHelp : null),
-      searchHelpViewName: _ipfCcmBoPgLoElement.searchHelpViewName || (elementFormData ? elementFormData.searchHelpViewName : null),
+      searchHelpViewDesc: _ipfCcmBoPgLoElement.searchHelpViewDesc || (elementFormData ? elementFormData.searchHelpViewDesc : null),
       searchHelpViewId: _ipfCcmBoPgLoElement.searchHelpViewId || (elementFormData ? elementFormData.searchHelpViewId : null),
       refProName: _ipfCcmBoPgLoElement.refProName || (elementFormData ? elementFormData.refProName : null),
       dictTableName: _ipfCcmBoPgLoElement.dictTableName || (elementFormData ? elementFormData.dictTableName : null),

@@ -274,12 +274,7 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
   }
 
   private _onSelect = (value: string, option: any) => {
-    const { valueProp, labelProp, labelInit } = this.props;
-    const { source } = this.state;
-    const item = _.find(source, r => r[valueProp] === value);
-    if (item && item[labelProp] !== labelInit) {
-      this._triggerChange(value, option);
-    }
+    this._triggerChange(value);
   }
 
   private _handleChange = (value: string, option: any) => {
@@ -292,10 +287,10 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
         currentPage: 1,
       });
     }
-    this._triggerChange(value, option);
+    this._triggerChange(value);
   }
 
-  private _triggerChange = (value: string, option: any) => {
+  private _triggerChange = (value: string) => {
     const { onChange, valueProp } = this.props;
     const { source } = this.state;
     const item = _.find(source, r => r[valueProp] === value);
