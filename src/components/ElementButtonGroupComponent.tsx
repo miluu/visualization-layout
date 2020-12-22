@@ -101,6 +101,8 @@ export class ElementButtonGroupComponent extends BaseElementComponent {
         layoutElementType: 'TOOLBAR',
         isParent: '',
         layoutBoName: element.layoutBoName,
+        layoutBoViewId: element.layoutBoViewId,
+        layoutBoViewDesc: element.layoutBoViewDesc,
       }),
       element,
     ));

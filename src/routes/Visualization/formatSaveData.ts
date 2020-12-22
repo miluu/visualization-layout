@@ -49,7 +49,7 @@ const emptyLayout: any = {
     lastModifyTimeZone: null,
     lastModifyor: null,
     layoutBoName: null,
-    layoutBoViewName: null,
+    layoutBoViewDesc: null,
     layoutBoViewId: null,
     layoutContainerType: null,
     layoutElementType: null,
@@ -129,7 +129,7 @@ const emptyElement: any = {
     lastModifyTimeZone: null,
     lastModifyor: null,
     layoutBoName: null,
-    layoutBoViewName: null,
+    layoutBoViewDesc: null,
     layoutBoViewId: null,
     layoutElementType: null,
     lockTime: null,
@@ -163,7 +163,7 @@ const emptyElement: any = {
     atValueType: null,
     atResultValue: null,
     searchHelp: null,
-    searchHelpViewName: null,
+    searchHelpViewDesc: null,
     searchHelpViewId: null,
     refProName: null,
     dictTableName: null,
@@ -715,7 +715,7 @@ function formatPostElementData(initElementData: any, modifyedElementData: any) {
     const uiType = element.uiType;
     const rowStatus = element.rowStatus;
     let layoutBoName = element.layoutBoName;
-    const layoutBoViewName = element.layoutBoViewName;
+    const layoutBoViewDesc = element.layoutBoViewDesc;
     const layoutBoViewId = element.layoutBoViewId;
     const layoutElementType = element.layoutElementType;
 
@@ -748,7 +748,7 @@ function formatPostElementData(initElementData: any, modifyedElementData: any) {
       NewElement[elementKey1].baseViewId = element.baseViewId;
       NewElement[elementKey1].layoutElementType = element.layoutElementType;
       NewElement[elementKey1].layoutBoName = layoutBoName;
-      NewElement[elementKey1].layoutBoViewName = layoutBoViewName;
+      NewElement[elementKey1].layoutBoViewDesc = layoutBoViewDesc;
       NewElement[elementKey1].layoutBoViewId = layoutBoViewId;
       NewElement[elementKey1].propertyName = element.propertyName;
       NewElement[elementKey1].queryType = element.queryType;
@@ -782,7 +782,7 @@ function formatPostElementData(initElementData: any, modifyedElementData: any) {
       NewElement[elementKey1].atValueType = element.atValueType;
       NewElement[elementKey1].atResultValue = element.atResultValue;
       NewElement[elementKey1].searchHelp = element.searchHelp;
-      NewElement[elementKey1].searchHelpViewName = element.searchHelpViewName;
+      NewElement[elementKey1].searchHelpViewDesc = element.searchHelpViewDesc;
       NewElement[elementKey1].searchHelpViewId = element.searchHelpViewId;
       NewElement[elementKey1].refProName = element.refProName;
       NewElement[elementKey1].dictTableName = element.dictTableName;
@@ -879,7 +879,7 @@ function formatPostElementData(initElementData: any, modifyedElementData: any) {
     initElement.cellName = element.cellName;
     initElement[elementKey].layoutElementType = element.layoutElementType;
     initElement[elementKey].layoutBoName = element.layoutBoName;
-    initElement[elementKey].layoutBoViewName = element.layoutBoViewName;
+    initElement[elementKey].layoutBoViewDesc = element.layoutBoViewDesc;
     initElement[elementKey].layoutBoViewId = element.layoutBoViewId;
     initElement[elementKey].propertyName = element.propertyName;
     initElement[elementKey].queryType = element.queryType;
@@ -913,7 +913,7 @@ function formatPostElementData(initElementData: any, modifyedElementData: any) {
     initElement[elementKey].atValueType = element.atValueType;
     initElement[elementKey].atResultValue = element.atResultValue;
     initElement[elementKey].searchHelp = element.searchHelp;
-    initElement[elementKey].searchHelpViewName = element.searchHelpViewName;
+    initElement[elementKey].searchHelpViewDesc = element.searchHelpViewDesc;
     initElement[elementKey].searchHelpViewId = element.searchHelpViewId;
     initElement[elementKey].refProName = element.refProName;
     initElement[elementKey].dictTableName = element.dictTableName;

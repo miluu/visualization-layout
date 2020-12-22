@@ -171,6 +171,8 @@ export const openGridSettingsModal = async (options: {
       return createElement({
         layoutElementType: 'ELEMENT',
         layoutBoName: layout.layoutBoName,
+        layoutBoViewDesc: layout.layoutBoViewDesc,
+        layoutBoViewId: layout.layoutBoViewId,
         controlWidth: 150,
         isVisible: 'X',
         isShowSort: 'X',
@@ -307,6 +309,8 @@ export const openToolbarSettingsModal = async (options: {
       return createElement({
         layoutElementType: 'BUTTON',
         layoutBoName: layout.layoutBoName,
+        layoutBoViewDesc: layout.layoutBoViewDesc,
+        layoutBoViewId: layout.layoutBoViewId,
         isVisible: 'X',
         methodName: item.methodName,
         methodId: item.methodId,
@@ -325,6 +329,8 @@ export const openToolbarSettingsModal = async (options: {
     transferModal.rightListRef.current.addItems([createElement({
       layoutElementType: 'BUTTON_GROUP',
       layoutBoName: layout.layoutBoName,
+      layoutBoViewId: layout.layoutBoViewId,
+      layoutBoViewDesc: layout.layoutBoViewDesc,
       isVisible: 'X',
       cellName: layout.cellName,
       [config.elementIdKey]: createId(),

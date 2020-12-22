@@ -424,6 +424,8 @@ export class UiFormSettingsModal extends React.PureComponent<IUiFormSettingsModa
             isShowLable: 'X',
             isVisible: 'X',
             layoutBoName: layout.layoutBoName,
+            layoutBoViewDesc: layout.layoutBoViewDesc,
+            layoutBoViewId: layout.layoutBoViewId,
             layoutElementType: layout.layoutElementType,
             propertyName: p.propertyName,
             uiType: p.uiType,
