@@ -146,12 +146,12 @@ export const DATASOURCE_BINDING_CONFIG = {
       type: 'select',
       dictName: 'BoName',
       otherRefPropertiesPair: [
-        ['layoutBoViewName', 'ownSourceViewDesc'],
+        ['layoutBoViewDesc', 'ownSourceViewDesc'],
         ['layoutBoViewId', 'ownSourceViewId'],
       ],
     },
     {
-      property: 'layoutBoViewName',
+      property: 'layoutBoViewDesc',
       label: '业务对象视图',
       disabled: true,
     },
@@ -332,12 +332,12 @@ export const DATASOURCE_BINDING_CONFIG = {
       type: 'select',
       dictName: 'BoName',
       otherRefPropertiesPair: [
-        ['layoutBoViewName', 'ownSourceViewDesc'],
+        ['layoutBoViewDesc', 'ownSourceViewDesc'],
         ['layoutBoViewId', 'ownSourceViewId'],
       ],
     },
     {
-      property: 'layoutBoViewName',
+      property: 'layoutBoViewDesc',
       label: '业务对象视图',
       disabled: true,
     },

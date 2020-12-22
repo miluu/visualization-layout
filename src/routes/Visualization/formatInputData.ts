@@ -90,7 +90,7 @@ function formatBoPageLayout(boPageLayoutIn: any) {
           _fromKey: _fromKey
       }),
       layoutBoName: layout.layoutBoName,
-      layoutBoViewName: layout.layoutBoViewName,
+      layoutBoViewDesc: layout.layoutBoViewDesc,
       layoutBoViewId: layout.layoutBoViewId,
       cellButtons: cellButtons,
       cellGrids: cellGrids,
@@ -120,7 +120,7 @@ function formatBoPgLoElement(boPgLoElementIn: any) {
       baseViewId: _ipfCcmBoPgLoElement.baseViewId,
       layoutElementType: _ipfCcmBoPgLoElement.layoutElementType,
       layoutBoName: _ipfCcmBoPgLoElement.layoutBoName,
-      layoutBoViewName: _ipfCcmBoPgLoElement.layoutBoViewName,
+      layoutBoViewDesc: _ipfCcmBoPgLoElement.layoutBoViewDesc,
       layoutBoViewId: _ipfCcmBoPgLoElement.layoutBoViewId,
       propertyName: _ipfCcmBoPgLoElement.propertyName || (elementFormData ? elementFormData.propertyName : null),
       propertyType: _ipfCcmBoPgLoElement.propertyType || (elementFormData ? elementFormData.propertyType : null),

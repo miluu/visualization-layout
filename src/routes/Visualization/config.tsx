@@ -163,7 +163,7 @@ export const VISUALIZATION_CONFIG = {
       valueProp: 'boName',
       labelProp: 'boName',
       otherRefPropertiesPair: [
-        ['layoutBoViewName', 'ownSourceViewDesc'],
+        ['layoutBoViewDesc', 'ownSourceViewDesc'],
         ['layoutBoViewId', 'ownSourceViewId'],
       ],
       columns: [
@@ -174,7 +174,7 @@ export const VISUALIZATION_CONFIG = {
       queryMethod: queryBoName,
     },
     {
-      property: 'layoutBoViewName',
+      property: 'layoutBoViewDesc',
       label: '业务对象视图',
       disabled: true,
     },
@@ -881,7 +881,7 @@ export const VISUALIZATION_CONFIG = {
       valueProp: 'boName',
       labelProp: 'boName',
       otherRefPropertiesPair: [
-        ['layoutBoViewName', 'ownSourceViewDesc'],
+        ['layoutBoViewDesc', 'ownSourceViewDesc'],
         ['layoutBoViewId', 'ownSourceViewId'],
       ],
       columns: [
@@ -892,7 +892,7 @@ export const VISUALIZATION_CONFIG = {
       queryMethod: queryBoName,
     },
     {
-      property: 'layoutBoViewName',
+      property: 'layoutBoViewDesc',
       label: '业务对象视图',
       disabled: true,
     },

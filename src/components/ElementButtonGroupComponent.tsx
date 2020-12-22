@@ -102,7 +102,7 @@ export class ElementButtonGroupComponent extends BaseElementComponent {
         isParent: '',
         layoutBoName: element.layoutBoName,
         layoutBoViewId: element.layoutBoViewId,
-        layoutBoViewName: element.layoutBoViewName,
+        layoutBoViewDesc: element.layoutBoViewDesc,
       }),
       element,
     ));
