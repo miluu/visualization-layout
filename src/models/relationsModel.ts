@@ -1,7 +1,7 @@
 import { Model } from 'dva';
 import { Action } from 'redux';
 import produce from 'immer';
-import { ActionTypes, NAMESPACE, ISetDataSourceAction, ILoadBoTreeSourceEffect, createSetDataSourceAction } from './relationsAction';
+import { ActionTypes, NAMESPACE, ISetBoTreeSourceAction, ILoadBoTreeSourceEffect, createSetBoTreeSourceAction } from './relationsAction';
 import { ILoadBoTreeSourceOptions, loadBoTreeSource } from 'src/services/relations';
 import { IAppState } from './appModel';
 
@@ -41,7 +41,7 @@ export const relationsModel: IRelationsModel = {
   state: initRelationsState,
 
   reducers: {
-    [ActionTypes.SetBoTreeSource](state, { boTreeSource }: ISetDataSourceAction) {
+    [ActionTypes.SetBoTreeSource](state, { boTreeSource }: ISetBoTreeSourceAction) {
       return produce(state, draft => {
         draft.boTreeSource = boTreeSource;
       });
@@ -55,7 +55,7 @@ export const relationsModel: IRelationsModel = {
         baseViewId: params.baseViewId,
         ipfCcmBoId: params.ipfCcmBoId,
       } as ILoadBoTreeSourceOptions);
-      yield put(createSetDataSourceAction(boTreeSource));
+      yield put(createSetBoTreeSourceAction(boTreeSource));
     },
   },
 

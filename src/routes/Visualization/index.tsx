@@ -67,7 +67,9 @@ import { UiSaveAsPrototypeForm } from 'src/ui/saveAsPrototypeForm';
 import { cellNameManager } from 'src/utils/cellName';
 import { UiElementCodeFormModal } from 'src/ui/ElementCodeForm';
 import { UiLanguageMsgFormModal } from 'src/ui/LanguageMsgForm';
-import { createLoadDataSourceEffect } from 'src/models/relationsAction';
+import { createLoadBoTreeSourceEffect } from 'src/models/relationsAction';
+import { UiBoTree } from 'src/ui/boTree';
+import { UiBoRelationsPanel } from 'src/ui/boRelationsPanel';
 
 const { Panel } = Collapse;
 const { TabPane } = Tabs;
@@ -182,7 +184,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
 
         <UiSidebar>
           <Collapse
-            defaultActiveKey={['1', '2', '3', '4']}
+            defaultActiveKey={['1', '2', '3', '4', '5']}
             bordered={false}
             expandIcon={({ isActive }) => <Icon type="caret-right" rotate={isActive ? 90 : 0} />}
           >
@@ -198,6 +200,13 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
                 )
                 : (
                   <>
+                    <Panel
+                      key="5"
+                      header="数据源"
+                    >
+                      <UiBoTree />
+                    </Panel>
+
                     <Panel
                       key="4"
                       header={t(I18N_IDS.PANEL_TITLE_PAGE_LAYOUTS)}
@@ -272,6 +281,12 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
                 </TabPane>
               </Tabs>
             </Panel>
+            <Panel
+              key="3"
+              header="子对象关系"
+            >
+              <UiBoRelationsPanel />
+            </Panel>
           </Collapse>
         </UiSidebar>
 
@@ -337,7 +352,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
     this.props.dispatch(createLoadDictsEffect('CellType,GroupWidget,layoutElementType,layoutElementType2,PageType,LayoutContainerType,LayoutType,MessageType,NewGridType,IpfCcmBoUIType,EventType,LayoutEventType,LayoutExecType,conditionType,correctType,initValueType,queryType,rangeType,tabBuildType,SearchOperation,buttonStyle,gridEditType,groupTotType,hotkeyType,hotkeyValue,isOrderBy,MessageType,DdLanguage,AutoTestValueType,YesOrNo,ModelTableLayoutType,DataType'));
     this.props.dispatch(createLoadViewListEffect());
     this.props.dispatch(createWatchSelectionRangeEffect());
-    this.props.dispatch(createLoadDataSourceEffect());
+    this.props.dispatch(createLoadBoTreeSourceEffect());
     if (!this.props.urlParams.isFromMenuOfPage) {
       this.props.dispatch(
         createLoadPageListEffect(queryPageList, [{

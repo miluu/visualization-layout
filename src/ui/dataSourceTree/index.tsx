@@ -12,7 +12,7 @@ import {
 } from 'react-color';
 
 import './style.less';
-import { IDatasource, ID_KEY, PID_KEY, TITLE_KEY, BG_KEY, IDatasourceState, DEFAULT_COLORS, ORDER_KEY } from 'src/models/datasourceModel';
+import { IDatasource, ID_KEY, PID_KEY, TITLE_KEY, BG_KEY, IDatasourceState, ORDER_KEY } from 'src/models/datasourceModel';
 import { connect } from 'dva';
 import { Dispatch, AnyAction } from 'redux';
 import { createUpdateItemAction, createRemoveItemAction, createAddSubItemEffect, createOnDropEffect } from 'src/models/datasourceActions';
@@ -20,6 +20,7 @@ import { delay } from 'src/utils';
 import { AntTreeNodeDropEvent } from 'antd/lib/tree/Tree';
 import { t } from 'src/i18n';
 import I18N_IDS from 'src/i18n/ids';
+import { DEFAULT_COLORS } from 'src/config';
 
 const { TreeNode } = Tree;
 

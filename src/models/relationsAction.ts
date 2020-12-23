@@ -27,11 +27,11 @@ export function addNamespace(type: string, b: boolean) {
 
 // Actions
 
-export interface ISetDataSourceAction extends Action {
+export interface ISetBoTreeSourceAction extends Action {
   boTreeSource: IBoTreeSourceItem[];
 }
 
-export function createSetDataSourceAction(boTreeSource: IBoTreeSourceItem[], withNamespace = false): ISetDataSourceAction {
+export function createSetBoTreeSourceAction(boTreeSource: IBoTreeSourceItem[], withNamespace = false): ISetBoTreeSourceAction {
   const type = addNamespace(ActionTypes.SetBoTreeSource, withNamespace);
   return {
     type,
@@ -43,7 +43,7 @@ export function createSetDataSourceAction(boTreeSource: IBoTreeSourceItem[], wit
 export interface ILoadBoTreeSourceEffect extends Action {
 }
 
-export function createLoadDataSourceEffect(withNamespace = true): ILoadBoTreeSourceEffect {
+export function createLoadBoTreeSourceEffect(withNamespace = true): ILoadBoTreeSourceEffect {
   const type = addNamespace(ActionTypes.LoadBoTreeSourceEffect, withNamespace);
   return {
     type,

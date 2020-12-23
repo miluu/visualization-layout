@@ -12,6 +12,7 @@ import { Dispatch, AnyAction } from 'redux';
 import { IBoTreeSourceItem, IRelationsState } from 'src/models/relationsModel';
 import { t } from 'src/i18n';
 import I18N_IDS from 'src/i18n/ids';
+import { DEFAULT_COLORS } from 'src/config';
 
 const { TreeNode } = Tree;
 
@@ -126,7 +127,7 @@ export class UiBoTree extends React.PureComponent<IUiBoTreeProps, IUiBoTreeState
               <span
                 className="editor-color-inner"
                 style={{
-                  backgroundColor: 'green',
+                  backgroundColor: this._getItemColor(item),
                 }}
               />
             </span>
@@ -157,6 +158,14 @@ export class UiBoTree extends React.PureComponent<IUiBoTreeProps, IUiBoTreeState
         </span>
       </>
     );
+  }
+
+  private _getItemColor = (item: IBoTreeSourceItem): string => {
+    const colorCount = DEFAULT_COLORS.length;
+    const { source } = this.props;
+    const index = _.findIndex(source, _item => _item === item);
+    const i = index % colorCount;
+    return DEFAULT_COLORS[i];
   }
 
   private _addSubBo = async (item: IBoTreeSourceItem) => {

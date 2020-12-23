@@ -21,6 +21,7 @@ import { IPagesState } from './pagesModel';
 import { message } from 'antd';
 import { t } from 'src/i18n';
 import I18N_IDS from 'src/i18n/ids';
+import { DEFAULT_COLORS } from 'src/config';
 
 export const ID_KEY = 'dataSourceId';
 export const PID_KEY = 'dataSourcePid';
@@ -28,9 +29,6 @@ export const TITLE_KEY = 'dataSourceName';
 export const BG_KEY = 'backgroundColor';
 export const ORDER_KEY = 'seqNo';
 export const PAGE_ID_KEY = 'ipfCcmOriginPageId';
-
-export const DEFAULT_COLORS = ['#FF6900', '#FCB900', '#7BDCB5', '#00D084', '#8ED1FC', '#0693E3', '#ABB8C3', '#EB144C', '#F78DA7', '#9900EF', '#73D8FF', '#AEA1FF', '#FDA1FF', '#333333', '#FDF899', 'TRANSPARENT'];
-
 export interface IDatasource {
   [BG_KEY]: string;
   [TITLE_KEY]: string;
