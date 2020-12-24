@@ -162,6 +162,8 @@ export const VISUALIZATION_CONFIG = {
       refProperty: 'layoutBoName',
       valueProp: 'boName',
       labelProp: 'boName',
+      uniqueKeys: ['boName', 'ownSourceViewId'],
+      uniqueProps: ['layoutBoName', 'layoutBoViewId'],
       otherRefPropertiesPair: [
         ['layoutBoViewDesc', 'ownSourceViewDesc'],
         ['layoutBoViewId', 'ownSourceViewId'],
@@ -880,6 +882,8 @@ export const VISUALIZATION_CONFIG = {
       refProperty: 'layoutBoName',
       valueProp: 'boName',
       labelProp: 'boName',
+      uniqueKeys: ['boName', 'ownSourceViewId'],
+      uniqueProps: ['layoutBoName', 'layoutBoViewId'],
       otherRefPropertiesPair: [
         ['layoutBoViewDesc', 'ownSourceViewDesc'],
         ['layoutBoViewId', 'ownSourceViewId'],

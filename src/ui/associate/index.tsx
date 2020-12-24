@@ -36,7 +36,9 @@ export interface IUiAssociateProps {
   value?: any;
   valueProp: string;
   labelProp: string;
+  uniqueKeys?: string[];
   labelInit?: string;
+  valueInit?: string;
   disabled?: boolean;
   onChange?: (value: any, option: any) => any;
   dicts?: IDictsMap;
@@ -53,6 +55,8 @@ export interface IUiAssociateState {
   isLoading: boolean;
   open: boolean;
 }
+
+const VALUE_KEY = '__value';
 
 @connect(
   ({ APP }: {
@@ -93,7 +97,6 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
   render() {
     const {
       value,
-      valueProp,
       labelProp,
       labelInit,
       columns,
@@ -101,11 +104,11 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
     } = this.props;
     const { total, pageSize, currentPage, isLoading, source, open } = this.state;
     let renderSource = source;
-    const valueItem = _.find(renderSource, item => item[valueProp] === value);
+    const valueItem = _.find(renderSource, item => item[VALUE_KEY] === value);
     if (!valueItem && labelInit) {
       renderSource = [
         {
-          [valueProp]: value,
+          [VALUE_KEY]: value,
           [labelProp]: labelInit,
           __hidden: true,
         },
@@ -130,8 +133,8 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
       ));
       return (
         <Option
-          value={d[valueProp]}
-          key={d[valueProp]}
+          value={d[VALUE_KEY]}
+          key={d[VALUE_KEY]}
           label={d[labelProp]}
           className="editor-associate-tr"
           disabled={d.__hidden}
@@ -207,6 +210,16 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
     );
   }
 
+  private _getOptionKey = (record: any) => {
+    const { uniqueKeys, valueProp } = this.props;
+    return uniqueKeys
+      ? _.chain(uniqueKeys)
+        .map(key => record[key])
+        .join('|')
+        .value()
+      : record[valueProp];
+  }
+
   private _getPlaceholder = () => {
     const {
       // value,
@@ -252,7 +265,15 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
     try {
       const result = await this.props.queryMethod(options);
       const source = result.source || [];
-      const uniqSource = _.uniqBy(source, this.props.valueProp);
+      const uniqSource = _.chain(source)
+        .map(record => {
+          return {
+            ...record,
+            __value: this._getOptionKey(record),
+          };
+        })
+        .uniqBy(record => this._getOptionKey(record))
+        .value();
       console.log('handleSearch', result);
       this.setState({
         source: uniqSource,
@@ -293,21 +314,21 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
   private _triggerChange = (value: string) => {
     const { onChange, valueProp } = this.props;
     const { source } = this.state;
-    const item = _.find(source, r => r[valueProp] === value);
+    const item = _.find(source, r => r[VALUE_KEY] === value);
     if (onChange) {
-      onChange(value, item);
+      onChange(_.get(item, valueProp), item);
     }
   }
 
   private _onBlur = (value: any) => {
     console.log('.... _onBlur', value);
-    const { valueProp } = this.props;
+    // const { valueProp } = this.props;
     const {
       isLoading,
       source,
     } = this.state;
-    if (!isLoading && source.length === 1 && source[0][valueProp] !== value) {
-      this._handleChange(source[0][valueProp], source[0]);
+    if (!isLoading && source.length === 1 && source[0][VALUE_KEY] !== value) {
+      this._handleChange(source[0][VALUE_KEY], source[0]);
     }
   }
 
@@ -319,7 +340,7 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
       this.setState({
         currentPage: 1,
       });
-      this._handleSearch(this.props.value, true);
+      this._handleSearch(this.props.labelInit || this.props.valueInit, true);
     }
   }
 
