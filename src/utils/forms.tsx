@@ -75,6 +75,8 @@ export interface IFormItemOption {
   otherRefPropertiesPair?: string[][];
   valueProp?: string;
   labelProp?: string;
+  uniqueKeys?: string[];
+  uniqueProps?: string[];
   columns?: IAssociateColumn[];
   queryMethod?: (options: IQueryOptions) => Promise<IQueryResult>;
   queryMethodCreator?: (options: any) => (options: IQueryOptions) => Promise<IQueryResult>;
@@ -348,15 +350,21 @@ export function renderAssociate(item: IFormItemOption, values: any, urlParams: a
     columns,
     queryMethod,
     queryMethodCreator,
+    uniqueKeys,
+    uniqueProps,
     otherRefPropertiesPair = [],
   } = item;
+  const inputValue = uniqueProps
+    ? _.chain(uniqueProps).map(prop => _.get(values, prop)).compact().join('|').value()
+    : _.get(values, property);
   return (
     <>
       <UiAssociate
         disabled={getDisabledValue({ options: item, info })}
-        value={_.get(values, property)}
+        value={inputValue}
         valueProp={valueProp}
         labelProp={labelProp}
+        uniqueKeys={uniqueKeys}
         columns={columns}
         queryMethod={queryMethod || queryMethodCreator({
           urlParams,
@@ -365,6 +373,7 @@ export function renderAssociate(item: IFormItemOption, values: any, urlParams: a
           methodsMap,
         })}
         labelInit={_.get(values, refProperty)}
+        valueInit={_.get(values, valueProp)}
         onChange={(v, o) => {
           console.log('......', v, o);
           onChangeCallback([item, {
