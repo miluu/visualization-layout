@@ -177,3 +177,63 @@ button, html [type="button"], [type="reset"], [type="submit"] {
     list-style: disc;
   }
 }
+
+.editor-common-table {
+  .ant-table-small > .ant-table-content > .ant-table-scroll > .ant-table-header > table > .ant-table-thead > tr > th,
+  .ant-table-small > .ant-table-content > .ant-table-fixed-left > .ant-table-header > table > .ant-table-thead > tr > th {
+    font-size: 12px;
+    padding: 4px 2px;
+    font-weight: bold;
+    background: #fafafa;
+  }
+  .ant-table-small > .ant-table-content > .ant-table-scroll > .ant-table-body > table > .ant-table-tbody > tr > td,
+  .ant-table-small > .ant-table-content > .ant-table-fixed-left > .ant-table-body-outer > .ant-table-body-inner > table > .ant-table-tbody > tr > td {
+    font-size: 12px;
+    padding: 4px 2px;
+  }
+}
+
+.editor-drawer-common {
+  .ant-drawer-header {
+    position: absolute;
+    width: 100%;
+    z-index: 1;
+  }
+  .editor-drawer-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-top: 1px solid #e9e9e9;
+    padding: 8px 12px;
+    text-align: right;
+    background: #fff;
+  }
+  .edito-drawer-body-content {
+    padding-top: 55px;
+    padding-bottom: 55px;
+  }
+  .editor-drawer-form {
+    .ant-form-item {
+      line-height: 1.2;
+      margin-bottom: 0;
+      .ant-form-item-label {
+        padding-right: 8px;
+        white-space: pre-wrap;
+        padding-top: 5px;
+        line-height: 20px;
+        label {
+          font-size: 12px;
+          color: #000;
+        }
+      }
+      .ant-form-item-control {
+        line-height: 30px;
+      }
+    }
+  }
+}
+
+.editor-ui-buttons {
+  margin-bottom: 4px;
+}

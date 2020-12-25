@@ -19,6 +19,44 @@ export interface IBoTreeSourceItem {
   [key: string]: any;
 }
 
+export interface IBoRelation {
+  propertyName?: string;
+  subBoName?: string;
+  ipfCcmBoRelationId?: string;
+  gridEditType?: string;
+  description?: string;
+  subBoOrderNo?: number;
+  subBoRelType?: string;
+  ipfCcmBoRelationColumns?: IBoRelationColumn[];
+  [key: string]: any;
+}
+
+export interface IBoRelationColumn {
+  baseViewId: string;
+  businessType: string;
+  columnName: string;
+  commitRemark: string;
+  configItemCode: string;
+  currentViewId: string;
+  ipfCcmBoRelationColumnId: string;
+  ipfCcmBoRelationId: string;
+  ipfFciCustomProjectId: string;
+  ipfFciSystemId: string;
+  isActive: string;
+  isLock: string;
+  isQuote: string;
+  linkColumnName: string;
+  linkPropertyName: string;
+  propertyName: string;
+  realBaseViewId: string;
+  rowStatus: string;
+  seqNo: number;
+  subColumnName: string;
+  subPropertyName: string;
+  workFlowTaskId: string;
+  [key: string]: any;
+}
+
 export interface IRelationsState {
   boTreeSource: IBoTreeSourceItem[];
 }

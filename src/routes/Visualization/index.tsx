@@ -52,7 +52,7 @@ import { createSetLayoutAndElementPropertyFormOptionsAction, createSetActiveForm
 import { IFormsState } from 'src/models/formsModel';
 import { UiTransferModal } from 'src/ui/transferModal';
 import { UiFormSettingsModal } from 'src/ui/formSettingsModal';
-import { transferModalRef, formSettingsModalRef, uploaderRef, listSourceEditorModalRef, importLayoutsJsonModal, elementCodeFormModalRef, languageMsgFormModalRef } from 'src/utils/modal';
+import { transferModalRef, formSettingsModalRef, uploaderRef, listSourceEditorModalRef, importLayoutsJsonModal, elementCodeFormModalRef, languageMsgFormModalRef, boRelationEditDrawerRef } from 'src/utils/modal';
 import { UiPropertyMehodListTabs } from 'src/ui/draggableTree/propertyMethodListTabs';
 import { UiUploader } from 'src/ui/uploaderModal';
 import { UiListSourceEditorModal } from 'src/ui/listSourceEditor';
@@ -70,6 +70,7 @@ import { UiLanguageMsgFormModal } from 'src/ui/LanguageMsgForm';
 import { createLoadBoTreeSourceEffect } from 'src/models/relationsAction';
 import { UiBoTree } from 'src/ui/boTree';
 import { UiBoRelationsPanel } from 'src/ui/boRelationsPanel';
+import { UiBoRelationEditDrawer } from 'src/ui/boRelationEditDrawer';
 
 const { Panel } = Collapse;
 const { TabPane } = Tabs;
@@ -308,6 +309,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
           />
           <UiElementCodeFormModal ref={elementCodeFormModalRef} />
           <UiLanguageMsgFormModal ref={languageMsgFormModalRef} />
+          <UiBoRelationEditDrawer ref={boRelationEditDrawerRef} />
         </>,
 
         {/* 原型列表 */}

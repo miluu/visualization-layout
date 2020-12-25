@@ -17,6 +17,7 @@ import { UiJumpByGridSettingsModal } from 'src/ui/jumpByGridSettingsModal';
 import { UiDisabledExpreeModal } from 'src/ui/disabledExpreeModal';
 import { UiImportLayoutsJsonModal } from 'src/ui/importLayoutsJsonModal';
 import { UiElementCodeFormModal } from 'src/ui/ElementCodeForm';
+import { UiBoRelationEditDrawer } from 'src/ui/boRelationEditDrawer';
 import { t } from 'src/i18n';
 import I18N_IDS from 'src/i18n/ids';
 import { UiLanguageMsgFormModal } from 'src/ui/LanguageMsgForm';
@@ -32,6 +33,7 @@ export const disabledExpreeModal = React.createRef<UiDisabledExpreeModal>();
 export const importLayoutsJsonModal = React.createRef<UiImportLayoutsJsonModal>();
 export const elementCodeFormModalRef = React.createRef<UiElementCodeFormModal>();
 export const languageMsgFormModalRef = React.createRef<UiLanguageMsgFormModal>();
+export const boRelationEditDrawerRef = React.createRef<UiBoRelationEditDrawer>();
 
 const propertyListProp = {
   keyProp: 'propertyName',
@@ -745,4 +747,9 @@ export function openLanguageMsgFormModal(options?: {
 export function closeLanguageMsgFormModal() {
   const modal: UiLanguageMsgFormModal = languageMsgFormModalRef.current['wrappedInstance'];
   modal.close();
+}
+
+export function openBoRelationEditDrawer() {
+  const drawer: UiBoRelationEditDrawer = boRelationEditDrawerRef.current;
+  drawer.open({});
 }
