@@ -10,6 +10,7 @@ import { confirm } from 'src/utils';
 import { ROW_STATUS } from 'src/config';
 import { IAssociateColumn, IQueryOptions, IQueryResult, UiAssociate } from '../associate';
 import { queryPropertyNameMethod, querySubPropertyNameMethod } from '../../services/relations';
+import { createAlphabetOrDigitalRule, createEnUcNumUlStringRule, createRequireRule, createRichLengthRule } from 'src/utils/validateRules';
 
 const FormItem = Form.Item;
 
@@ -93,24 +94,29 @@ export class UiBoRelationColumnEditDrawer extends React.PureComponent<IUiBoRelat
   }
 
   private save = () => {
-    const { type } = this.state;
-    const { boRelationColumn } = this.state;
-    const formValues = this.getForm().getFieldsValue();
-    const rowStatusObj: any = {};
-    if (type === 'add') {
-      rowStatusObj.rowStatus = ROW_STATUS.ADDED;
-    } else if (boRelationColumn.rowStatus === ROW_STATUS.NOT_MODIFIED) {
-      rowStatusObj.rowStatus = ROW_STATUS.MODIFIED;
-    }
-    this.props.onSubmit({
-      type: this.state.type,
-      data: {
-        ...boRelationColumn,
-        ...formValues,
-        ...rowStatusObj,
-      },
+    this.getForm().validateFields(null, { force: true }, (err) => {
+      if (err) {
+        return;
+      }
+      const { type } = this.state;
+      const { boRelationColumn } = this.state;
+      const formValues = this.getForm().getFieldsValue();
+      const rowStatusObj: any = {};
+      if (type === 'add') {
+        rowStatusObj.rowStatus = ROW_STATUS.ADDED;
+      } else if (boRelationColumn.rowStatus === ROW_STATUS.NOT_MODIFIED) {
+        rowStatusObj.rowStatus = ROW_STATUS.MODIFIED;
+      }
+      this.props.onSubmit({
+        type: this.state.type,
+        data: {
+          ...boRelationColumn,
+          ...formValues,
+          ...rowStatusObj,
+        },
+      });
+      this.close();
     });
-    this.close();
   }
 
   private onClose = async () => {
@@ -197,29 +203,39 @@ class BoRelationColumnEditForm extends React.PureComponent<IBoRelationColumnEdit
       <Form {...formItemLayout} >
         <FormItem label="属性名称" required>
           {
-            getFieldDecorator('propertyName')(
+            getFieldDecorator('propertyName', {
+              rules: [
+                createRichLengthRule({
+                  label: '属性名称',
+                  min: 0,
+                  max: 200,
+                }),
+                createAlphabetOrDigitalRule({ label: '属性名称' }),
+              ],
+            })(
               <UiAssociate
                 columns={PROPERTY_NAME_ASSOCIATE_COLUMNS}
                 labelProp="propertyName"
                 valueProp="propertyName"
                 labelInit={this.props.form.getFieldValue('propertyName')}
                 queryMethod={this.propertyNameQueryMehtod}
+                onChange={(value, option) => this.onPropertyNameChange(option, 'columnName', 'columnName')}
               />,
             )
           }
         </FormItem>
-        {/* <FormItem label="属性名称" required>
-          {
-            getFieldDecorator('propertyName')(
-              <Input
-                size="small"
-              />,
-            )
-          }
-        </FormItem> */}
         <FormItem label="字段名" required>
           {
-            getFieldDecorator('columnName')(
+            getFieldDecorator('columnName', {
+              rules: [
+                createRichLengthRule({
+                  label: '字段名',
+                  min: 0,
+                  max: 200,
+                }),
+                createEnUcNumUlStringRule({ label: '字段名' }),
+              ],
+            })(
               <Input
                 size="small"
               />,
@@ -228,20 +244,39 @@ class BoRelationColumnEditForm extends React.PureComponent<IBoRelationColumnEdit
         </FormItem>
         <FormItem label="子属性名">
           {
-            getFieldDecorator('subPropertyName')(
+            getFieldDecorator('subPropertyName', {
+              rules: [
+                createRichLengthRule({
+                  label: '子属性名',
+                  min: 0,
+                  max: 200,
+                }),
+                createAlphabetOrDigitalRule({ label: '子属性名' }),
+              ],
+            })(
               <UiAssociate
                 columns={PROPERTY_NAME_ASSOCIATE_COLUMNS}
                 labelProp="propertyName"
                 valueProp="propertyName"
                 labelInit={this.props.form.getFieldValue('subPropertyName')}
                 queryMethod={this.subPropertyNameQueryMehtod}
+                onChange={(value, option) => this.onPropertyNameChange(option, 'subColumnName', 'columnName')}
               />,
             )
           }
         </FormItem>
         <FormItem label="子字段名">
           {
-            getFieldDecorator('subColumnName')(
+            getFieldDecorator('subColumnName', {
+              rules: [
+                createRichLengthRule({
+                  label: '子字段名',
+                  min: 0,
+                  max: 200,
+                }),
+                createEnUcNumUlStringRule({ label: '子字段名' }),
+              ],
+            })(
               <Input
                 size="small"
               />,
@@ -250,7 +285,11 @@ class BoRelationColumnEditForm extends React.PureComponent<IBoRelationColumnEdit
         </FormItem>
         <FormItem label="顺序">
           {
-            getFieldDecorator('seqNo')(
+            getFieldDecorator('seqNo', {
+              rules: [
+                createRequireRule({ label: '顺序' }),
+              ],
+            })(
               <InputNumber
                 size="small"
                 precision={0}
@@ -262,20 +301,39 @@ class BoRelationColumnEditForm extends React.PureComponent<IBoRelationColumnEdit
         </FormItem>
         <FormItem label="关联属性名" required>
           {
-            getFieldDecorator('linkPropertyName')(
+            getFieldDecorator('linkPropertyName', {
+              rules: [
+                createRichLengthRule({
+                  label: '关联属性名',
+                  min: 0,
+                  max: 200,
+                }),
+                createAlphabetOrDigitalRule({ label: '关联属性名' }),
+              ],
+            })(
               <UiAssociate
                 columns={PROPERTY_NAME_ASSOCIATE_COLUMNS}
                 labelProp="propertyName"
                 valueProp="propertyName"
                 labelInit={this.props.form.getFieldValue('linkPropertyName')}
                 queryMethod={this.linkPropertyNameQueryMehtod}
+                onChange={(value, option) => this.onPropertyNameChange(option, 'linkColumnName', 'columnName')}
               />,
             )
           }
         </FormItem>
         <FormItem label="关联字段名">
           {
-            getFieldDecorator('linkColumnName')(
+            getFieldDecorator('linkColumnName', {
+              rules: [
+                createRichLengthRule({
+                  label: '关联字段名',
+                  min: 0,
+                  max: 200,
+                }),
+                createEnUcNumUlStringRule({ label: '关联字段名' }),
+              ],
+            })(
               <Input
                 size="small"
               />,
@@ -284,6 +342,12 @@ class BoRelationColumnEditForm extends React.PureComponent<IBoRelationColumnEdit
         </FormItem>
       </Form>
     );
+  }
+
+  private onPropertyNameChange = (option: any, formProp: string, optionProp: string) => {
+    this.props.form.setFieldsValue({
+      [formProp]: option?.[optionProp] || null,
+    });
   }
 
   private propertyNameQueryMehtod = async (options: IQueryOptions): Promise<IQueryResult> => {

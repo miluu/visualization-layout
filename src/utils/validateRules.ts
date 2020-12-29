@@ -10,6 +10,61 @@ export function createRequireRule({ label }: { label: string }): ValidationRule 
   };
 }
 
+export function createFirstLetterLowerRule({ label }: { label: string }): ValidationRule {
+  return {
+    validator(rule: any, value: string, callback: (message?: string) => void) {
+      if (!value) {
+        callback();
+        return;
+      }
+      const reg = /^[a-z].*$/;
+      const isValid = reg.test(value);
+      if (!isValid) {
+        callback(`【${label}】首字母必须为字母且小写。`);
+        return;
+      }
+      callback();
+    },
+  };
+}
+
+export function createNotSpecialCharacterRule({ label }: { label: string }): ValidationRule {
+  return {
+    validator(rule: any, value: string, callback: (message?: string) => void) {
+      if (!value) {
+        callback();
+        return;
+      }
+      const regStr = "[`~!@$%^&*(()+=|{}':;,\\[\\]\\\\.<>/?~!@！@#￥%……&*（）——+|｛｝【】‘；：“”。，、？]";
+      const reg = new RegExp(regStr);
+      const isValid = !reg.test(value);
+      if (!isValid) {
+        callback(`【${label}】不得包含特殊字符。`);
+        return;
+      }
+      callback();
+    },
+  };
+}
+
+export function createAlphabetOrDigitalRule({ label }: { label: string }): ValidationRule {
+  return {
+    validator(rule: any, value: string, callback: (message?: string) => void) {
+      if (!value) {
+        callback();
+        return;
+      }
+      const reg = /^[0-9a-zA-Z]+$/;
+      const isValid = reg.test(value);
+      if (!isValid) {
+        callback(`【${label}】由必须英文、数字字符串组成。`);
+        return;
+      }
+      callback();
+    },
+  };
+}
+
 export function createRichLengthRule({
   label,
   max,

@@ -24,7 +24,7 @@ import { deleteBoRelations, ILoadBoTreeSourceOptions, loadBoRelations, loadBoTre
 import { IAppState } from './appModel';
 import { getSelectBoTreeItem } from 'src/utils/boRelations';
 import { createSetIsLoadingAction } from './appActions';
-import { Modal } from 'antd';
+import { Modal, notification } from 'antd';
 
 export interface IBoTreeSourceItem {
   appModule: string;
@@ -174,8 +174,9 @@ export const relationsModel: IRelationsModel = {
       yield put(createSetIsLoadingAction(true, true));
       try {
         result = yield call(deleteBoRelations, { ids, baseViewId });
-        Modal.success({
-          content: result?.msg || '删除成功。',
+        notification.success({
+          message: '提示',
+          description: result?.msg || '删除成功。',
         });
       } catch (e) {
         Modal.error({
@@ -199,8 +200,9 @@ export const relationsModel: IRelationsModel = {
       let result;
       try {
         result = yield call(saveOrUpdateBoRelation, { data, baseViewId, type: editType });
-        Modal.success({
-          content: result?.msg || '保存成功。',
+        notification.success({
+          message: '提示',
+          description: result?.msg || '保存成功。',
         });
       } catch (e) {
         Modal.error({

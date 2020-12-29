@@ -1,4 +1,4 @@
-import { Button, Drawer, Icon, Input, InputNumber, Modal, Select, Table, Tabs } from 'antd';
+import { Button, Drawer, Icon, Input, InputNumber, notification, Select, Table, Tabs } from 'antd';
 import * as _ from 'lodash';
 import Form, { FormProps, WrappedFormUtils } from 'antd/lib/form/Form';
 import { Dispatch, AnyAction } from 'redux';
@@ -15,6 +15,7 @@ import { DROPDOWN_ALIGN_PROPS, ROW_STATUS } from 'src/config';
 import { isFormDataModified } from 'src/utils/forms';
 import produce from 'immer';
 import { IAppState, IDictsMap } from 'src/models/appModel';
+import { createFirstLetterLowerRule, createNotSpecialCharacterRule, createRequireRule, createRichLengthRule } from 'src/utils/validateRules';
 
 const FormItem = Form.Item;
 const TabPane = Tabs.TabPane;
@@ -62,7 +63,7 @@ export class UiBoRelationEditDrawer extends React.PureComponent<IUiBoRelationEdi
         dataIndex: 'ipfCcmBoRelationColumnId',
         width: '40px',
         fixed: 'left',
-        render: (text: string, record: IBoRelationColumn, index: number) => {
+        render: (text: string, record: IBoRelationColumn) => {
           return (
             <>
               <a
@@ -183,32 +184,38 @@ export class UiBoRelationEditDrawer extends React.PureComponent<IUiBoRelationEdi
     const isRelationModified = this.isDataModified();
     const isRelationColumnsModified = this.isRelationColumnsModified();
     if (!(isRelationModified || isRelationColumnsModified)) {
-      Modal.info({
-        content: '数据未修改，无需保存。',
+      notification.info({
+        message: '提示',
+        description: '数据未修改，无需保存。',
       });
       return;
     }
-    const data = this.combineBoRelationWithFormValues();
-    if (isRelationColumnsModified) {
-      data.ipfCcmBoRelationColumns = _.chain(this.state.boRelationColumns).filter(item => {
-        return item.rowStatus === ROW_STATUS.ADDED
-          || item.rowStatus === ROW_STATUS.MODIFIED
-          || item.rowStatus === ROW_STATUS.DELETED;
-      })
-        .map(item => {
-          if (item.rowStatus === ROW_STATUS.ADDED) {
-            return {
-              ...item,
-              ipfCcmBoRelationColumnId: null,
-            };
-          }
-          return item;
+    this.getForm().validateFields(null, { force: true }, (err) => {
+      if (err) {
+        return;
+      }
+      const data = this.combineBoRelationWithFormValues();
+      if (isRelationColumnsModified) {
+        data.ipfCcmBoRelationColumns = _.chain(this.state.boRelationColumns).filter(item => {
+          return item.rowStatus === ROW_STATUS.ADDED
+            || item.rowStatus === ROW_STATUS.MODIFIED
+            || item.rowStatus === ROW_STATUS.DELETED;
         })
-        .value();
-    }
-    this.props.dispatch(createSaveOrUpdateRelationEffect(data, this.state.type, () => {
-      this.close();
-    }));
+          .map(item => {
+            if (item.rowStatus === ROW_STATUS.ADDED) {
+              return {
+                ...item,
+                ipfCcmBoRelationColumnId: null,
+              };
+            }
+            return item;
+          })
+          .value();
+      }
+      this.props.dispatch(createSaveOrUpdateRelationEffect(data, this.state.type, () => {
+        this.close();
+      }));
+    });
   }
 
   private combineBoRelationWithFormValues = () =>  {
@@ -410,18 +417,37 @@ class BoRelationEditForm extends React.PureComponent<IBoRelationEditFormProps> {
     };
     return (
       <Form {...formItemLayout} >
-        <FormItem label="属性名称" required>
+        <FormItem label="属性名称" >
           {
-            getFieldDecorator('propertyName')(
+            getFieldDecorator('propertyName', {
+              rules: [
+                createRequireRule({ label: '属性名称' }),
+                createFirstLetterLowerRule({ label: '属性名称' }),
+                createRichLengthRule({
+                  label: '属性名称',
+                  min: 0,
+                  max: 200,
+                }),
+              ],
+            })(
               <Input
                 size="small"
               />,
             )
           }
         </FormItem>
-        <FormItem label="子对象名称" required>
+        <FormItem label="子对象名称" >
           {
-            getFieldDecorator('subBoName')(
+            getFieldDecorator('subBoName', {
+              rules: [
+                createRequireRule({ label: '子对象名称' }),
+                createRichLengthRule({
+                  label: '子对象名称',
+                  min: 0,
+                  max: 200,
+                }),
+              ],
+            })(
               <Input
                 size="small"
               />,
@@ -430,7 +456,15 @@ class BoRelationEditForm extends React.PureComponent<IBoRelationEditFormProps> {
         </FormItem>
         <FormItem label="对象关系类型">
           {
-            getFieldDecorator('subBoRelType')(
+            getFieldDecorator('subBoRelType', {
+              rules: [
+                createRichLengthRule({
+                  label: '对象关系类型',
+                  min: 0,
+                  max: 50,
+                }),
+              ],
+            })(
               <Select
                 size="small"
                 allowClear
@@ -447,7 +481,15 @@ class BoRelationEditForm extends React.PureComponent<IBoRelationEditFormProps> {
         </FormItem>
         <FormItem label="对象类型">
           {
-            getFieldDecorator('objectType')(
+            getFieldDecorator('objectType', {
+              rules: [
+                createRichLengthRule({
+                  label: '对象类型',
+                  min: 0,
+                  max: 50,
+                }),
+              ],
+            })(
               <Select
                 size="small"
                 allowClear
@@ -464,7 +506,16 @@ class BoRelationEditForm extends React.PureComponent<IBoRelationEditFormProps> {
         </FormItem>
         <FormItem label="描述">
           {
-            getFieldDecorator('description')(
+            getFieldDecorator('description', {
+              rules: [
+                createRichLengthRule({
+                  label: '描述',
+                  min: 0,
+                  max: 1000,
+                }),
+                createNotSpecialCharacterRule({ label: '描述' }),
+              ],
+            })(
               <Input
                 size="small"
               />,
@@ -473,7 +524,18 @@ class BoRelationEditForm extends React.PureComponent<IBoRelationEditFormProps> {
         </FormItem>
         <FormItem label="子业务对象保存方式">
           {
-            getFieldDecorator('persistentSaveType')(
+            getFieldDecorator('persistentSaveType', {
+              rules: [
+                createRichLengthRule({
+                  label: '子业务对象保存方式',
+                  min: 0,
+                  max: 50,
+                }),
+                ...this.props.form.getFieldValue('objectType') === '0' ? [
+                  createRequireRule({ label: '子业务对象保存方式' }),
+                ] : [],
+              ],
+            })(
               <Select
                 size="small"
                 allowClear
@@ -488,7 +550,7 @@ class BoRelationEditForm extends React.PureComponent<IBoRelationEditFormProps> {
             )
           }
         </FormItem>
-        <FormItem label="子业务对象的排序号" required>
+        <FormItem label="子业务对象的排序号" >
           {
             getFieldDecorator('subBoOrderNo')(
               <InputNumber
@@ -502,7 +564,15 @@ class BoRelationEditForm extends React.PureComponent<IBoRelationEditFormProps> {
         </FormItem>
         <FormItem label="表格维护方式">
           {
-            getFieldDecorator('gridEditType')(
+            getFieldDecorator('gridEditType', {
+              rules: [
+                createRichLengthRule({
+                  label: '表格维护方式',
+                  min: 0,
+                  max: 50,
+                }),
+              ],
+            })(
               <Select
                 size="small"
                 allowClear
@@ -519,7 +589,15 @@ class BoRelationEditForm extends React.PureComponent<IBoRelationEditFormProps> {
         </FormItem>
         <FormItem label="关联对象名称">
           {
-            getFieldDecorator('linkBoName')(
+            getFieldDecorator('linkBoName', {
+              rules: [
+                createRichLengthRule({
+                  label: '关联对象名称',
+                  min: 0,
+                  max: 200,
+                }),
+              ],
+            })(
               <Input
                 size="small"
               />,
@@ -528,7 +606,15 @@ class BoRelationEditForm extends React.PureComponent<IBoRelationEditFormProps> {
         </FormItem>
         <FormItem label="页签生成方式">
           {
-            getFieldDecorator('tabBuildType')(
+            getFieldDecorator('tabBuildType', {
+              rules: [
+                createRichLengthRule({
+                  label: '页签生成方式',
+                  min: 0,
+                  max: 50,
+                }),
+              ],
+            })(
               <Select
                 size="small"
                 allowClear
