@@ -16,7 +16,7 @@ import I18N_IDS from 'src/i18n/ids';
 import { t } from 'src/i18n';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { IAppState, IDictsMap } from 'src/models/appModel';
-import { createRequireRule, createRichLengthRule, createEnNumUlStringRule } from 'src/utils/validateRules';
+import { createRequireRule, createRichLengthRule, createEnNumUlStringRule, createUniqGlRules } from 'src/utils/validateRules';
 import { checkLanguageMsg } from 'src/services/elementCode';
 import { createSetIsLoadingAction } from 'src/models/appActions';
 import { getDictDisplay } from 'src/utils';
@@ -326,16 +326,16 @@ class LanguageMsgForm extends React.PureComponent<ILanguageMsgFormProps> {
                     createRequireRule({ label: '消息键值' }),
                     createRichLengthRule({ label: '消息键值', max: 50 }),
                     createEnNumUlStringRule({ label: '消息键值' }),
-                    // createUniqGlRules({
-                    //   label: '消息键值',
-                    //   boName: 'IpfLanguageMsg',
-                    //   entityName: 'com.gillion.platform.implement.dml.domain.IpfLanguageMsg',
-                    //   fields: ['messageKey'],
-                    //   form: this.props.form,
-                    //   property: 'messageKey',
-                    //   url: '/ipf/validation/uniqueGl',
-                    //   baseViewId: window['__urlParams']?.baseViewId,
-                    // }),
+                    createUniqGlRules({
+                      label: '消息键值',
+                      boName: 'IpfLanguageMsg',
+                      entityName: 'com.gillion.platform.implement.dml.domain.IpfLanguageMsg',
+                      fields: ['messageKey'],
+                      form: this.props.form,
+                      property: 'messageKey',
+                      url: '/ipf/validation/uniqueGl',
+                      baseViewId: window['__urlParams']?.baseViewId,
+                    }),
                   ],
                 })(
                   <Input disabled={editType === 'edit'} />,
