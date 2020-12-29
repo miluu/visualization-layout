@@ -310,7 +310,9 @@ export function renderSelect(item: IFormItemOption, dicts: IDictsMap, info: any,
       onChange={(value: any) => {
         const items = [item];
         const _values = [value];
+        let force = false;
         if (item.otherRefPropertiesPair?.length) {
+          force = true;
           const selectItem = _.find(list, listItem => listItem.key === value) || {};
           console.log('...... selectItem', selectItem);
           items.push(
@@ -326,7 +328,7 @@ export function renderSelect(item: IFormItemOption, dicts: IDictsMap, info: any,
             }),
           );
         }
-        onChangeCallback(items, _values);
+        onChangeCallback(items, _values, force);
       }}
       placeholder={item.placeholder}
       {...DROPDOWN_ALIGN_PROPS}
