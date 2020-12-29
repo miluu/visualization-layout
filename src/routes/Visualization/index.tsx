@@ -350,8 +350,45 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
   }
 
   private _init = () => {
-    // tslint:disable-next-line:max-line-length
-    this.props.dispatch(createLoadDictsEffect('CellType,GroupWidget,layoutElementType,layoutElementType2,PageType,LayoutContainerType,LayoutType,MessageType,NewGridType,IpfCcmBoUIType,EventType,LayoutEventType,LayoutExecType,conditionType,correctType,initValueType,queryType,rangeType,tabBuildType,SearchOperation,buttonStyle,gridEditType,groupTotType,hotkeyType,hotkeyValue,isOrderBy,MessageType,DdLanguage,AutoTestValueType,YesOrNo,ModelTableLayoutType,DataType'));
+    this.props.dispatch(createLoadDictsEffect([
+      'CellType',
+      'GroupWidget',
+      'layoutElementType',
+      'layoutElementType2',
+      'PageType',
+      'LayoutContainerType',
+      'LayoutType',
+      'MessageType',
+      'NewGridType',
+      'IpfCcmBoUIType',
+      'EventType',
+      'LayoutEventType',
+      'LayoutExecType',
+      'conditionType',
+      'correctType',
+      'initValueType',
+      'queryType',
+      'rangeType',
+      'tabBuildType',
+      'SearchOperation',
+      'buttonStyle',
+      'gridEditType',
+      'groupTotType',
+      'hotkeyType',
+      'hotkeyValue',
+      'isOrderBy',
+      'MessageType',
+      'DdLanguage',
+      'AutoTestValueType',
+      'YesOrNo',
+      'ModelTableLayoutType',
+      'DataTyp',
+      'ObjectType',
+      'PersistentSaveType',
+      'SubBoRelType',
+      'gridEditType',
+      'tabBuildType',
+    ].join(',')));
     this.props.dispatch(createLoadViewListEffect());
     this.props.dispatch(createWatchSelectionRangeEffect());
     this.props.dispatch(createLoadBoTreeSourceEffect());

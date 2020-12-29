@@ -8,9 +8,9 @@ import { IBoRelation, IRelationsState } from 'src/models/relationsModel';
 import { openBoRelationEditDrawer } from 'src/utils/modal';
 import './style.less';
 import { createDeleteRelationsEffect, createLoadRelationsEffect } from 'src/models/relationsAction';
-import { IAppState } from 'src/models/appModel';
+import { IAppState, IDictsMap } from 'src/models/appModel';
 import { ROW_STATUS } from 'src/config';
-import { createId } from 'src/utils';
+import { createId, getDictDisplay } from 'src/utils';
 import { getSelectBoTreeItem } from 'src/utils/boRelations';
 
 interface IUiBoRelationsPanelProps {
@@ -18,6 +18,7 @@ interface IUiBoRelationsPanelProps {
   relations?: IBoRelation[];
   ipfCcmBoId?: string;
   baseViewId?: string;
+  dicts?: IDictsMap;
 }
 
 interface IUiBoRelationsPanelState {
@@ -47,6 +48,7 @@ interface IUiBoRelationsPanelState {
       relations: relations[selectedBoTreeItem || ipfCcmBoId] || [],
       ipfCcmBoId,
       baseViewId,
+      dicts: APP.dicts,
     };
   },
 )
@@ -80,7 +82,7 @@ export class UiBoRelationsPanel extends React.PureComponent<IUiBoRelationsPanelP
       },
       { title: '属性名称', dataIndex: 'propertyName', width: '180px' },
       { title: '子对象名称', dataIndex: 'subBoName', width: '180px' },
-      { title: '对象关系类型', dataIndex: 'subBoRelType' },
+      { title: '对象关系类型', dataIndex: 'subBoRelType', render: (text: string) => this.renderDictValue(text)('SubBoRelType') },
     ],
     selectedRelations: [],
   };
@@ -137,6 +139,11 @@ export class UiBoRelationsPanel extends React.PureComponent<IUiBoRelationsPanelP
         selectedRelations: [],
       });
     }
+  }
+
+  private renderDictValue = (text: string) => (dictName: string) => {
+    const { dicts } = this.props;
+    return getDictDisplay(text, dictName, dicts);
   }
 
   private onSelectionChange = (selectedRowKeys: string[]) => {

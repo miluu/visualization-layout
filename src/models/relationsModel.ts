@@ -49,6 +49,8 @@ export interface IBoRelation {
   subBoOrderNo?: number;
   subBoRelType?: string;
   ipfCcmBoRelationColumns?: IBoRelationColumn[];
+  ipfCcmBoId?: string;
+  linkBoName?: string;
   [key: string]: any;
 }
 
@@ -211,7 +213,7 @@ export const relationsModel: IRelationsModel = {
     },
 
     // Watchers
-    *[ActionTypes.SaveOrUpdateRelationWatcher](__, { take, put, select, call }) {
+    *[ActionTypes.SaveOrUpdateRelationWatcher](__, { take, put, select }) {
       while (true) {
         yield take([
           `${ActionTypes.SaveOrUpdateRelationEffect}/@@end`,

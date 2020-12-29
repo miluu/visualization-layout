@@ -1,6 +1,7 @@
 import { httpGet, httpPost } from '.';
 import { paramsSerializer } from 'src/utils';
 import { IBoRelation, IBoTreeSourceItem } from 'src/models/relationsModel';
+import { IQueryOptions, IQueryResult } from 'src/ui/associate';
 
 export interface ILoadBoTreeSourceOptions{
   baseViewId: string;
@@ -98,4 +99,143 @@ export async function deleteBoRelations({
       paramsSerializer,
     },
   );
+}
+
+export async function queryPropertyNameMethod(options: IQueryOptions, ipfCcmBoId?: string, boName?: string) {
+  const baseViewId = window['__urlParams']?.baseViewId;
+  let result: IQueryResult;
+  const {
+    currentPage,
+    pageSize,
+    keywords,
+    isExactQuery,
+  } = options;
+  const searchColumns: any[] = [{
+    propertyName: 'baseViewId',
+    columnName: 'BASE_VIEW_ID',
+    dataType: 'S',
+    value: baseViewId,
+    operation:'EQ',
+  }];
+  if (boName) {
+    searchColumns.push({
+      propertyName: 'boName',
+      columnName: 'BO_NAME',
+      dataType:'S',
+      value: boName || '',
+      operation: 'EQ',
+    });
+  }
+  if (ipfCcmBoId) {
+    searchColumns.push({
+      propertyName: 'ipfCcmBoId',
+      columnName: 'IPF_CCM_BO_ID',
+      dataType:'S',
+      value: ipfCcmBoId || '',
+      operation: 'EQ',
+    });
+  }
+  if (keywords && isExactQuery) {
+    searchColumns.push({
+      propertyName:'propertyName',
+      columnName:'PROPERTY_NAME',
+      dataType:'S',
+      value: keywords,
+      operation: 'EQ',
+    });
+  } else if (keywords) {
+    searchColumns.push({
+      propertyName:'propertyName',
+      columnName:'PROPERTY_NAME',
+      dataType:'S',
+      junction:'or',
+      value: keywords,
+      operation: 'LIKEIC',
+    });
+  }
+  let res: any;
+  res = await httpGet('/ipf/commonSearchHelp/query', {
+    paramsSerializer,
+    params: {
+      type: 'S',
+      sourceName: 'IpfCcmBoProperty',
+      searchName: 'VwIpfCcmBoProperty',
+      baseViewId,
+      currentPage,
+      propertyName: keywords,
+      pageSize,
+      queryResultType: 'page',
+      sum: 'false',
+      searchColumns,
+    },
+  });
+  result = {
+    source: res.ipfCcmBoPropertys || [],
+    total: res.total,
+  };
+  return result;
+}
+
+export async function querySubPropertyNameMethod(options: IQueryOptions, boName?: string) {
+  const baseViewId = window['__urlParams']?.baseViewId;
+  let result: IQueryResult;
+  const {
+    currentPage,
+    pageSize,
+    keywords,
+    isExactQuery,
+  } = options;
+  const searchColumns: any[] = [{
+    propertyName: 'baseViewId',
+    columnName: 'BASE_VIEW_ID',
+    dataType: 'S',
+    value: baseViewId,
+    operation:'EQ',
+  }];
+  searchColumns.push({
+    propertyName: 'boName',
+    columnName: 'BO_NAME',
+    dataType:'S',
+    value: boName || '',
+    operation: 'EQ',
+  });
+  if (keywords && isExactQuery) {
+    searchColumns.push({
+      propertyName:'propertyName',
+      columnName:'PROPERTY_NAME',
+      dataType:'S',
+      value: keywords,
+      operation: 'EQ',
+    });
+  } else if (keywords) {
+    searchColumns.push({
+      propertyName:'propertyName',
+      columnName:'PROPERTY_NAME',
+      dataType:'S',
+      junction:'or',
+      value: keywords,
+      operation: 'LIKEIC',
+    });
+  }
+  let res: any;
+  res = await httpGet('/ipf/commonSearchHelp/query', {
+    paramsSerializer,
+    params: {
+      type: 'S',
+      sourceName: 'VwIpfCcmBoProperty',
+      searchName: 'IpfCcmBoProperty',
+      baseViewId,
+      currentPage,
+      propertyName: keywords,
+      pageSize,
+      queryResultType: 'page',
+      sum: 'false',
+      searchColumns,
+    },
+  });
+  result = {
+    source: res.vwIpfCcmBoPropertys || [],
+    total: res.total,
+  };
+  return result;
 }

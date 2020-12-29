@@ -30,7 +30,7 @@ const GROUPABLE_UI_TYPES = [
 export async function delay(ms: number = 0) {
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve();
+      resolve(void 0);
     }, ms);
   });
 }

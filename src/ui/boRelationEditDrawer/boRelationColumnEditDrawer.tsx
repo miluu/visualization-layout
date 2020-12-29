@@ -1,13 +1,15 @@
-import { Button, Drawer, Input } from 'antd';
+import { Button, Drawer, Input, InputNumber } from 'antd';
 import * as _ from 'lodash';
 import Form, { FormProps, WrappedFormUtils } from 'antd/lib/form/Form';
 import React from 'react';
-import { IBoRelationColumn } from 'src/models/relationsModel';
+import { IBoRelation, IBoRelationColumn } from 'src/models/relationsModel';
 
 import './style.less';
 import { isFormDataModified } from 'src/utils/forms';
 import { confirm } from 'src/utils';
 import { ROW_STATUS } from 'src/config';
+import { IAssociateColumn, IQueryOptions, IQueryResult, UiAssociate } from '../associate';
+import { queryPropertyNameMethod, querySubPropertyNameMethod } from '../../services/relations';
 
 const FormItem = Form.Item;
 
@@ -17,6 +19,7 @@ interface IUiBoRelationColumnEditDrawerProps {
 
 interface IUiBoRelationColumnEditDrawerState {
   boRelationColumn: IBoRelationColumn;
+  boRelation: IBoRelation;
   type: string;
   visible: boolean;
 }
@@ -24,6 +27,7 @@ interface IUiBoRelationColumnEditDrawerState {
 export class UiBoRelationColumnEditDrawer extends React.PureComponent<IUiBoRelationColumnEditDrawerProps, IUiBoRelationColumnEditDrawerState> {
   state: IUiBoRelationColumnEditDrawerState = {
     boRelationColumn: null,
+    boRelation: null,
     type: 'edit',
     visible: false,
   };
@@ -49,11 +53,12 @@ export class UiBoRelationColumnEditDrawer extends React.PureComponent<IUiBoRelat
     );
   }
 
-  open = ({ boRelationColumn, type }: { boRelationColumn: IBoRelationColumn, type: string }) => {
+  open = ({ boRelationColumn, type, boRelation }: { boRelationColumn: IBoRelationColumn, boRelation: IBoRelation, type: string }) => {
     this.setState({
       visible: true,
       type,
       boRelationColumn,
+      boRelation,
     });
   }
 
@@ -140,7 +145,7 @@ export class UiBoRelationColumnEditDrawer extends React.PureComponent<IUiBoRelat
   private renderForm = () => {
     return (
       <div className="editor-drawer-form">
-        <BoRelationColumnEditForm ref={this.formRef} />
+        <BoRelationColumnEditForm boRelation={this.state.boRelation} ref={this.formRef} />
       </div>
     );
   }
@@ -167,7 +172,16 @@ export class UiBoRelationColumnEditDrawer extends React.PureComponent<IUiBoRelat
 
 interface IBoRelationColumnEditFormProps {
   form?: WrappedFormUtils;
+  boRelation?: IBoRelation;
 }
+
+const PROPERTY_NAME_ASSOCIATE_COLUMNS: IAssociateColumn[] = [
+  { title: '属性名称', field: 'propertyName' },
+  { title: '字段名', field: 'columnName' },
+  { title: '显示文本', field: 'fieldText' },
+  { title: '数据类型', field: 'dataType' },
+  { title: '业务对象名称', field: 'boName' },
+];
 
 @(Form.create({ name: 'BoRelationColumnEditForm' }) as any)
 class BoRelationColumnEditForm extends React.PureComponent<IBoRelationColumnEditFormProps> {
@@ -184,12 +198,25 @@ class BoRelationColumnEditForm extends React.PureComponent<IBoRelationColumnEdit
         <FormItem label="属性名称" required>
           {
             getFieldDecorator('propertyName')(
+              <UiAssociate
+                columns={PROPERTY_NAME_ASSOCIATE_COLUMNS}
+                labelProp="propertyName"
+                valueProp="propertyName"
+                labelInit={this.props.form.getFieldValue('propertyName')}
+                queryMethod={this.propertyNameQueryMehtod}
+              />,
+            )
+          }
+        </FormItem>
+        {/* <FormItem label="属性名称" required>
+          {
+            getFieldDecorator('propertyName')(
               <Input
                 size="small"
               />,
             )
           }
-        </FormItem>
+        </FormItem> */}
         <FormItem label="字段名" required>
           {
             getFieldDecorator('columnName')(
@@ -202,17 +229,12 @@ class BoRelationColumnEditForm extends React.PureComponent<IBoRelationColumnEdit
         <FormItem label="子属性名">
           {
             getFieldDecorator('subPropertyName')(
-              <Input
-                size="small"
-              />,
-            )
-          }
-        </FormItem>
-        <FormItem label="子字段名">
-          {
-            getFieldDecorator('subColumnName')(
-              <Input
-                size="small"
+              <UiAssociate
+                columns={PROPERTY_NAME_ASSOCIATE_COLUMNS}
+                labelProp="propertyName"
+                valueProp="propertyName"
+                labelInit={this.props.form.getFieldValue('subPropertyName')}
+                queryMethod={this.subPropertyNameQueryMehtod}
               />,
             )
           }
@@ -229,8 +251,11 @@ class BoRelationColumnEditForm extends React.PureComponent<IBoRelationColumnEdit
         <FormItem label="顺序">
           {
             getFieldDecorator('seqNo')(
-              <Input
+              <InputNumber
                 size="small"
+                precision={0}
+                min={0}
+                style={{ width: '100%' }}
               />,
             )
           }
@@ -238,8 +263,12 @@ class BoRelationColumnEditForm extends React.PureComponent<IBoRelationColumnEdit
         <FormItem label="关联属性名" required>
           {
             getFieldDecorator('linkPropertyName')(
-              <Input
-                size="small"
+              <UiAssociate
+                columns={PROPERTY_NAME_ASSOCIATE_COLUMNS}
+                labelProp="propertyName"
+                valueProp="propertyName"
+                labelInit={this.props.form.getFieldValue('linkPropertyName')}
+                queryMethod={this.linkPropertyNameQueryMehtod}
               />,
             )
           }
@@ -253,16 +282,22 @@ class BoRelationColumnEditForm extends React.PureComponent<IBoRelationColumnEdit
             )
           }
         </FormItem>
-        <FormItem label="关联对象名称">
-          {
-            getFieldDecorator('linkBoName')(
-              <Input
-                size="small"
-              />,
-            )
-          }
-        </FormItem>
       </Form>
     );
+  }
+
+  private propertyNameQueryMehtod = async (options: IQueryOptions): Promise<IQueryResult> => {
+    const { boRelation } = this.props;
+    return queryPropertyNameMethod(options, boRelation?.ipfCcmBoId);
+  }
+
+  private subPropertyNameQueryMehtod = async (options: IQueryOptions): Promise<IQueryResult> => {
+    const { boRelation } = this.props;
+    return querySubPropertyNameMethod(options, boRelation?.subBoName);
+  }
+
+  private linkPropertyNameQueryMehtod = async (options: IQueryOptions): Promise<IQueryResult> => {
+    const { boRelation } = this.props;
+    return querySubPropertyNameMethod(options, boRelation?.linkBoName);
   }
 }

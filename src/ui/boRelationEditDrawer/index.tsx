@@ -1,4 +1,4 @@
-import { Button, Drawer, Icon, Input, Modal, Table, Tabs } from 'antd';
+import { Button, Drawer, Icon, Input, InputNumber, Modal, Select, Table, Tabs } from 'antd';
 import * as _ from 'lodash';
 import Form, { FormProps, WrappedFormUtils } from 'antd/lib/form/Form';
 import { Dispatch, AnyAction } from 'redux';
@@ -11,17 +11,19 @@ import './style.less';
 import { confirm, createId } from 'src/utils';
 import { connect } from 'dva';
 import { createSaveOrUpdateRelationEffect } from 'src/models/relationsAction';
-import { ROW_STATUS } from 'src/config';
+import { DROPDOWN_ALIGN_PROPS, ROW_STATUS } from 'src/config';
 import { isFormDataModified } from 'src/utils/forms';
 import produce from 'immer';
-import { IAppState } from 'src/models/appModel';
+import { IAppState, IDictsMap } from 'src/models/appModel';
 
 const FormItem = Form.Item;
 const TabPane = Tabs.TabPane;
+const Option = Select.Option;
 
 interface IUiBoRelationEditDrawerProps {
   dispatch?: Dispatch<AnyAction>;
   params?: any;
+  dicts?: IDictsMap;
 }
 
 interface IUiBoRelationEditDrawerState {
@@ -43,6 +45,7 @@ interface IUiBoRelationEditDrawerState {
 }) => {
   return {
     params: APP.params,
+    dicts: APP.dicts,
   };
 }, null, null, { withRef: true })
 export class UiBoRelationEditDrawer extends React.PureComponent<IUiBoRelationEditDrawerProps, IUiBoRelationEditDrawerState> {
@@ -185,19 +188,7 @@ export class UiBoRelationEditDrawer extends React.PureComponent<IUiBoRelationEdi
       });
       return;
     }
-    const formData = this.getForm()?.getFieldsValue?.() || {};
-    const rowStatusObj: any = {};
-    if (this.state.type === 'add') {
-      rowStatusObj.rowStatus = ROW_STATUS.ADDED;
-      rowStatusObj.ipfCcmBoRelationId = null;
-    } else if (isRelationModified) {
-      rowStatusObj.rowStatus = ROW_STATUS.MODIFIED;
-    }
-    const data: IBoRelation = {
-      ...this.state.boRelation,
-      ...formData,
-      ...rowStatusObj,
-    };
+    const data = this.combineBoRelationWithFormValues();
     if (isRelationColumnsModified) {
       data.ipfCcmBoRelationColumns = _.chain(this.state.boRelationColumns).filter(item => {
         return item.rowStatus === ROW_STATUS.ADDED
@@ -218,6 +209,24 @@ export class UiBoRelationEditDrawer extends React.PureComponent<IUiBoRelationEdi
     this.props.dispatch(createSaveOrUpdateRelationEffect(data, this.state.type, () => {
       this.close();
     }));
+  }
+
+  private combineBoRelationWithFormValues = () =>  {
+    const isRelationModified = this.isDataModified();
+    const formData = this.getForm()?.getFieldsValue?.() || {};
+    const rowStatusObj: any = {};
+    if (this.state.type === 'add') {
+      rowStatusObj.rowStatus = ROW_STATUS.ADDED;
+      rowStatusObj.ipfCcmBoRelationId = null;
+    } else if (isRelationModified) {
+      rowStatusObj.rowStatus = ROW_STATUS.MODIFIED;
+    }
+    const data: IBoRelation = {
+      ...this.state.boRelation,
+      ...formData,
+      ...rowStatusObj,
+    };
+    return data;
   }
 
   private onClose = async () => {
@@ -256,8 +265,11 @@ export class UiBoRelationEditDrawer extends React.PureComponent<IUiBoRelationEdi
   }
 
   private editBoRelationColumn = (record: IBoRelationColumn) => {
-    console.log(record);
-    this.boRelationColumnEditDrawerRef.current.open({ boRelationColumn: record, type: 'edit' });
+    this.boRelationColumnEditDrawerRef.current.open({
+      boRelationColumn: record,
+      type: 'edit',
+      boRelation: this.combineBoRelationWithFormValues(),
+    });
   }
 
   private deleteBoRelationColumn = (id: string) => {
@@ -266,11 +278,15 @@ export class UiBoRelationEditDrawer extends React.PureComponent<IUiBoRelationEdi
 
   private addBoRelationColumn = () => {
     console.log('addBoRelationColumn');
-    this.boRelationColumnEditDrawerRef.current.open({ boRelationColumn: {
-      rowStatus: ROW_STATUS.ADDED,
-      ipfCcmBoRelationColumnId: createId(),
-      baseViewId: this.state.boRelation.baseViewId || this.props.params.baseViewId,
-    } as any, type: 'add' });
+    this.boRelationColumnEditDrawerRef.current.open({
+      boRelationColumn: {
+        rowStatus: ROW_STATUS.ADDED,
+        ipfCcmBoRelationColumnId: createId(),
+        baseViewId: this.state.boRelation.baseViewId || this.props.params.baseViewId,
+      } as any,
+      type: 'add',
+      boRelation: this.combineBoRelationWithFormValues(),
+    });
   }
 
   private deleteBoRelationColumns = (ids?: string[]) => {
@@ -297,9 +313,10 @@ export class UiBoRelationEditDrawer extends React.PureComponent<IUiBoRelationEdi
   }
 
   private renderForm = () => {
+    const { dicts } = this.props;
     return (
       <div className="editor-drawer-form">
-        <BoRelationEditForm ref={this.formRef} />
+        <BoRelationEditForm dicts={dicts} ref={this.formRef} />
       </div>
     );
   }
@@ -377,12 +394,14 @@ export class UiBoRelationEditDrawer extends React.PureComponent<IUiBoRelationEdi
 
 interface IBoRelationEditFormProps {
   form?: WrappedFormUtils;
+  dicts?: IDictsMap;
 }
 
 @(Form.create({ name: 'BoRelationEditForm' }) as any)
 class BoRelationEditForm extends React.PureComponent<IBoRelationEditFormProps> {
   render() {
-    const { getFieldDecorator } = this.props.form;
+    const { dicts, form } = this.props;
+    const { getFieldDecorator } = form;
     const formItemLayout: Partial<FormProps> = {
       labelCol: { span: 8 },
       wrapperCol: { span: 16 },
@@ -412,18 +431,34 @@ class BoRelationEditForm extends React.PureComponent<IBoRelationEditFormProps> {
         <FormItem label="对象关系类型">
           {
             getFieldDecorator('subBoRelType')(
-              <Input
+              <Select
                 size="small"
-              />,
+                allowClear
+                {...DROPDOWN_ALIGN_PROPS}
+              >
+                {_.map((dicts['SubBoRelType']), listItem => (
+                  <Option title={listItem.value} key={listItem.key} value={listItem.key}>
+                    {listItem.value}
+                  </Option>
+                ))}
+              </Select>,
             )
           }
         </FormItem>
         <FormItem label="对象类型">
           {
             getFieldDecorator('objectType')(
-              <Input
+              <Select
                 size="small"
-              />,
+                allowClear
+                {...DROPDOWN_ALIGN_PROPS}
+              >
+                {_.map((dicts['ObjectType']), listItem => (
+                  <Option title={listItem.value} key={listItem.key} value={listItem.key}>
+                    {listItem.value}
+                  </Option>
+                ))}
+              </Select>,
             )
           }
         </FormItem>
@@ -439,17 +474,28 @@ class BoRelationEditForm extends React.PureComponent<IBoRelationEditFormProps> {
         <FormItem label="子业务对象保存方式">
           {
             getFieldDecorator('persistentSaveType')(
-              <Input
+              <Select
                 size="small"
-              />,
+                allowClear
+                {...DROPDOWN_ALIGN_PROPS}
+              >
+                {_.map((dicts['PersistentSaveType']), listItem => (
+                  <Option title={listItem.value} key={listItem.key} value={listItem.key}>
+                    {listItem.value}
+                  </Option>
+                ))}
+              </Select>,
             )
           }
         </FormItem>
         <FormItem label="子业务对象的排序号" required>
           {
             getFieldDecorator('subBoOrderNo')(
-              <Input
+              <InputNumber
                 size="small"
+                precision={0}
+                min={0}
+                style={{ width: '100%' }}
               />,
             )
           }
@@ -457,9 +503,17 @@ class BoRelationEditForm extends React.PureComponent<IBoRelationEditFormProps> {
         <FormItem label="表格维护方式">
           {
             getFieldDecorator('gridEditType')(
-              <Input
+              <Select
                 size="small"
-              />,
+                allowClear
+                {...DROPDOWN_ALIGN_PROPS}
+              >
+                {_.map((dicts['gridEditType']), listItem => (
+                  <Option title={listItem.value} key={listItem.key} value={listItem.key}>
+                    {listItem.value}
+                  </Option>
+                ))}
+              </Select>,
             )
           }
         </FormItem>
@@ -475,9 +529,17 @@ class BoRelationEditForm extends React.PureComponent<IBoRelationEditFormProps> {
         <FormItem label="页签生成方式">
           {
             getFieldDecorator('tabBuildType')(
-              <Input
+              <Select
                 size="small"
-              />,
+                allowClear
+                {...DROPDOWN_ALIGN_PROPS}
+              >
+                {_.map((dicts['tabBuildType']), listItem => (
+                  <Option title={listItem.value} key={listItem.key} value={listItem.key}>
+                    {listItem.value}
+                  </Option>
+                ))}
+              </Select>,
             )
           }
         </FormItem>
