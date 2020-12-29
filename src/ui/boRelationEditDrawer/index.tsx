@@ -1,17 +1,27 @@
-import { Button, Drawer, Icon, Input, Table, Tabs } from 'antd';
+import { Button, Drawer, Icon, Input, Modal, Table, Tabs } from 'antd';
+import * as _ from 'lodash';
 import Form, { FormProps, WrappedFormUtils } from 'antd/lib/form/Form';
+import { Dispatch, AnyAction } from 'redux';
 import { ColumnProps } from 'antd/lib/table';
 import React from 'react';
 import { IBoRelation, IBoRelationColumn } from 'src/models/relationsModel';
 import { UiBoRelationColumnEditDrawer } from './boRelationColumnEditDrawer';
 
 import './style.less';
+import { confirm, createId } from 'src/utils';
+import { connect } from 'dva';
+import { createSaveOrUpdateRelationEffect } from 'src/models/relationsAction';
+import { ROW_STATUS } from 'src/config';
+import { isFormDataModified } from 'src/utils/forms';
+import produce from 'immer';
+import { IAppState } from 'src/models/appModel';
 
 const FormItem = Form.Item;
 const TabPane = Tabs.TabPane;
 
 interface IUiBoRelationEditDrawerProps {
-
+  dispatch?: Dispatch<AnyAction>;
+  params?: any;
 }
 
 interface IUiBoRelationEditDrawerState {
@@ -19,15 +29,30 @@ interface IUiBoRelationEditDrawerState {
   visible: boolean;
   selectedRelationColumns: string[];
   editingRelationColumn: string[];
+
+  boRelationColumns: IBoRelationColumn[];
+
   columns: Array<ColumnProps<IBoRelationColumn>>;
+  type: string;
 }
 
+@connect(({
+  APP,
+}: {
+  APP: IAppState,
+}) => {
+  return {
+    params: APP.params,
+  };
+}, null, null, { withRef: true })
 export class UiBoRelationEditDrawer extends React.PureComponent<IUiBoRelationEditDrawerProps, IUiBoRelationEditDrawerState> {
   state: IUiBoRelationEditDrawerState = {
     boRelation: null,
+    boRelationColumns: [],
     visible: false,
     selectedRelationColumns: [],
     editingRelationColumn: null,
+    type: 'edit',
     columns: [
       {
         title: '操作',
@@ -46,7 +71,7 @@ export class UiBoRelationEditDrawer extends React.PureComponent<IUiBoRelationEdi
               {' '}
               <a
                 title="删除"
-                onClick={() => this.deleteBoRelationColumn(record)}
+                onClick={() => this.deleteBoRelationColumn(text)}
               >
                 <Icon type="delete" />
               </a>
@@ -65,73 +90,216 @@ export class UiBoRelationEditDrawer extends React.PureComponent<IUiBoRelationEdi
   };
 
   boRelationColumnEditDrawerRef = React.createRef<UiBoRelationColumnEditDrawer>();
+  formRef = React.createRef<any>();
 
   render() {
     const { visible } = this.state;
     return (
       <Drawer
-        title="编辑子对象关系"
+        title={this.getTitle()}
         className="editor-drawer-common"
         visible={visible}
         onClose={this.onClose}
         width={400}
         destroyOnClose
+        afterVisibleChange={this.afterVisibleChange}
       >
         <div className="edito-drawer-body-content">
           { this.renderForm() }
           { this.renderTable() }
           { this.renderFooter() }
-          <UiBoRelationColumnEditDrawer ref={this.boRelationColumnEditDrawerRef} />
+          <UiBoRelationColumnEditDrawer ref={this.boRelationColumnEditDrawerRef} onSubmit={this.onBoRelationColumnSubmit} />
         </div>
       </Drawer>
     );
   }
 
-  open = (options: any) => {
+  open = (options: any = {}) => {
     this.setState({
       visible: true,
+      type: options.type,
+      boRelation: options.boRelation,
+      boRelationColumns: options.boRelation?.ipfCcmBoRelationColumns,
     });
   }
 
   close = () => {
     this.setState({
       boRelation: null,
+      boRelationColumns: [],
       visible: false,
       selectedRelationColumns: [],
       editingRelationColumn: null,
     });
   }
 
-  private save = () => {
-    console.log('保存。');
+  private onBoRelationColumnSubmit = ({ type, data }: any) => {
+    const { boRelationColumns } = this.state;
+    let newBoRelationColumns: IBoRelationColumn[];
+    if (type === 'add') {
+      newBoRelationColumns = [
+        data,
+        ...boRelationColumns || [],
+      ];
+    } else {
+      newBoRelationColumns = produce(boRelationColumns, draft => {
+        const index = _.findIndex(draft, item => item.ipfCcmBoRelationColumnId === data.ipfCcmBoRelationColumnId);
+        if (index >= 0) {
+          draft[index] = data;
+        }
+      });
+    }
+    this.setState({
+      boRelationColumns: newBoRelationColumns,
+    });
   }
 
-  private onClose = () => {
+  private getTitle = () => {
+    const { type } = this.state;
+    if (type === 'add') {
+      return '新增子对象关系';
+    }
+    return '编辑子对象关系';
+  }
+
+  private afterVisibleChange = (visible: boolean) => {
+    if (visible) {
+      const form: WrappedFormUtils = this.formRef.current?.getForm();
+      if (form) {
+        form.setFieldsValue(
+          _.pick(
+            this.state.boRelation,
+            _.keys(form.getFieldsValue()),
+          ),
+        );
+      }
+    }
+  }
+
+  private save = () => {
+    const isRelationModified = this.isDataModified();
+    const isRelationColumnsModified = this.isRelationColumnsModified();
+    if (!(isRelationModified || isRelationColumnsModified)) {
+      Modal.info({
+        content: '数据未修改，无需保存。',
+      });
+      return;
+    }
+    const formData = this.getForm()?.getFieldsValue?.() || {};
+    const rowStatusObj: any = {};
+    if (this.state.type === 'add') {
+      rowStatusObj.rowStatus = ROW_STATUS.ADDED;
+      rowStatusObj.ipfCcmBoRelationId = null;
+    } else if (isRelationModified) {
+      rowStatusObj.rowStatus = ROW_STATUS.MODIFIED;
+    }
+    const data: IBoRelation = {
+      ...this.state.boRelation,
+      ...formData,
+      ...rowStatusObj,
+    };
+    if (isRelationColumnsModified) {
+      data.ipfCcmBoRelationColumns = _.chain(this.state.boRelationColumns).filter(item => {
+        return item.rowStatus === ROW_STATUS.ADDED
+          || item.rowStatus === ROW_STATUS.MODIFIED
+          || item.rowStatus === ROW_STATUS.DELETED;
+      })
+        .map(item => {
+          if (item.rowStatus === ROW_STATUS.ADDED) {
+            return {
+              ...item,
+              ipfCcmBoRelationColumnId: null,
+            };
+          }
+          return item;
+        })
+        .value();
+    }
+    this.props.dispatch(createSaveOrUpdateRelationEffect(data, this.state.type, () => {
+      this.close();
+    }));
+  }
+
+  private onClose = async () => {
+    const isModified = this.isDataModified() || this.isRelationColumnsModified();
+    if (isModified) {
+      const b = await confirm({ content: '数据已修改，确定关闭？' });
+      if (!b) {
+        return;
+      }
+    }
     this.close();
+  }
+
+  private isDataModified = () => {
+    const form = this.getForm();
+    if (!form) {
+      return false;
+    }
+    const formValues = form.getFieldsValue();
+    const { boRelation } = this.state;
+    return isFormDataModified(boRelation, formValues);
+  }
+
+  private isRelationColumnsModified = () => {
+    const { boRelationColumns } = this.state;
+    return !!_.find(boRelationColumns, item => {
+      return item.rowStatus === ROW_STATUS.MODIFIED
+        || item.rowStatus === ROW_STATUS.DELETED
+        || item.rowStatus === ROW_STATUS.ADDED;
+    });
+  }
+
+  private getForm = () => {
+    const form: WrappedFormUtils = this.formRef.current?.getForm();
+    return form;
   }
 
   private editBoRelationColumn = (record: IBoRelationColumn) => {
     console.log(record);
-    this.boRelationColumnEditDrawerRef.current.open();
+    this.boRelationColumnEditDrawerRef.current.open({ boRelationColumn: record, type: 'edit' });
   }
 
-  private deleteBoRelationColumn = (record: IBoRelationColumn) => {
-    console.log(record);
+  private deleteBoRelationColumn = (id: string) => {
+    this.deleteBoRelationColumns([id]);
   }
 
   private addBoRelationColumn = () => {
     console.log('addBoRelationColumn');
-    this.boRelationColumnEditDrawerRef.current.open();
+    this.boRelationColumnEditDrawerRef.current.open({ boRelationColumn: {
+      rowStatus: ROW_STATUS.ADDED,
+      ipfCcmBoRelationColumnId: createId(),
+      baseViewId: this.state.boRelation.baseViewId || this.props.params.baseViewId,
+    } as any, type: 'add' });
   }
 
-  private deleteBoRelationColumns = () => {
-    console.log('deleteBoRelationColumns', this.state.selectedRelationColumns);
+  private deleteBoRelationColumns = (ids?: string[]) => {
+    const { selectedRelationColumns, boRelationColumns } = this.state;
+    const willDeleteIds = ids ?? selectedRelationColumns;
+    const newBoRelationColumns = produce(boRelationColumns, draft => {
+      _.forEach(willDeleteIds, id => {
+        const item = _.find(draft, _item => _item.ipfCcmBoRelationColumnId === id);
+        if (!item) {
+          return;
+        }
+        if (item.rowStatus === ROW_STATUS.ADDED) {
+          item.rowStatus = ROW_STATUS.ADDED_REMOVE;
+        } else {
+          item.rowStatus = ROW_STATUS.DELETED;
+        }
+      });
+    });
+    const newSelectedRelationColumns = _.differenceWith(selectedRelationColumns, willDeleteIds);
+    this.setState({
+      boRelationColumns: newBoRelationColumns,
+      selectedRelationColumns: newSelectedRelationColumns,
+    });
   }
 
   private renderForm = () => {
     return (
       <div className="editor-drawer-form">
-        <BoRelationEditForm />
+        <BoRelationEditForm ref={this.formRef} />
       </div>
     );
   }
@@ -143,12 +311,13 @@ export class UiBoRelationEditDrawer extends React.PureComponent<IUiBoRelationEdi
   }
 
   private renderTable = () => {
-    const { selectedRelationColumns, columns } = this.state;
+    const { selectedRelationColumns, columns, boRelationColumns } = this.state;
     const rowSelection = {
       selectedRowKeys: selectedRelationColumns,
       onChange: this.onRelationColumnsSelectionChange,
       columnWidth: '40px',
     };
+    const renderBoRelationColumns = _.filter(boRelationColumns, item => !(item.rowStatus === ROW_STATUS.DELETED || item.rowStatus === ROW_STATUS.ADDED_REMOVE));
     return (
       <Tabs defaultActiveKey="1" size="small">
         <TabPane
@@ -165,19 +334,13 @@ export class UiBoRelationEditDrawer extends React.PureComponent<IUiBoRelationEdi
             <Button
               size="small"
               type="danger"
-              onClick={this.deleteBoRelationColumns}
+              onClick={() => this.deleteBoRelationColumns()}
+              disabled={!selectedRelationColumns?.length}
             >批量删除</Button>
           </div>
           <div className="editor-common-table">
             <Table
-              dataSource={[
-                { ipfCcmBoRelationColumnId: '1' },
-                { ipfCcmBoRelationColumnId: '2' },
-                { ipfCcmBoRelationColumnId: '3' },
-                { ipfCcmBoRelationColumnId: '4' },
-                { ipfCcmBoRelationColumnId: '5' },
-                { ipfCcmBoRelationColumnId: '6' },
-              ] as any}
+              dataSource={renderBoRelationColumns || []}
               columns={columns}
               size="small"
               rowKey="ipfCcmBoRelationColumnId"

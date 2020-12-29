@@ -1,35 +1,45 @@
 import { Button, Drawer, Input } from 'antd';
+import * as _ from 'lodash';
 import Form, { FormProps, WrappedFormUtils } from 'antd/lib/form/Form';
 import React from 'react';
 import { IBoRelationColumn } from 'src/models/relationsModel';
 
 import './style.less';
+import { isFormDataModified } from 'src/utils/forms';
+import { confirm } from 'src/utils';
+import { ROW_STATUS } from 'src/config';
 
 const FormItem = Form.Item;
 
 interface IUiBoRelationColumnEditDrawerProps {
-
+  onSubmit?(data: any): void;
 }
 
 interface IUiBoRelationColumnEditDrawerState {
   boRelationColumn: IBoRelationColumn;
+  type: string;
   visible: boolean;
 }
 
 export class UiBoRelationColumnEditDrawer extends React.PureComponent<IUiBoRelationColumnEditDrawerProps, IUiBoRelationColumnEditDrawerState> {
   state: IUiBoRelationColumnEditDrawerState = {
     boRelationColumn: null,
+    type: 'edit',
     visible: false,
   };
+
+  formRef = React.createRef<any>();
+
   render() {
     const { visible } = this.state;
     return (
       <Drawer
-        title="编辑子对象关系字段"
+        title={this.getTitle()}
         className="editor-drawer-common"
         visible={visible}
         onClose={this.onClose}
         width={400}
+        afterVisibleChange={this.afterVisibleChange}
       >
         <div className="edito-drawer-body-content">
           { this.renderForm() }
@@ -39,31 +49,98 @@ export class UiBoRelationColumnEditDrawer extends React.PureComponent<IUiBoRelat
     );
   }
 
-  open = () => {
+  open = ({ boRelationColumn, type }: { boRelationColumn: IBoRelationColumn, type: string }) => {
     this.setState({
       visible: true,
+      type,
+      boRelationColumn,
     });
   }
 
   close = () => {
     this.setState({
-      boRelationColumn: null,
       visible: false,
     });
   }
 
-  private save = () => {
-    console.log('保存。');
+  private getForm() {
+    const form: WrappedFormUtils = this.formRef.current?.getForm();
+    return form;
   }
 
-  private onClose = () => {
+  private isDataModified() {
+    const form = this.getForm();
+    if (!form) {
+      return false;
+    }
+    const formValues = form.getFieldsValue();
+    const { boRelationColumn } = this.state;
+    return isFormDataModified(boRelationColumn, formValues);
+
+  }
+
+  private getTitle = () => {
+    const { type } = this.state;
+    if (type === 'add') {
+      return '新增子对象关系字段';
+    }
+    return '编辑子对象关系字段';
+  }
+
+  private save = () => {
+    const { type } = this.state;
+    const { boRelationColumn } = this.state;
+    const formValues = this.getForm().getFieldsValue();
+    const rowStatusObj: any = {};
+    if (type === 'add') {
+      rowStatusObj.rowStatus = ROW_STATUS.ADDED;
+    } else if (boRelationColumn.rowStatus === ROW_STATUS.NOT_MODIFIED) {
+      rowStatusObj.rowStatus = ROW_STATUS.MODIFIED;
+    }
+    this.props.onSubmit({
+      type: this.state.type,
+      data: {
+        ...boRelationColumn,
+        ...formValues,
+        ...rowStatusObj,
+      },
+    });
     this.close();
+  }
+
+  private onClose = async () => {
+    if (
+      this.isDataModified()
+      && !await confirm({ content: '数据已修改，确定关闭？' })
+    ) {
+      return;
+    }
+    this.close();
+  }
+
+  private afterVisibleChange = (visible: boolean) => {
+    const form: WrappedFormUtils = this.formRef.current?.getForm();
+    if (!visible) {
+      if (form) {
+        this.formRef.current?.getForm()?.resetFields();
+      }
+      this.setState({
+        boRelationColumn: null,
+      });
+    } else if (form) {
+      form.setFieldsValue(
+        _.pick(
+          this.state.boRelationColumn,
+          _.keys(form.getFieldsValue()),
+        ),
+      );
+    }
   }
 
   private renderForm = () => {
     return (
       <div className="editor-drawer-form">
-        <BoRelationColumnEditForm />
+        <BoRelationColumnEditForm ref={this.formRef} />
       </div>
     );
   }

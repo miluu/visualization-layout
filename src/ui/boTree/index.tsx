@@ -2,22 +2,20 @@ import * as React from 'react';
 import * as _ from 'lodash';
 import {
   Tree,
-  Icon,
-  Popconfirm,
 } from 'antd';
 
 import './style.less';
 import { connect } from 'dva';
 import { Dispatch, AnyAction } from 'redux';
 import { IBoTreeSourceItem, IRelationsState } from 'src/models/relationsModel';
-import { t } from 'src/i18n';
-import I18N_IDS from 'src/i18n/ids';
 import { DEFAULT_COLORS } from 'src/config';
+import { createSelectBoTreeItemAction } from 'src/models/relationsAction';
 
 const { TreeNode } = Tree;
 
 export interface IUiBoTreeProps {
   source?: IBoTreeSourceItem[];
+  selectedItem?: string;
   dispatch?: Dispatch<AnyAction>;
 }
 
@@ -32,6 +30,7 @@ export interface IUiBoTreeState {
 }) => {
   return {
     source: RELATIONS.boTreeSource || [],
+    selectedItem: RELATIONS.selectedBoTreeItem,
   };
 })
 /**
@@ -44,15 +43,18 @@ export class UiBoTree extends React.PureComponent<IUiBoTreeProps, IUiBoTreeState
 
   render() {
     const map = this._buildSourceMap();
+    const selectedItems = this.props.selectedItem ? [this.props.selectedItem] : [];
     return (
       <div className="editor-ui-datasource-tree">
         <Tree
           blockNode
-          selectable={false}
+          selectedKeys={selectedItems}
+          selectable={true}
           defaultExpandAll
-          autoExpandParent
+          autoExpandParent={false}
           expandedKeys={this.state.expandedKeys}
           onExpand={this._onExpand}
+          onSelect={this._onSelect}
         >
           {
             this._renderNodes(map)
@@ -70,7 +72,7 @@ export class UiBoTree extends React.PureComponent<IUiBoTreeProps, IUiBoTreeState
       && nextSource && nextSource.length
     ) {
       this.setState({
-        expandedKeys: _.map(nextSource, s => s.id),
+        expandedKeys: _.map(nextSource, s => s.id || ''),
       });
     }
   }
@@ -79,6 +81,10 @@ export class UiBoTree extends React.PureComponent<IUiBoTreeProps, IUiBoTreeState
     this.setState({
       expandedKeys: keys,
     });
+  }
+
+  private _onSelect = (keys: string[]) => {
+    this.props.dispatch(createSelectBoTreeItemAction(keys[0], true));
   }
 
   private _buildSourceMap() {
@@ -93,7 +99,7 @@ export class UiBoTree extends React.PureComponent<IUiBoTreeProps, IUiBoTreeState
     const items = map[pid] || [];
     return _.map(items, item => (
       <TreeNode
-        key={item.id}
+        key={item.id || ''}
         title={this._renderNodeContent(item)}
       >
         {this._renderNodes(map, item.id)}
@@ -105,7 +111,6 @@ export class UiBoTree extends React.PureComponent<IUiBoTreeProps, IUiBoTreeState
     return (
       <div
         className="editor-ui-datasource-node"
-        onDoubleClick={() => this._startEdit(item)}
       >
         {
           this._renderNodeContentInner(item)
@@ -117,7 +122,7 @@ export class UiBoTree extends React.PureComponent<IUiBoTreeProps, IUiBoTreeState
   private _renderNodeContentInner = (item: IBoTreeSourceItem) => {
     return (
       <>
-        <span className="eitor-item-content" onClick={e => e.stopPropagation()}>
+        <span className="eitor-item-content">
           <button
             className="editor-ui-color"
           >
@@ -135,26 +140,6 @@ export class UiBoTree extends React.PureComponent<IUiBoTreeProps, IUiBoTreeState
           <span
             className="editor-item-title"
           >{item.custom}</span>
-          <a
-            title="新增子对象关系"
-            className="editor-tree-action"
-            onClick={() => this._addSubBo(item)}
-          ><Icon type="plus-circle" /></a>
-          {
-            item.pid
-              ? (
-                <Popconfirm
-                  title="确定删除此子对象关系?"
-                  onConfirm={() => this._deleteBo(item)}
-                  okText={t(I18N_IDS.TEXT_OK)}
-                  cancelText={t(I18N_IDS.TEXT_CANCEL)}
-                  placement="right"
-                >
-                  <a title="删除子对象关系" className="editor-tree-action" ><Icon type="delete" /></a>
-                </Popconfirm>
-              )
-              : null
-          }
         </span>
       </>
     );
@@ -168,15 +153,4 @@ export class UiBoTree extends React.PureComponent<IUiBoTreeProps, IUiBoTreeState
     return DEFAULT_COLORS[i];
   }
 
-  private _addSubBo = async (item: IBoTreeSourceItem) => {
-    //
-  }
-
-  private _deleteBo = (item: IBoTreeSourceItem) => {
-    //
-  }
-
-  private _startEdit = async (item: IBoTreeSourceItem) => {
-    //
-  }
 }

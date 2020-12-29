@@ -749,7 +749,7 @@ export function closeLanguageMsgFormModal() {
   modal.close();
 }
 
-export function openBoRelationEditDrawer() {
-  const drawer: UiBoRelationEditDrawer = boRelationEditDrawerRef.current;
-  drawer.open({});
+export function openBoRelationEditDrawer(options: any) {
+  const drawer: UiBoRelationEditDrawer = boRelationEditDrawerRef.current['wrappedInstance'];
+  drawer.open(options);
 }

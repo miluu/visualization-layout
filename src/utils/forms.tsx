@@ -459,3 +459,15 @@ function getDictName(input: string | ((values: any) => string), values: any): st
   }
   return input(values);
 }
+
+export function isFormDataModified(obj: any, formValues: any) {
+  let isModified = false;
+  _.forEach(formValues, (v, k) => {
+    if (obj[k] !== v) {
+      isModified = true;
+      return false;
+    }
+    return true;
+  });
+  return isModified;
+}
