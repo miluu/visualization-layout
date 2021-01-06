@@ -155,7 +155,13 @@ export class UiEventForm extends React.Component<IUiEventFormProps> {
                                 item: opt,
                                 values: eventMap,
                                 dicts,
-                                onChangeCallback: (__, value) => this._onChange({ [item.property]: value }, eventType.key),
+                                onChangeCallback: (__, value) => {
+                                  let _value: any = value;
+                                  if (_.isArray(value)) {
+                                    _value = value[0];
+                                  }
+                                  this._onChange({ [item.property]: _value }, eventType.key);
+                                },
                               });
                             })
                           }
