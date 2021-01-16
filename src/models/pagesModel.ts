@@ -17,6 +17,8 @@ import {
   createSetCurrentPageIdAction,
   IDeletePageEffect,
   createDeletePageAction,
+  createAddPageAction,
+  createUpdatePageAction,
   IShowFormAction,
   ISetEditingPageAction,
   IEditPageEffect,
@@ -35,10 +37,13 @@ import {
   IGenerateCodeEffect,
   createSetViewPageListAction,
   ISetViewPageListAction,
+  IAddBoPageEffect,
+  IUpdateBoPageEffect,
+  IDeleteBoPageEffect,
 } from './pagesActions';
 import { createSetIsLoadingAction } from './appActions';
 import { delay, groupPages, confirm, isFtpUpload } from 'src/utils';
-import { Modal, message } from 'antd';
+import { Modal, message, notification } from 'antd';
 import { ILayoutsState } from './layoutsModel';
 import { cellNameManager } from 'src/utils/cellName';
 import { savePrototypePageInfo, queryPageList, generateCode, copyPage } from 'src/routes/Prototype/service';
@@ -48,6 +53,7 @@ import { ModalFuncProps } from 'antd/lib/modal';
 import { IAppState } from './appModel';
 import { t } from 'src/i18n';
 import I18N_IDS from 'src/i18n/ids';
+import { deleteBoPages, saveOrUpdateBoPage } from 'src/services/page';
 
 export enum EditingType {
   EDIT,
@@ -194,6 +200,7 @@ export function createPagesModel<P = any>({ namespace, pageIdKey, parentPageIdKe
           draft.pageInfos = info;
         });
       },
+
     },
 
     effects: {
@@ -563,6 +570,76 @@ export function createPagesModel<P = any>({ namespace, pageIdKey, parentPageIdKe
             config.cellNameKey,
           );
         }
+      },
+
+      *[ActionTypes.AddBoPageEffect]({ page, callback }: IAddBoPageEffect<P>, { put, call, select }) {
+        const { params }: IAppState = yield select((s: any) => s.APP);
+        const baseViewId: string = params.baseViewId;
+        yield put(createSetIsLoadingAction(true, true));
+        let result;
+        try {
+          result = yield call(saveOrUpdateBoPage, { data: page, baseViewId, type: 'add' });
+          notification.success({
+            message: '提示',
+            description: result?.msg || '保存成功。',
+          });
+          yield put(createAddPageAction(result.ipfCcmBoPage));
+          callback();
+        } catch (e) {
+          Modal.error({
+            content: e?.msg || '保存失败。',
+          });
+        } finally {
+          yield put(createSetIsLoadingAction(false, true));
+        }
+      },
+
+      *[ActionTypes.UpdateBoPageEffect]({ page, callback }: IUpdateBoPageEffect<P>, { put, call, select }) {
+        const { params }: IAppState = yield select((s: any) => s.APP);
+        const baseViewId: string = params.baseViewId;
+        yield put(createSetIsLoadingAction(true, true));
+        let result;
+        try {
+          result = yield call(saveOrUpdateBoPage, { data: page, baseViewId, type: 'edit' });
+          notification.success({
+            message: '提示',
+            description: result?.msg || '修改成功。',
+          });
+          yield put(createUpdatePageAction(result.ipfCcmBoPage));
+          callback();
+        } catch (e) {
+          Modal.error({
+            content: e?.msg || '修改失败。',
+          });
+        } finally {
+          yield put(createSetIsLoadingAction(false, true));
+        }
+      },
+
+      *[ActionTypes.DeleteBoPageEffect]({ id, callback }: IDeleteBoPageEffect<P>, { put, call, select }) {
+        const pageState: IPagesState<P> = yield select((s: {PAGES: IPagesState<P>}) => s.PAGES);
+        if (id === pageState.currentPageId) {
+          return;
+        }
+        const { params }: IAppState = yield select((s: any) => s.APP);
+        const baseViewId: string = params.baseViewId;
+        let result;
+        yield put(createSetIsLoadingAction(true, true));
+        try {
+          result = yield call(deleteBoPages, { ids:[id], baseViewId });
+          notification.success({
+            message: '提示',
+            description: result?.msg || '删除成功。',
+          });
+          yield put(createDeletePageAction(id));
+        } catch (e) {
+          Modal.error({
+            content: e?.msg || '删除失败。',
+          });
+        } finally {
+          yield put(createSetIsLoadingAction(false, true));
+        }
+        console.log('[DeletePagesEffect]', result);
       },
 
     },

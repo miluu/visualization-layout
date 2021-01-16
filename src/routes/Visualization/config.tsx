@@ -78,6 +78,9 @@ export const VISUALIZATION_CONFIG = {
   /** 查询页面列表 URL */
   queryPageListUrl: '/ipf/boPageLayout/getIpfCcmBoPageList',
 
+  /** 查询Bo页面列表 URL */
+  queryBoPageListUrl: '/ipf/ipfCcmBoPage/query',
+
   /** 查询页面布局数据 URL */
   queryPageUrl: '/ipf/boPageLayout/getIpfCcmBoPage',
 

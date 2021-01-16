@@ -10,6 +10,12 @@ export interface IIpfCcmPage {
   ipfCcmBoId?: string;
   rowStatus?: ROW_STATUS;
   deviceType?: string;
+  boName?: string;
+  businessType?: string;
+  isPageDispSetting?: string;
+  isDataPenetration?: string;
+  linkBoName?: string;
+  baseViewId?: string;
   [key: string]: any;
 }
 

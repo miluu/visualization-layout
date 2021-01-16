@@ -7,10 +7,41 @@ import { IQueryOptions, IQueryResult } from 'src/ui/associate';
 import { paramsSerializer } from 'src/utils';
 
 export async function queryPageList(params: any): Promise<IIpfCcmPage[]> {
-  return axios.get(VISUALIZATION_CONFIG.queryPageListUrl, {
+  /*return axios.get(VISUALIZATION_CONFIG.queryPageListUrl, {
     params,
   }).then(resp => {
     return resp.data.boPageList;
+  });*/
+  const boParams = {
+    baseViewId: params['baseViewId'],
+    cascadeParam: { name: 'IpfCcmBoPage' },
+    currentPage: 1,
+    gridType: 'HTR',
+    pageSize: 500,
+    queryResultType: 'page',
+    sum: false,
+    searchColumns: [
+      {
+        propertyName: 'ipfCcmBoId',
+        columnName: 'IPF_CCM_BO_ID',
+        dataType: 'S',
+        value: params['ipfCcmBoId'],
+        operation: 'EQ',
+      },
+      {
+        propertyName: 'baseViewId',
+        columnName: 'BASE_VIEW_ID',
+        dataType: 'S',
+        value: params['baseViewId'],
+        operation: 'EQ',
+      },
+    ],
+  };
+  return axios.get(VISUALIZATION_CONFIG.queryBoPageListUrl, {
+    params: boParams,
+    paramsSerializer,
+  }).then(resp => {
+    return resp.data.ipfCcmBoPages;
   });
 }
 

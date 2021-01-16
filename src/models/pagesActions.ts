@@ -1,6 +1,7 @@
 import { Action } from 'redux';
 import * as _ from 'lodash';
 import { EditingType } from './pagesModel';
+import { noop } from 'src/utils';
 
 const NAMESPACE = 'PAGES';
 
@@ -32,6 +33,12 @@ export enum ActionTypes {
 
   SelectPageWatcher = 'Select Page Watcher',
   ViewPageListWatcher = 'View Page List Watcher',
+  // 操作页面对象
+  AddBoPageEffect = 'Add BoPage Effect',
+  UpdateBoPageEffect = 'Update BoPage Effect',
+  DeleteBoPageEffect = 'Delete BoPage Effect',
+  SelectBoPageEffect = 'Select BoPage Effect',
+  SetBoPageList = 'Set BoPage List',
 }
 
 export function addNamespace(type: string, b: boolean) {
@@ -293,4 +300,56 @@ export interface ISelectPageWatcher extends Action {
 export function createSelectPageWatcherAction(withNamespace = false): ISelectPageWatcher {
   const type = addNamespace(ActionTypes.SelectPageWatcher, withNamespace);
   return { type };
+}
+
+export interface IAddBoPageEffect<P> extends Action {
+  page: P;
+  callback(): void;
+}
+
+export function createAddBoPageEffect<P>(page: P, callback = noop, withNamespace = true): IAddBoPageEffect<P> {
+  const type = addNamespace(ActionTypes.AddBoPageEffect, withNamespace);
+  return { type, page, callback };
+}
+
+export interface IUpdateBoPageEffect<P> extends Action {
+  page: P;
+  callback(): void;
+}
+
+export function createUpdateBoPageEffect<P>(page: P, callback = noop, withNamespace = true): IUpdateBoPageEffect<P> {
+  const type = addNamespace(ActionTypes.UpdateBoPageEffect, withNamespace);
+  return { type, page, callback };
+}
+
+export interface IDeleteBoPageEffect<P> extends Action {
+  id: string;
+  callback(): void;
+}
+
+export function createDeleteBoPageEffect<P>(id: string, callback = noop, withNamespace = true): IDeleteBoPageEffect<P> {
+  const type = addNamespace(ActionTypes.DeleteBoPageEffect, withNamespace);
+  return { type, id, callback };
+}
+
+export interface ISelectBoPageEffect<P> extends Action {
+  id: string;
+  callback(): void;
+}
+
+export function createSelectBoPageEffect<P>(id: string, callback = noop, withNamespace = true): ISelectBoPageEffect<P> {
+  const type = addNamespace(ActionTypes.SelectBoPageEffect, withNamespace);
+  return { type, id, callback };
+}
+
+export interface ISetBoPageListAction<P> extends Action {
+  boPageList: P[];
+}
+
+export function createSetBoPageListAction<P>(boPageList:  P[], withNamespace = false): ISetBoPageListAction<P> {
+  const type = addNamespace(ActionTypes.SetBoPageList, withNamespace);
+  return {
+    type,
+    boPageList,
+  };
 }

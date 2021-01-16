@@ -10,6 +10,7 @@ import { Dispatch, AnyAction } from 'redux';
 import { IBoTreeSourceItem, IRelationsState } from 'src/models/relationsModel';
 import { DEFAULT_COLORS } from 'src/config';
 import { createSelectBoTreeItemAction } from 'src/models/relationsAction';
+import { createSelectBoTreeItemAction as createSelectBoTreeItemBusinessTypeAction } from 'src/models/businessTypesAction';
 
 const { TreeNode } = Tree;
 
@@ -85,6 +86,7 @@ export class UiBoTree extends React.PureComponent<IUiBoTreeProps, IUiBoTreeState
 
   private _onSelect = (keys: string[]) => {
     this.props.dispatch(createSelectBoTreeItemAction(keys[0], true));
+    this.props.dispatch(createSelectBoTreeItemBusinessTypeAction(keys[0], true));
   }
 
   private _buildSourceMap() {

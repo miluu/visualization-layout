@@ -62,7 +62,8 @@ import {
   languageMsgFormModalRef,
   boRelationEditDrawerRef,
   checkSettingsModalRef,
-  closeCheckSettingsModal,
+  boBusinessTypeEditDrawerRef,
+  pageListEditDrawerRef,
 } from 'src/utils/modal';
 import { UiPropertyMehodListTabs } from 'src/ui/draggableTree/propertyMethodListTabs';
 import { UiUploader } from 'src/ui/uploaderModal';
@@ -79,11 +80,15 @@ import { cellNameManager } from 'src/utils/cellName';
 import { UiElementCodeFormModal } from 'src/ui/ElementCodeForm';
 import { UiLanguageMsgFormModal } from 'src/ui/LanguageMsgForm';
 import { createLoadBoTreeSourceEffect } from 'src/models/relationsAction';
+import { createLoadBoTreeSourceEffect as createLoadBoTreeSourceBusinessTypeEffect } from 'src/models/businessTypesAction';
 import { UiBoTree } from 'src/ui/boTree';
 import { UiBoRelationsPanel } from 'src/ui/boRelationsPanel';
 import { UiBoRelationEditDrawer } from 'src/ui/boRelationEditDrawer';
 import { UiCheckSettingsModal } from 'src/ui/checkSettingsModal';
 import { UiBoChecksPanel } from 'src/ui/boChecksPanel';
+import { UiBoBusinessTypesPanel } from 'src/ui/boBusinessTypesPanel';
+import { UiBoBusinessTypeEditDrawer } from 'src/ui/boBusinessTypeEditDrawer';
+import { UiPageListEditDrawer } from '../../ui/pageListEditDrawer';
 
 const { Panel } = Collapse;
 const { TabPane } = Tabs;
@@ -252,7 +257,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
 
         <UiSidebar position="right" defaultWidth={250} >
           <Collapse
-            defaultActiveKey={['1', '2', '3', '4']}
+            defaultActiveKey={['1', '2', '3', '4', '5']}
             bordered={false}
             expandIcon={({ isActive }) => <Icon type="caret-right" rotate={isActive ? 90 : 0} />}
           >
@@ -261,6 +266,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
               header={t(I18N_IDS.PANEL_TITLE_PAGE_LIST)}
             >
               <UiPageList
+                dispatch={this.props.dispatch}
                 list={pageList}
                 currentPageId={currentPageId}
                 dblClickPage={this._selectPage}
@@ -297,9 +303,31 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
             </Panel>
             <Panel
               key="3"
-              header="子对象关系"
+              header="子对象关系 / 业务类型"
             >
-              <UiBoRelationsPanel />
+              <Tabs
+                defaultActiveKey="1"
+                size="small"
+                animated={{
+                  tabPane: false,
+                  inkBar: true,
+                }}
+              >
+                <TabPane
+                  tab="子对象关系"
+                  key="1"
+                  forceRender
+                >
+                  <UiBoRelationsPanel />
+                </TabPane>
+                <TabPane
+                  tab="业务类型"
+                  key="2"
+                  forceRender
+                >
+                  <UiBoBusinessTypesPanel />
+                </TabPane>
+              </Tabs>
             </Panel>
             <Panel
               key="4"
@@ -330,6 +358,8 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
           <UiLanguageMsgFormModal ref={languageMsgFormModalRef} />
           <UiBoRelationEditDrawer ref={boRelationEditDrawerRef} />
           <UiCheckSettingsModal ref={checkSettingsModalRef} />
+          <UiBoBusinessTypeEditDrawer ref={boBusinessTypeEditDrawerRef} />
+          <UiPageListEditDrawer ref={pageListEditDrawerRef} />
         </>,
 
         {/* 原型列表 */}
@@ -409,10 +439,12 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
       'gridEditType',
       'tabBuildType',
       'CheckType',
+      'DeviceType',
     ].join(',')));
     this.props.dispatch(createLoadViewListEffect());
     this.props.dispatch(createWatchSelectionRangeEffect());
     this.props.dispatch(createLoadBoTreeSourceEffect());
+    this.props.dispatch(createLoadBoTreeSourceBusinessTypeEffect());
     if (!this.props.urlParams.isFromMenuOfPage) {
       this.props.dispatch(
         createLoadPageListEffect(queryPageList, [{
@@ -675,7 +707,6 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
 
 }
 
-window['closeCheckSettingsModal'] = closeCheckSettingsModal;
 // 模拟 angularJs 全局变量，避免引入平台弹窗页面报错
 // window['angular'] = {
 //   element() {

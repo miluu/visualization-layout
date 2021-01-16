@@ -88,6 +88,7 @@ const Visualization = myDynamic({
       tempChildrenLayoutsKey: VISUALIZATION_CONFIG.tempChildrenLayoutsKey,
     })),
     import('./models/relationsModel').then(result => result.relationsModel),
+    import('./models/businessTypesModel').then(result => result.businessTypesModel),
   ],
 });
 

@@ -28,6 +28,24 @@ export function createFirstLetterLowerRule({ label }: { label: string }): Valida
   };
 }
 
+export function createFirstLetterUpperRule({ label }: { label: string }): ValidationRule {
+  return {
+    validator(rule: any, value: string, callback: (message?: string) => void) {
+      if (!value) {
+        callback();
+        return;
+      }
+      const reg = /^[A-Z].*$/;
+      const isValid = reg.test(value);
+      if (!isValid) {
+        callback(`【${label}】首字母必须为字母且大写。`);
+        return;
+      }
+      callback();
+    },
+  };
+}
+
 export function createNotSpecialCharacterRule({ label }: { label: string }): ValidationRule {
   return {
     validator(rule: any, value: string, callback: (message?: string) => void) {
@@ -78,6 +96,7 @@ export function createRichLengthRule({
     validator(rule: any, value: string, callback: (message?: string) => void) {
       if (!value) {
         callback();
+        return;
       }
       const length = getRichLength(value);
       if (!_.isUndefined(min) && length < min) {
@@ -190,6 +209,7 @@ export function createUniqGlRules({ label, boName, entityName, fields, form, con
         });
       } catch (e) {
         callback(message);
+        return;
       }
       if (result?.success) {
         callback();

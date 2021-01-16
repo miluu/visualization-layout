@@ -22,6 +22,8 @@ import { t } from 'src/i18n';
 import I18N_IDS from 'src/i18n/ids';
 import { UiLanguageMsgFormModal } from 'src/ui/LanguageMsgForm';
 import { UiCheckSettingsModal } from 'src/ui/checkSettingsModal';
+import { UiBoBusinessTypeEditDrawer } from 'src/ui/boBusinessTypeEditDrawer';
+import { UiPageListEditDrawer } from 'src/ui/pageListEditDrawer';
 
 export const uploaderRef = React.createRef<UiUploader>();
 export const transferModalRef = React.createRef<UiTransferModal>();
@@ -36,6 +38,8 @@ export const elementCodeFormModalRef = React.createRef<UiElementCodeFormModal>()
 export const languageMsgFormModalRef = React.createRef<UiLanguageMsgFormModal>();
 export const boRelationEditDrawerRef = React.createRef<UiBoRelationEditDrawer>();
 export const checkSettingsModalRef = React.createRef<UiCheckSettingsModal>();
+export const boBusinessTypeEditDrawerRef = React.createRef<UiBoBusinessTypeEditDrawer>();
+export const pageListEditDrawerRef = React.createRef<UiPageListEditDrawer>();
 
 const propertyListProp = {
   keyProp: 'propertyName',
@@ -772,4 +776,14 @@ export function openCheckSettingsModal(options: any) {
 export function closeCheckSettingsModal() {
   const modal: UiCheckSettingsModal = checkSettingsModalRef.current;
   modal?.close?.();
+}
+
+export function openBoBusinessTypeEditDrawer(options:any) {
+  const drawer = boBusinessTypeEditDrawerRef.current['wrappedInstance'];
+  drawer.open(options);
+}
+
+export function openPageListEditDrawer(options:any) {
+  const drawer = pageListEditDrawerRef.current['wrappedInstance'];
+  drawer.open(options);
 }
