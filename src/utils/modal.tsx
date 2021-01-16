@@ -21,6 +21,7 @@ import { UiBoRelationEditDrawer } from 'src/ui/boRelationEditDrawer';
 import { t } from 'src/i18n';
 import I18N_IDS from 'src/i18n/ids';
 import { UiLanguageMsgFormModal } from 'src/ui/LanguageMsgForm';
+import { UiCheckSettingsModal } from 'src/ui/checkSettingsModal';
 
 export const uploaderRef = React.createRef<UiUploader>();
 export const transferModalRef = React.createRef<UiTransferModal>();
@@ -34,6 +35,7 @@ export const importLayoutsJsonModal = React.createRef<UiImportLayoutsJsonModal>(
 export const elementCodeFormModalRef = React.createRef<UiElementCodeFormModal>();
 export const languageMsgFormModalRef = React.createRef<UiLanguageMsgFormModal>();
 export const boRelationEditDrawerRef = React.createRef<UiBoRelationEditDrawer>();
+export const checkSettingsModalRef = React.createRef<UiCheckSettingsModal>();
 
 const propertyListProp = {
   keyProp: 'propertyName',
@@ -749,7 +751,25 @@ export function closeLanguageMsgFormModal() {
   modal.close();
 }
 
+/**
+ * 打开子对象关系抽屉
+ * @param options
+ */
 export function openBoRelationEditDrawer(options: any) {
   const drawer: UiBoRelationEditDrawer = boRelationEditDrawerRef.current['wrappedInstance'];
   drawer.open(options);
+}
+
+/**
+ * 打开校验配置弹窗
+ * @param options
+ */
+export function openCheckSettingsModal(options: any) {
+  const modal: UiCheckSettingsModal = checkSettingsModalRef.current;
+  modal?.open?.(options);
+}
+
+export function closeCheckSettingsModal() {
+  const modal: UiCheckSettingsModal = checkSettingsModalRef.current;
+  modal?.close?.();
 }

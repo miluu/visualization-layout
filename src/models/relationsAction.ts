@@ -1,6 +1,6 @@
 import { Action } from 'redux';
 import * as _ from 'lodash';
-import { IBoRelation, IBoTreeSourceItem } from './relationsModel';
+import { IBoCheck, IBoRelation, IBoTreeSourceItem } from './relationsModel';
 import { noop } from 'src/utils';
 
 export const NAMESPACE = 'RELATIONS';
@@ -13,6 +13,8 @@ export enum ActionTypes {
   SetEditingRelation = 'Set Editing Relation',
   SetBoTreeSource = 'Set Bo Tree Source',
   SelectBoTreeItem = 'Select Bo Tree Item',
+  SetBoChecks = 'Set Bo Checks',
+  ResetBoChecks = 'Reset Bo Checks',
 
   // Effects
   LoadRelationsEffect = 'Load Relations Effect',
@@ -21,6 +23,7 @@ export enum ActionTypes {
   SaveOrUpdateRelationEffect = 'Save Or Update Relation Effect',
   DeleteRelationsEffect = 'Delete Relations Effect',
   LoadBoTreeSourceEffect = 'Load Bo Tree Source Effect',
+  LoadBoChecksEffect = 'Load Bo Checks Effect',
 
   // Watchers
   SelectBoTreeItemWatcher = 'Select Bo Tree Item Watcher',
@@ -84,6 +87,30 @@ export function createResetRelationsAction(withNamespace = false): IResetRelatio
   };
 }
 
+export interface ISetBoChhecksAction extends Action {
+  ipfCcmBoId: string;
+  boChecks: IBoCheck[];
+}
+
+export function createSetBoChecksAction(ipfCcmBoId: string, boChecks: IBoCheck[], withNamespace = false): ISetBoChhecksAction {
+  const type = addNamespace(ActionTypes.SetBoChecks, withNamespace);
+  return {
+    type,
+    ipfCcmBoId,
+    boChecks,
+  };
+}
+
+export interface IResetBoChecksAction extends Action {
+}
+
+export function createResetBoChecksAction(withNamespace = false): IResetRelationsAction {
+  const type = addNamespace(ActionTypes.ResetBoChecks, withNamespace);
+  return {
+    type,
+  };
+}
+
 // Effects
 export interface ILoadBoTreeSourceEffect extends Action {
 }
@@ -132,6 +159,18 @@ export function createSaveOrUpdateRelationEffect(data: IBoRelation, editType = '
     data,
     editType,
     callback,
+  };
+}
+
+export interface ILoadBoChecksEffect extends Action {
+  force: boolean;
+}
+
+export function createLoadBoChecksEffect(force = false, withNamespace = true): ILoadBoChecksEffect {
+  const type = addNamespace(ActionTypes.LoadBoChecksEffect, withNamespace);
+  return {
+    force,
+    type,
   };
 }
 

@@ -52,7 +52,18 @@ import { createSetLayoutAndElementPropertyFormOptionsAction, createSetActiveForm
 import { IFormsState } from 'src/models/formsModel';
 import { UiTransferModal } from 'src/ui/transferModal';
 import { UiFormSettingsModal } from 'src/ui/formSettingsModal';
-import { transferModalRef, formSettingsModalRef, uploaderRef, listSourceEditorModalRef, importLayoutsJsonModal, elementCodeFormModalRef, languageMsgFormModalRef, boRelationEditDrawerRef } from 'src/utils/modal';
+import {
+  transferModalRef,
+  formSettingsModalRef,
+  uploaderRef,
+  listSourceEditorModalRef,
+  importLayoutsJsonModal,
+  elementCodeFormModalRef,
+  languageMsgFormModalRef,
+  boRelationEditDrawerRef,
+  checkSettingsModalRef,
+  closeCheckSettingsModal,
+} from 'src/utils/modal';
 import { UiPropertyMehodListTabs } from 'src/ui/draggableTree/propertyMethodListTabs';
 import { UiUploader } from 'src/ui/uploaderModal';
 import { UiListSourceEditorModal } from 'src/ui/listSourceEditor';
@@ -71,6 +82,8 @@ import { createLoadBoTreeSourceEffect } from 'src/models/relationsAction';
 import { UiBoTree } from 'src/ui/boTree';
 import { UiBoRelationsPanel } from 'src/ui/boRelationsPanel';
 import { UiBoRelationEditDrawer } from 'src/ui/boRelationEditDrawer';
+import { UiCheckSettingsModal } from 'src/ui/checkSettingsModal';
+import { UiBoChecksPanel } from 'src/ui/boChecksPanel';
 
 const { Panel } = Collapse;
 const { TabPane } = Tabs;
@@ -288,6 +301,12 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
             >
               <UiBoRelationsPanel />
             </Panel>
+            <Panel
+              key="4"
+              header="校验"
+            >
+              <UiBoChecksPanel />
+            </Panel>
           </Collapse>
         </UiSidebar>
 
@@ -310,6 +329,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
           <UiElementCodeFormModal ref={elementCodeFormModalRef} />
           <UiLanguageMsgFormModal ref={languageMsgFormModalRef} />
           <UiBoRelationEditDrawer ref={boRelationEditDrawerRef} />
+          <UiCheckSettingsModal ref={checkSettingsModalRef} />
         </>,
 
         {/* 原型列表 */}
@@ -388,6 +408,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
       'SubBoRelType',
       'gridEditType',
       'tabBuildType',
+      'CheckType',
     ].join(',')));
     this.props.dispatch(createLoadViewListEffect());
     this.props.dispatch(createWatchSelectionRangeEffect());
@@ -653,3 +674,18 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
   }
 
 }
+
+window['closeCheckSettingsModal'] = closeCheckSettingsModal;
+// 模拟 angularJs 全局变量，避免引入平台弹窗页面报错
+// window['angular'] = {
+//   element() {
+//     return {
+//       scope() {
+//         return {
+//           $emit() {/*  */},
+//         };
+//       },
+//     };
+//   },
+// };
+// window['$'] = window['angular']['element'];

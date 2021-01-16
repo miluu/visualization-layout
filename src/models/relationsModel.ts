@@ -19,8 +19,11 @@ import {
   createResetRelationsAction,
   createLoadBoTreeSourceEffect,
   createSelectBoTreeItemAction,
+  ISetBoChhecksAction,
+  ILoadBoChecksEffect,
+  createSetBoChecksAction,
 } from './relationsAction';
-import { deleteBoRelations, ILoadBoTreeSourceOptions, loadBoRelations, loadBoTreeSource, saveOrUpdateBoRelation } from 'src/services/relations';
+import { deleteBoRelations, ILoadBoTreeSourceOptions, loadBoChecks, loadBoRelations, loadBoTreeSource, saveOrUpdateBoRelation } from 'src/services/relations';
 import { IAppState } from './appModel';
 import { getSelectBoTreeItem } from 'src/utils/boRelations';
 import { createSetIsLoadingAction } from './appActions';
@@ -80,16 +83,29 @@ export interface IBoRelationColumn {
   [key: string]: any;
 }
 
+export interface IBoCheck {
+  ipfCcmBoCheckId: string;
+  checkName: string;
+  checkType: string;
+  propertyName: string;
+  baseViewId: string;
+  ipfCcmBoId: string;
+  ipfCcmBoCheckRelGroups: any[];
+  ipfCcmBoCheckFields: any[];
+}
+
 export interface IRelationsState {
   boTreeSource: IBoTreeSourceItem[];
   selectedBoTreeItem: string;
   relations: _.Dictionary<IBoRelation[]>;
+  boChecks: _.Dictionary<IBoCheck[]>;
 }
 
 const initRelationsState: IRelationsState = {
   boTreeSource: [],
   selectedBoTreeItem: null,
   relations: {},
+  boChecks: {},
 };
 
 export interface IRelationsModel extends Model {
@@ -121,6 +137,18 @@ export const relationsModel: IRelationsModel = {
     [ActionTypes.ResetRelations](state) {
       return produce(state, draft => {
         draft.relations = {};
+      });
+    },
+
+    [ActionTypes.SetBoChecks](state, { ipfCcmBoId, boChecks }: ISetBoChhecksAction) {
+      return produce(state, draft => {
+        draft.boChecks[ipfCcmBoId] = boChecks;
+      });
+    },
+
+    [ActionTypes.ResetBoChecks](state) {
+      return produce(state, draft => {
+        draft.boChecks = {};
       });
     },
 
@@ -212,6 +240,26 @@ export const relationsModel: IRelationsModel = {
         yield put(createSetIsLoadingAction(false, true));
       }
       callback();
+    },
+
+    *[ActionTypes.LoadBoChecksEffect]({ force }: ILoadBoChecksEffect, { put, call, select }) {
+      const { params }: IAppState = yield select((s: any) => s.APP);
+      const relationsState: IRelationsState = yield select((s: any) => s.RELATIONS);
+      let baseViewId: string = params.baseViewId;
+      let ipfCcmBoId: string = params.ipfCcmBoId;
+      if (relationsState.selectedBoTreeItem) {
+        const selectedBoTreeItem = getSelectBoTreeItem(relationsState);
+        baseViewId = selectedBoTreeItem?.baseViewId || params.baseViewId;
+        ipfCcmBoId = selectedBoTreeItem?.id || params.ipfCcmBoId;
+      }
+
+      if (!force && relationsState.boChecks[ipfCcmBoId]) {
+        console.log('[LoadRelationsEffect] 校验数据已加载，不再重复加载:', ipfCcmBoId);
+        return;
+      }
+
+      const result = yield call(loadBoChecks, { baseViewId, ipfCcmBoId });
+      yield put(createSetBoChecksAction(ipfCcmBoId, result));
     },
 
     // Watchers

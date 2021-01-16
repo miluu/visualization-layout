@@ -7,8 +7,8 @@ import { IFormItemOption } from 'src/utils/forms';
 import { IUiDraggableListItem } from 'src/ui/draggableList';
 import { IUiDraggableListGroupItem } from 'src/ui/draggableListGroup';
 import { transformUiType, createId } from 'src/utils';
-import { Button, Select, Modal } from 'antd';
-import { openUploaderModal, openListSourceEditor } from 'src/utils/modal';
+import { Button, Select, Modal, notification } from 'antd';
+import { openUploaderModal, openListSourceEditor, openCheckSettingsModal } from 'src/utils/modal';
 import { UiComponentGroupList } from 'src/ui/componentGroupList';
 import I18N_IDS from 'src/i18n/ids';
 import { t } from 'src/i18n';
@@ -16,6 +16,7 @@ import { dataElementCodeQueryMethodCreator, titleMsgCodeQueryMethod } from './se
 import { modifyLanguageMsg, modifyDataElement } from 'src/services/elementCode';
 import { UiAssociate } from 'src/ui/associate';
 import { queryBoName, queryDictMethod, queryPropertyCreator, queryMethodCreator, queryShlpMethod } from 'src/services/bo';
+import { createSetIsLoadingAction } from 'src/models/appActions';
 
 const { Option } = Select;
 
@@ -174,6 +175,35 @@ export const VISUALIZATION_CONFIG = {
         // { title: '视图ID', field: 'ownSourceViewId' },
       ],
       queryMethod: queryBoName,
+      extra(__, values, ___, ____, dispatch) {
+        return (
+          <Button
+            size="small"
+            block
+            onClick={async () => {
+              dispatch(createSetIsLoadingAction(true, true));
+              const result = await queryBoName({
+                pageSize: 1,
+                currentPage: 1,
+                keywords: values?.layoutBoName,
+              });
+              dispatch(createSetIsLoadingAction(false, true));
+              console.log(result);
+              const bo = result?.source?.[0];
+              if (!bo) {
+                notification.warn({ message: `未找到业务对象：${values?.layoutBoName}` });
+                return;
+              }
+              openCheckSettingsModal({
+                baseViewId: bo.baseViewId,
+                ipfCcmBoId: bo.ipfCcmBoId,
+              });
+            }}
+          >
+            校验配置
+          </Button>
+        );
+      },
     },
     {
       property: 'layoutBoViewDesc',
@@ -894,6 +924,16 @@ export const VISUALIZATION_CONFIG = {
         // { title: '视图ID', field: 'ownSourceViewId' },
       ],
       queryMethod: queryBoName,
+      extra() {
+        return (
+          <Button
+            size="small"
+            block
+          >
+            校验配置
+          </Button>
+        );
+      },
     },
     {
       property: 'layoutBoViewDesc',

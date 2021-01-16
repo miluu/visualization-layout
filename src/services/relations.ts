@@ -239,3 +239,42 @@ export async function querySubPropertyNameMethod(options: IQueryOptions, boName?
   };
   return result;
 }
+
+export interface ILoadBoChecksOptions {
+  baseViewId: string;
+  ipfCcmBoId: string;
+}
+export async function loadBoChecks({
+  baseViewId,
+  ipfCcmBoId,
+}: ILoadBoChecksOptions) {
+  const result = await httpGet('/ipf/ipfCcmBoCheck/query', {
+    params: {
+      baseViewId,
+      cascadeParam: { name: 'IpfCcmBoCheck' },
+      currentPage: 1,
+      gridType: 'HTR',
+      pageSize: 500,
+      queryResultType: 'page',
+      sum: false,
+      searchColumns: [
+        {
+          propertyName: 'ipfCcmBoId',
+          columnName: 'IPF_CCM_BO_ID',
+          dataType: 'S',
+          value: ipfCcmBoId,
+          operation: 'EQ',
+        },
+        {
+          propertyName: 'baseViewId',
+          columnName: 'BASE_VIEW_ID',
+          dataType: 'S',
+          value: baseViewId,
+          operation: 'EQ',
+        },
+      ],
+    },
+    paramsSerializer,
+  });
+  return result?.ipfCcmBoChecks;
+}
