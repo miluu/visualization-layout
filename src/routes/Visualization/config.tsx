@@ -8,7 +8,7 @@ import { IUiDraggableListItem } from 'src/ui/draggableList';
 import { IUiDraggableListGroupItem } from 'src/ui/draggableListGroup';
 import { transformUiType, createId } from 'src/utils';
 import { Button, Select, Modal, notification } from 'antd';
-import { openUploaderModal, openListSourceEditor, openCheckSettingsModal } from 'src/utils/modal';
+import { openUploaderModal, openListSourceEditor, openCheckSettingsModal, openBoEditDrawe } from 'src/utils/modal';
 import { UiComponentGroupList } from 'src/ui/componentGroupList';
 import I18N_IDS from 'src/i18n/ids';
 import { t } from 'src/i18n';
@@ -665,6 +665,113 @@ export const VISUALIZATION_CONFIG = {
       label: t(I18N_IDS.LABEL_PAGE_LAYOUT_ATTR),
       type: 'textarea',
     },
+    {
+      property: 'needPaging',
+      label: '表格分页',
+      type: 'checkbox',
+      showWhen(values) {
+        return isGrid(values);
+      },
+    },
+    {
+      property: 'pageNumber',
+      label: '页码',
+      type: 'select',
+      dictName: 'PageGroup',
+      showWhen(values) {
+        return isGrid(values);
+      },
+    },
+    {
+      property: 'pageSize',
+      label: '每页记录数',
+      type: 'select',
+      dictName: 'PageSize',
+      showWhen(values) {
+        return isGrid(values);
+      },
+    },
+    {
+      property: 'isGridShowSeq',
+      label: '显示序号',
+      type: 'checkbox',
+      showWhen(values) {
+        return isGrid(values);
+      },
+    },
+    {
+      property: 'isGridFilter',
+      label: '表格列筛选',
+      type: 'checkbox',
+      showWhen(values) {
+        return isGrid(values);
+      },
+    },
+    {
+      property: 'isGridCustom',
+      label: '表格列定义',
+      type: 'checkbox',
+      showWhen(values) {
+        return isGrid(values);
+      },
+    },
+    {
+      property: 'isShoppingMode',
+      label: '购物车模式',
+      type: 'checkbox',
+      showWhen(values) {
+        return isGrid(values);
+      },
+    },
+    {
+      property: 'isGridDfltSel',
+      label: '选中第一行',
+      type: 'checkbox',
+      showWhen(values) {
+        return isGrid(values);
+      },
+    },
+    {
+      property: 'isDataLazy',
+      label: '表格数据懒加载',
+      type: 'checkbox',
+      showWhen(values) {
+        return isGrid(values);
+      },
+    },
+    {
+      property: 'gridAlign',
+      label: '表格列对齐',
+      type: 'select',
+      dictName: 'gridAlign',
+      showWhen(values) {
+        return isGrid(values);
+      },
+    },
+    {
+      property: 'lockRowExpress',
+      label: '行锁定表达式',
+      type: 'fieldText',
+      showWhen(values) {
+        return isGrid(values);
+      },
+    },
+    {
+      property: 'rowStyleExpress',
+      label: '行样式表达式',
+      type: 'textarea',
+      showWhen(values) {
+        return isGrid(values);
+      },
+    },
+    {
+      property: 'isHideTableCheckbox',
+      label: '隐藏表格复选框',
+      type: 'checkbox',
+      showWhen(values) {
+        return isGrid(values);
+      },
+    },
   ] as IFormItemOption[],
   /** Element 属性表单配置 */
   elementPropertyFormOptions: [
@@ -936,38 +1043,71 @@ export const VISUALIZATION_CONFIG = {
       queryMethod: queryBoName,
       extra(__, values, ___, ____, dispatch) {
         return (
-          <Button
-            size="small"
-            block
-            onClick={async () => {
-              let { baseViewId, ipfCcmBoId } = window?.['__urlParams'] || {};
-              if (values?.layoutBoName) {
-                dispatch(createSetIsLoadingAction(true, true));
-                const result = await queryBoName({
-                  pageSize: 1,
-                  currentPage: 1,
-                  keywords: values?.layoutBoName,
-                });
-                dispatch(createSetIsLoadingAction(false, true));
-                const bo = result?.source?.[0];
-                if (!bo) {
-                  notification.warn({ message: `未找到业务对象：${values?.layoutBoName}` });
-                  return;
+          <>
+            <Button
+              size="small"
+              block
+              disabled={!values?.layoutBoName}
+              onClick={async () => {
+                let { baseViewId, ipfCcmBoId } = window?.['__urlParams'] || {};
+                if (values?.layoutBoName) {
+                  dispatch(createSetIsLoadingAction(true, true));
+                  const result = await queryBoName({
+                    pageSize: 1,
+                    currentPage: 1,
+                    keywords: values?.layoutBoName,
+                  });
+                  dispatch(createSetIsLoadingAction(false, true));
+                  const bo = result?.source?.[0];
+                  if (!bo) {
+                    notification.warn({ message: `未找到业务对象：${values?.layoutBoName}` });
+                    return;
+                  }
+                  baseViewId = bo.baseViewId;
+                  ipfCcmBoId = bo.ipfCcmBoId;
                 }
-                baseViewId = bo.baseViewId;
-                ipfCcmBoId = bo.ipfCcmBoId;
-              }
-              if (!(baseViewId && ipfCcmBoId)) {
-                notification.warn({ message: 'Error.' });
-              }
-              openCheckSettingsModal({
-                baseViewId,
-                ipfCcmBoId,
-              });
-            }}
-          >
-            校验配置
-          </Button>
+                if (!(baseViewId && ipfCcmBoId)) {
+                  notification.warn({ message: 'Error.' });
+                }
+                openBoEditDrawe({
+                  baseViewId,
+                  ipfCcmBoId,
+                });
+              }}
+            >业务对象编辑</Button>
+            <Button
+              size="small"
+              block
+              onClick={async () => {
+                let { baseViewId, ipfCcmBoId } = window?.['__urlParams'] || {};
+                if (values?.layoutBoName) {
+                  dispatch(createSetIsLoadingAction(true, true));
+                  const result = await queryBoName({
+                    pageSize: 1,
+                    currentPage: 1,
+                    keywords: values?.layoutBoName,
+                  });
+                  dispatch(createSetIsLoadingAction(false, true));
+                  const bo = result?.source?.[0];
+                  if (!bo) {
+                    notification.warn({ message: `未找到业务对象：${values?.layoutBoName}` });
+                    return;
+                  }
+                  baseViewId = bo.baseViewId;
+                  ipfCcmBoId = bo.ipfCcmBoId;
+                }
+                if (!(baseViewId && ipfCcmBoId)) {
+                  notification.warn({ message: 'Error.' });
+                }
+                openCheckSettingsModal({
+                  baseViewId,
+                  ipfCcmBoId,
+                });
+              }}
+            >
+              校验配置
+            </Button>
+          </>
         );
       },
     },

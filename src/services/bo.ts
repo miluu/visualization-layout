@@ -1,4 +1,4 @@
-import { httpGet } from '.';
+import { httpGet, httpPost } from '.';
 import { IQueryOptions, IQueryResult } from 'src/ui/associate';
 import { paramsSerializer } from 'src/utils';
 
@@ -308,4 +308,37 @@ export async function queryShlpMethod(options: IQueryOptions) {
     total: res.total,
   };
   return result;
+}
+export interface IGetIpfCcmBoOptions {
+  baseViewId: string;
+  ipfCcmBoId: string;
+}
+export async function getIpfCcmBo({
+  baseViewId,
+  ipfCcmBoId,
+}: IGetIpfCcmBoOptions) {
+  const result = await httpGet('/ipf/ipfCcmBo/getIpfCcmBo', {
+    params: {
+      baseViewId,
+      ipfCcmBoId,
+    },
+    paramsSerializer,
+  });
+  return result?.ipfCcmBo;
+}
+interface ISaveOrUpdateIpfCcmBoOptions  {
+  data: any;
+  baseViewId?: string;
+}
+export async function saveOrUpdateIpfCcmBo({
+  data,
+  baseViewId,
+}: ISaveOrUpdateIpfCcmBoOptions) {
+  return httpPost('/ipf/ipfCcmBo/update', data, {
+    params: {
+      $v_group_name: 'IpfCcmBo_Default',
+      baseViewId,
+    },
+    paramsSerializer,
+  });
 }

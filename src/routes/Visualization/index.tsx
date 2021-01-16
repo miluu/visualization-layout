@@ -64,6 +64,7 @@ import {
   checkSettingsModalRef,
   boBusinessTypeEditDrawerRef,
   pageListEditDrawerRef,
+  boEditDraweRef,
 } from 'src/utils/modal';
 import { UiPropertyMehodListTabs } from 'src/ui/draggableTree/propertyMethodListTabs';
 import { UiUploader } from 'src/ui/uploaderModal';
@@ -84,6 +85,7 @@ import { createLoadBoTreeSourceEffect as createLoadBoTreeSourceBusinessTypeEffec
 import { UiBoTree } from 'src/ui/boTree';
 import { UiBoRelationsPanel } from 'src/ui/boRelationsPanel';
 import { UiBoRelationEditDrawer } from 'src/ui/boRelationEditDrawer';
+import { BoEditDrawe } from 'src/ui/boEditDrawer';
 import { UiCheckSettingsModal } from 'src/ui/checkSettingsModal';
 import { UiBoChecksPanel } from 'src/ui/boChecksPanel';
 import { UiBoBusinessTypesPanel } from 'src/ui/boBusinessTypesPanel';
@@ -385,7 +387,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
             })}
           />
         </Modal>
-
+        <BoEditDrawe ref={boEditDraweRef} />
       </div>
     );
   }

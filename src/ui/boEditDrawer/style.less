@@ -1,0 +1,53 @@
+.editor-associate-dropdown {
+  .editor-associate-none {
+    display: none !important;
+  }
+  .ant-select-dropdown-menu {
+    max-height: 400px;
+  }
+  .ant-select-dropdown-menu-item-group:first-child {
+    .ant-select-dropdown-menu-item-group-title {
+      height: 24px;
+      line-height: 24px;
+    }
+  }
+  .ant-select-dropdown-menu-item-group:nth-child(2) {
+    display: table;
+    width: 100%;
+    .ant-select-dropdown-menu-item-group-title {
+      display: table-header-group;
+      line-height: normal;
+    }
+    .ant-select-dropdown-menu-item-group-list {
+      display: table-row-group;
+    }
+    .editor-associate-head-tr {
+      display: table-row;
+      background-color: #fafafa;
+    }
+    .editor-associate-tr {
+      display: table-row;
+    }
+    .editor-associate-th {
+      display: table-cell;
+      padding-left: 8px;
+      padding-right: 8px;
+      border-bottom: 1px solid #e8e8e8;
+      color: #000;
+      font-weight: bold;
+      padding: 6px 8px;
+      white-space: nowrap;
+    }
+    .editor-associate-td {
+      display: table-cell;
+      padding: 6px 8px;
+      font-size: 12px;
+      border-bottom: 1px solid #e8e8e8;
+    }
+  }
+}
+.editor-associate {
+  &.ant-select-open .ant-select-arrow-icon svg {
+    transform: none;
+  }
+}
