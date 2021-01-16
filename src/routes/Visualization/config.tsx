@@ -181,22 +181,29 @@ export const VISUALIZATION_CONFIG = {
             size="small"
             block
             onClick={async () => {
-              dispatch(createSetIsLoadingAction(true, true));
-              const result = await queryBoName({
-                pageSize: 1,
-                currentPage: 1,
-                keywords: values?.layoutBoName,
-              });
-              dispatch(createSetIsLoadingAction(false, true));
-              console.log(result);
-              const bo = result?.source?.[0];
-              if (!bo) {
-                notification.warn({ message: `未找到业务对象：${values?.layoutBoName}` });
-                return;
+              let { baseViewId, ipfCcmBoId } = window?.['__urlParams'] || {};
+              if (values?.layoutBoName) {
+                dispatch(createSetIsLoadingAction(true, true));
+                const result = await queryBoName({
+                  pageSize: 1,
+                  currentPage: 1,
+                  keywords: values?.layoutBoName,
+                });
+                dispatch(createSetIsLoadingAction(false, true));
+                const bo = result?.source?.[0];
+                if (!bo) {
+                  notification.warn({ message: `未找到业务对象：${values?.layoutBoName}` });
+                  return;
+                }
+                baseViewId = bo.baseViewId;
+                ipfCcmBoId = bo.ipfCcmBoId;
+              }
+              if (!(baseViewId && ipfCcmBoId)) {
+                notification.warn({ message: 'Error.' });
               }
               openCheckSettingsModal({
-                baseViewId: bo.baseViewId,
-                ipfCcmBoId: bo.ipfCcmBoId,
+                baseViewId,
+                ipfCcmBoId,
               });
             }}
           >
@@ -924,11 +931,37 @@ export const VISUALIZATION_CONFIG = {
         // { title: '视图ID', field: 'ownSourceViewId' },
       ],
       queryMethod: queryBoName,
-      extra() {
+      extra(__, values, ___, ____, dispatch) {
         return (
           <Button
             size="small"
             block
+            onClick={async () => {
+              let { baseViewId, ipfCcmBoId } = window?.['__urlParams'] || {};
+              if (values?.layoutBoName) {
+                dispatch(createSetIsLoadingAction(true, true));
+                const result = await queryBoName({
+                  pageSize: 1,
+                  currentPage: 1,
+                  keywords: values?.layoutBoName,
+                });
+                dispatch(createSetIsLoadingAction(false, true));
+                const bo = result?.source?.[0];
+                if (!bo) {
+                  notification.warn({ message: `未找到业务对象：${values?.layoutBoName}` });
+                  return;
+                }
+                baseViewId = bo.baseViewId;
+                ipfCcmBoId = bo.ipfCcmBoId;
+              }
+              if (!(baseViewId && ipfCcmBoId)) {
+                notification.warn({ message: 'Error.' });
+              }
+              openCheckSettingsModal({
+                baseViewId,
+                ipfCcmBoId,
+              });
+            }}
           >
             校验配置
           </Button>
