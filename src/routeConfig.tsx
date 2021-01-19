@@ -89,6 +89,8 @@ const Visualization = myDynamic({
     })),
     import('./models/relationsModel').then(result => result.relationsModel),
     import('./models/businessTypesModel').then(result => result.businessTypesModel),
+    import('./models/propertiesModel').then(result => result.propertiesModel),
+    import('./models/methodsModel').then(result => result.methodsModel),
   ],
 });
 

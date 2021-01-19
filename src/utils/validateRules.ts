@@ -195,6 +195,7 @@ export function createUniqGlRules({ label, boName, entityName, fields, form, con
       let result;
       if (!value) {
         callback();
+        return;
       }
       try {
         result = await httpPost(url ?? '/ipf/validation/uniqueGl', {
@@ -213,6 +214,7 @@ export function createUniqGlRules({ label, boName, entityName, fields, form, con
       }
       if (result?.success) {
         callback();
+        return;
       }
       callback(message);
     },

@@ -18,6 +18,8 @@ import { UiDisabledExpreeModal } from 'src/ui/disabledExpreeModal';
 import { UiImportLayoutsJsonModal } from 'src/ui/importLayoutsJsonModal';
 import { UiElementCodeFormModal } from 'src/ui/ElementCodeForm';
 import { UiBoRelationEditDrawer } from 'src/ui/boRelationEditDrawer';
+import { UiBoPropertyEditDrawer } from 'src/ui/boPropertyEditDrawer';
+import { UiBoMethodEditDrawer } from 'src/ui/boMethodEditDrawer';
 import { t } from 'src/i18n';
 import I18N_IDS from 'src/i18n/ids';
 import { UiLanguageMsgFormModal } from 'src/ui/LanguageMsgForm';
@@ -25,6 +27,7 @@ import { UiCheckSettingsModal } from 'src/ui/checkSettingsModal';
 import { UiBoBusinessTypeEditDrawer } from 'src/ui/boBusinessTypeEditDrawer';
 import { UiPageListEditDrawer } from 'src/ui/pageListEditDrawer';
 import { BoEditDrawe } from 'src/ui/boEditDrawer';
+
 export const uploaderRef = React.createRef<UiUploader>();
 export const transferModalRef = React.createRef<UiTransferModal>();
 export const editableListModalRef = React.createRef<UiEditableListModal>();
@@ -37,6 +40,8 @@ export const importLayoutsJsonModal = React.createRef<UiImportLayoutsJsonModal>(
 export const elementCodeFormModalRef = React.createRef<UiElementCodeFormModal>();
 export const languageMsgFormModalRef = React.createRef<UiLanguageMsgFormModal>();
 export const boRelationEditDrawerRef = React.createRef<UiBoRelationEditDrawer>();
+export const boPropertyEditDrawerRef = React.createRef<UiBoPropertyEditDrawer>();
+export const boMethodEditDrawerRef = React.createRef<UiBoMethodEditDrawer>();
 export const checkSettingsModalRef = React.createRef<UiCheckSettingsModal>();
 export const boBusinessTypeEditDrawerRef = React.createRef<UiBoBusinessTypeEditDrawer>();
 export const pageListEditDrawerRef = React.createRef<UiPageListEditDrawer>();
@@ -801,4 +806,14 @@ export function openBoEditDrawe({
     baseViewId,
     ipfCcmBoId,
   });
+}
+
+export function openBoPropertyEditDrawer(options: any) {
+  const drawer: UiBoPropertyEditDrawer = boPropertyEditDrawerRef.current['wrappedInstance'];
+  drawer.open(options);
+}
+
+export function openBoMethodEditDrawer(options: any) {
+  const drawer: UiBoMethodEditDrawer = boMethodEditDrawerRef.current['wrappedInstance'];
+  drawer.open(options);
 }
