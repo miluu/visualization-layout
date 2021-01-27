@@ -421,6 +421,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
         ipfCcmBoId: this.props.urlParams['ipfCcmBoId'],
         ipfCcmBoPageId: p.ipfCcmBoPageId,
         isOnlyShowMain: this.props.isOnlyShowMain,
+        baseViewId: this.props.urlParams['baseViewId'],
       }],
       this._initPageData,
       forceQuery,

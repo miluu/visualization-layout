@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import { UiTransferModal, TransferHandler, ITransferListProps } from 'src/ui/transferModal';
 import { UiColumnList } from 'src/ui/columnList';
 import { createElement, createLayout } from 'src/routes/Visualization/config';
-import { createId, delay, propertiesFilter } from '.';
+import { createId, delay, getPropertiesOrMehtods, propertiesFilter } from '.';
 import { UiFormSettingsModal } from 'src/ui/formSettingsModal';
 import { ICreateLayouttsModelOptions } from 'src/models/layoutsModel';
 import { cellNameManager } from './cellName';
@@ -90,7 +90,7 @@ export const openGridSettingsModal = async (options: {
   };
 
   const { config, layout, properties, methods } = options;
-  const methodList = methods[layout.layoutBoName];
+  const methodList = getPropertiesOrMehtods(methods, layout);
   const propertList = propertiesFilter(properties, layout);
 
   transferModal.open({
@@ -246,7 +246,7 @@ export const openToolbarSettingsModal = async (options: {
   };
 
   const { config, layout, methods, childrenButtons } = options;
-  const methodList = methods[layout.layoutBoName] || [];
+  const methodList = getPropertiesOrMehtods(methods, layout);
 
   transferModal.open({
     leftListProps: {

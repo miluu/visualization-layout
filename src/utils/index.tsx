@@ -590,10 +590,34 @@ export function sortMethodsMap(methods: IMehtodsMap): IMehtodsMap {
 }
 
 export function propertiesFilter(properties: IPropertiesMap, layout: any) {
-  return _.filter(properties[layout.layoutBoName] || [], p => (
+  return _.filter(getPropertiesOrMehtods(properties, layout), p => (
     /* p.propertyName !== 'principalGroupCode'
     &&  */p.propertyName !== 'recordVersion'
   ));
+}
+
+/**
+ * 根据业务对象名称和 ownSourceViewId 获取属性/方法列表
+ * 如无 ownSourceViewId，返回唯一匹配的列表，如匹配不唯一，则不返回列表，并提示选择视图
+ */
+export function getPropertiesOrMehtods(map: IPropertiesMap | IMehtodsMap, { layoutBoName, ownSourceViewId }: any) {
+  if (ownSourceViewId) {
+    return map[`${layoutBoName}|${ownSourceViewId}`]
+      || map[`${layoutBoName}`] || [];
+  }
+  const matchs = _.filter(map, (v, k) => {
+    const boName = k.split('|')[0];
+    return boName === layoutBoName;
+  });
+  if (matchs.length === 1) {
+    return matchs[0];
+  }
+  if (matchs.length > 1) {
+    Modal.warn({
+      content: '请选择业务对象视图！',
+    });
+  }
+  return [];
 }
 
 export async function confirm(options: ModalFuncProps) {
@@ -1136,7 +1160,7 @@ export function getLayoutElements(layouts: any[], nonGridElement = false, childr
 }
 
 export function getProperty(element: any, properties: IPropertiesMap) {
-  const boProperties = properties[element.layoutBoName];
+  const boProperties = getPropertiesOrMehtods(properties, element);
   return _.find(boProperties, p => p.propertyName && element.propertyName && p.propertyName === element.propertyName);
 }
 
