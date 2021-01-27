@@ -67,6 +67,7 @@ import {
   boEditDraweRef,
   boPropertyEditDrawerRef,
   boMethodEditDrawerRef,
+  closeCheckSettingsModal,
 } from 'src/utils/modal';
 import { UiPropertyMehodListTabs } from 'src/ui/draggableTree/propertyMethodListTabs';
 import { UiUploader } from 'src/ui/uploaderModal';
@@ -82,7 +83,7 @@ import { UiSaveAsPrototypeForm } from 'src/ui/saveAsPrototypeForm';
 import { cellNameManager } from 'src/utils/cellName';
 import { UiElementCodeFormModal } from 'src/ui/ElementCodeForm';
 import { UiLanguageMsgFormModal } from 'src/ui/LanguageMsgForm';
-import { createLoadBoTreeSourceEffect } from 'src/models/relationsAction';
+import { createLoadBoTreeSourceEffect, createLoadBoChecksEffect } from 'src/models/relationsAction';
 import { createLoadBoTreeSourceEffect as createLoadBoTreeSourceBusinessTypeEffect } from 'src/models/businessTypesAction';
 import { UiBoTree } from 'src/ui/boTree';
 import { UiBoRelationsPanel } from 'src/ui/boRelationsPanel';
@@ -502,6 +503,11 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
         [VISUALIZATION_CONFIG.pageIdKey]: this.props.urlParams[VISUALIZATION_CONFIG.pageIdKey],
       } as any, true);
     }
+
+    window['closeCheckSettingsModal'] = () => {
+      closeCheckSettingsModal();
+      this.props.dispatch(createLoadBoChecksEffect(true));
+    };
   }
 
   private _selectPage = (p: IIpfCcmPage, forceQuery = false) => {
