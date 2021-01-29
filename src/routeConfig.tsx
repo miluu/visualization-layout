@@ -87,7 +87,6 @@ const Visualization = myDynamic({
       getElementComponentKey: VISUALIZATION_CONFIG.getElementComponentKey,
       tempChildrenLayoutsKey: VISUALIZATION_CONFIG.tempChildrenLayoutsKey,
     })),
-    import('./models/relationsModel').then(result => result.relationsModel),
   ],
 });
 

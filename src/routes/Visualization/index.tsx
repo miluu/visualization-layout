@@ -52,7 +52,7 @@ import { createSetLayoutAndElementPropertyFormOptionsAction, createSetActiveForm
 import { IFormsState } from 'src/models/formsModel';
 import { UiTransferModal } from 'src/ui/transferModal';
 import { UiFormSettingsModal } from 'src/ui/formSettingsModal';
-import { transferModalRef, formSettingsModalRef, uploaderRef, listSourceEditorModalRef, importLayoutsJsonModal, elementCodeFormModalRef, languageMsgFormModalRef, boRelationEditDrawerRef } from 'src/utils/modal';
+import { transferModalRef, formSettingsModalRef, uploaderRef, listSourceEditorModalRef, importLayoutsJsonModal, elementCodeFormModalRef, languageMsgFormModalRef } from 'src/utils/modal';
 import { UiPropertyMehodListTabs } from 'src/ui/draggableTree/propertyMethodListTabs';
 import { UiUploader } from 'src/ui/uploaderModal';
 import { UiListSourceEditorModal } from 'src/ui/listSourceEditor';
@@ -68,9 +68,6 @@ import { cellNameManager } from 'src/utils/cellName';
 import { UiElementCodeFormModal } from 'src/ui/ElementCodeForm';
 import { UiLanguageMsgFormModal } from 'src/ui/LanguageMsgForm';
 import { createLoadBoTreeSourceEffect } from 'src/models/relationsAction';
-import { UiBoTree } from 'src/ui/boTree';
-import { UiBoRelationsPanel } from 'src/ui/boRelationsPanel';
-import { UiBoRelationEditDrawer } from 'src/ui/boRelationEditDrawer';
 
 const { Panel } = Collapse;
 const { TabPane } = Tabs;
@@ -202,13 +199,6 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
                 : (
                   <>
                     <Panel
-                      key="5"
-                      header="数据源"
-                    >
-                      <UiBoTree />
-                    </Panel>
-
-                    <Panel
                       key="4"
                       header={t(I18N_IDS.PANEL_TITLE_PAGE_LAYOUTS)}
                     >
@@ -282,12 +272,6 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
                 </TabPane>
               </Tabs>
             </Panel>
-            <Panel
-              key="3"
-              header="子对象关系"
-            >
-              <UiBoRelationsPanel />
-            </Panel>
           </Collapse>
         </UiSidebar>
 
@@ -309,7 +293,6 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
           />
           <UiElementCodeFormModal ref={elementCodeFormModalRef} />
           <UiLanguageMsgFormModal ref={languageMsgFormModalRef} />
-          <UiBoRelationEditDrawer ref={boRelationEditDrawerRef} />
         </>,
 
         {/* 原型列表 */}
@@ -560,7 +543,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
     cellNameManager.init(boPageLayout, cellNameManager.configName);
   }
 
-  private _onClickSave = (e: React.MouseEvent) => {
+  private _onClickSave = () => {
     const {  dispatch } = this.props;
     dispatch(createSaveEffect(
       (data) => {
@@ -581,7 +564,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
   /**
    * 另存为模板
    */
-  private _saveAsTemplate = (e: React.MouseEvent) => {
+  private _saveAsTemplate = () => {
     this.setState({
       saveAsTemplateType: 'TEMPLATE',
     });
@@ -590,7 +573,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
   /**
    * 另存为控件组合
    */
-  private _saveAsGroup = (e: React.MouseEvent) => {
+  private _saveAsGroup = () => {
     if (!this.props.hasSelectLayout) {
       Modal.warn({
         content: '请先选择一个布局容器',
