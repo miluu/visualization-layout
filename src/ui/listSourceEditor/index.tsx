@@ -61,9 +61,17 @@ export class UiListSourceEditorModal extends React.Component<any, IUiListSourceE
   state = initState;
   listRef = React.createRef<UiColumnList>();
   tableWrapRef = React.createRef<HTMLDivElement>();
+  tableInnerRef = React.createRef<HTMLDivElement>();
 
   render() {
     const { visible, sourceObj, columns, isEditingColumn, columnsEditable, selectedRows, extraButtons } = this.state;
+    const innerHeight = this.tableInnerRef.current?.clientHeight;
+    let scrollY = document.body.clientHeight - 260;
+    if (innerHeight) {
+      scrollY = innerHeight - 40;
+    } else if (580 < scrollY) {
+      scrollY = 580;
+    }
     return (
       <UiSettingsModal
         visible={visible}
@@ -118,14 +126,14 @@ export class UiListSourceEditorModal extends React.Component<any, IUiListSourceE
               { extraButtons?.(this) }
             </div>
             <div className={classnames('editor-list-source-editor-table', { 'editor-is-empty': !sourceObj?.length })} ref={this.tableWrapRef} >
-              <div className="editor-list-source-editor-table-inner">
+              <div className="editor-list-source-editor-table-inner" ref={this.tableInnerRef}>
                 <Table
                   bordered
                   pagination={false}
                   size="small"
                   scroll={{
                     x: 150 * columns.length + 50,
-                    y: 'calc(100vh - 260px)',
+                    y: scrollY,
                   }}
                   rowKey="__id"
                   onRow={(record) => {
