@@ -85,6 +85,7 @@ import { UiElementCodeFormModal } from 'src/ui/ElementCodeForm';
 import { UiLanguageMsgFormModal } from 'src/ui/LanguageMsgForm';
 import { createLoadBoTreeSourceEffect, createLoadBoChecksEffect } from 'src/models/relationsAction';
 import { createLoadBoTreeSourceEffect as createLoadBoTreeSourceBusinessTypeEffect } from 'src/models/businessTypesAction';
+import { UiBoTree } from 'src/ui/boTree';
 import { UiBoRelationsPanel } from 'src/ui/boRelationsPanel';
 import { UiBoPropertiesPanel } from 'src/ui/boPropertiesPanel';
 import { UiBoMethodsPanel } from 'src/ui/boMethodsPanel';
@@ -227,6 +228,13 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
                 )
                 : (
                   <>
+                    <Panel
+                      key="5"
+                      header="数据源"
+                    >
+                      <UiBoTree />
+                    </Panel>
+
                     <Panel
                       key="4"
                       header={t(I18N_IDS.PANEL_TITLE_PAGE_LAYOUTS)}
