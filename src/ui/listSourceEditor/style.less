@@ -65,8 +65,10 @@
       left: 0;
       bottom: 0;
       right: 0;
+      overflow: hidden;
       .ant-table-body {
         height: calc(~"100vh - 260px");
+        max-height: 580px;
         overflow: scroll;
       }
       .ant-table-small > .ant-table-content .ant-table-row:last-child td {
@@ -74,6 +76,7 @@
       }
       .ant-table-small.ant-table-bordered .ant-table-placeholder {
         height: calc(~"100vh - 260px");
+        max-height: 580px;
         display: flex;
         flex-direction: column;
         justify-content: center;

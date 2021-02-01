@@ -475,8 +475,8 @@ export default class DatasourceBinding extends React.PureComponent<IDatasourceBi
     const properties: any = {};
     const methods: any = {};
     _.forEach(data, bo => {
-      properties[bo.boName] = bo.ipfCcmBoProperties;
-      methods[bo.boName] = bo.ipfCcmBoMethods;
+      properties[`${bo.boName}|${bo.ownSourceViewId || ''}`] = bo.ipfCcmBoProperties;
+      methods[`${bo.boName}|${bo.ownSourceViewId || ''}`] = bo.ipfCcmBoMethods;
     });
     const result = {
       properties: sortPropertiesMap(properties),

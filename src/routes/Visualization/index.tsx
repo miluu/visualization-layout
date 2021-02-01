@@ -85,7 +85,6 @@ import { UiElementCodeFormModal } from 'src/ui/ElementCodeForm';
 import { UiLanguageMsgFormModal } from 'src/ui/LanguageMsgForm';
 import { createLoadBoTreeSourceEffect, createLoadBoChecksEffect } from 'src/models/relationsAction';
 import { createLoadBoTreeSourceEffect as createLoadBoTreeSourceBusinessTypeEffect } from 'src/models/businessTypesAction';
-import { UiBoTree } from 'src/ui/boTree';
 import { UiBoRelationsPanel } from 'src/ui/boRelationsPanel';
 import { UiBoPropertiesPanel } from 'src/ui/boPropertiesPanel';
 import { UiBoMethodsPanel } from 'src/ui/boMethodsPanel';
@@ -228,13 +227,6 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
                 )
                 : (
                   <>
-                    <Panel
-                      key="5"
-                      header="数据源"
-                    >
-                      <UiBoTree />
-                    </Panel>
-
                     <Panel
                       key="4"
                       header={t(I18N_IDS.PANEL_TITLE_PAGE_LAYOUTS)}
@@ -526,6 +518,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
         ipfCcmBoId: this.props.urlParams['ipfCcmBoId'],
         ipfCcmBoPageId: p.ipfCcmBoPageId,
         isOnlyShowMain: this.props.isOnlyShowMain,
+        baseViewId: this.props.urlParams['baseViewId'],
       }],
       this._initPageData,
       forceQuery,
@@ -664,7 +657,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
     cellNameManager.init(boPageLayout, cellNameManager.configName);
   }
 
-  private _onClickSave = (e: React.MouseEvent) => {
+  private _onClickSave = () => {
     const {  dispatch } = this.props;
     dispatch(createSaveEffect(
       (data) => {
@@ -685,7 +678,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
   /**
    * 另存为模板
    */
-  private _saveAsTemplate = (e: React.MouseEvent) => {
+  private _saveAsTemplate = () => {
     this.setState({
       saveAsTemplateType: 'TEMPLATE',
     });
@@ -694,7 +687,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
   /**
    * 另存为控件组合
    */
-  private _saveAsGroup = (e: React.MouseEvent) => {
+  private _saveAsGroup = () => {
     if (!this.props.hasSelectLayout) {
       Modal.warn({
         content: '请先选择一个布局容器',
