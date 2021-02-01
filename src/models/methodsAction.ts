@@ -1,6 +1,6 @@
 import { Action } from 'redux';
 import * as _ from 'lodash';
-import { IBoMethod } from './methodsModel';
+import { IBoMethod, IBoTreeSourceItem } from './methodsModel';
 import { noop } from 'src/utils';
 
 export const NAMESPACE = 'METHODS';
@@ -11,6 +11,8 @@ export enum ActionTypes {
   ResetMethods = 'Reset Methods',
   AddMethod = 'Add Method',
   SetEditingMethod = 'Set Editing Method',
+  SetBoTreeSource = 'Set Bo Tree Source',
+  SelectBoTreeItem = 'Select Bo Tree Item',
 
   // Effects
   LoadMethodsEffect = 'Load Methods Effect',
@@ -21,6 +23,7 @@ export enum ActionTypes {
   LoadBoTreeSourceEffect = 'Load Bo Tree Source Effect',
 
   // Watchers
+  SelectBoTreeItemWatcher = 'Select Bo Tree Item Watcher',
   SaveOrUpdateMethodWatcher = 'Save Or Update Method Watcher',
 }
 
@@ -32,6 +35,30 @@ export function addNamespace(type: string, b: boolean) {
 }
 
 // Actions
+
+export interface ISetBoTreeSourceAction extends Action {
+  boTreeSource: IBoTreeSourceItem[];
+}
+
+export function createSetBoTreeSourceAction(boTreeSource: IBoTreeSourceItem[], withNamespace = false): ISetBoTreeSourceAction {
+  const type = addNamespace(ActionTypes.SetBoTreeSource, withNamespace);
+  return {
+    type,
+    boTreeSource,
+  };
+}
+
+export interface ISelectBoTreeItemAction extends Action {
+  id: string;
+}
+
+export function createSelectBoTreeItemAction(id: string, withNamespace = false): ISelectBoTreeItemAction {
+  const type = addNamespace(ActionTypes.SelectBoTreeItem, withNamespace);
+  return {
+    type,
+    id,
+  };
+}
 
 export interface ISetMethodsAction extends Action {
   ipfCcmBoId: string;
@@ -111,6 +138,12 @@ export function createSaveOrUpdateMethodEffect(data: IBoMethod, editType = 'edit
 export interface ISelectBoTreeItemWatcher extends Action {
 }
 
+export function createSelectBoTreeItemWatcher(withNamespace = false): ISelectBoTreeItemWatcher {
+  const type = addNamespace(ActionTypes.SelectBoTreeItemWatcher, withNamespace);
+  return {
+    type,
+  };
+}
 export interface ISaveOrUpdateMethodWatcher extends Action {
 }
 

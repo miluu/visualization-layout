@@ -80,8 +80,8 @@ export class UiBoBusinessTypesPanel extends React.PureComponent<IUiBoBusinessTyp
           );
         },
       },
-      { title: '业务类型', dataIndex: 'businessType', width: '200px' },
-      { title: '描述', dataIndex: 'description', width: '200px' },
+      { title: '业务类型', dataIndex: 'businessType', width: '110px' },
+      { title: '描述', dataIndex: 'description' },
     ],
     selectedBusinessTypes: [],
   };

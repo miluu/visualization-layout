@@ -80,10 +80,21 @@ export class UiBoPropertiesPanel extends React.PureComponent<IUiBoPropertiesPane
           );
         },
       },
-      { title: '属性名', dataIndex: 'propertyName', width: '180px' },
-      { title: '显示文本', dataIndex: 'fieldText', width: '180px' },
-      { title: '属性类型', dataIndex: 'propertyType', width: '180px' },
-      { title: '对象关系类型', dataIndex: 'subBoRelType', width: '180px', render: (text: string) => this.renderDictValue(text)('SubBoRelType') },
+      {
+        title: '属性名',
+        dataIndex: 'propertyName',
+        width: '180px',
+        onFilter: (value, record) => record.propertyName.indexOf(value) === 0,
+        sorter: (a, b) => a.propertyName.length - b.propertyName.length,
+      },
+      {
+        title: '显示文本',
+        dataIndex: 'fieldText',
+        width: '180px',
+        onFilter: (value, record) => record.fieldText.indexOf(value) === 0,
+        sorter: (a, b) => a.fieldText.length - b.fieldText.length,
+      },
+      { title: '属性类型', dataIndex: 'propertyType', width: '180px', render: (text: string) => this.renderDictValue(text)('IpfCcmBoPropertyType') },
     ],
     selectedProperties: [],
   };

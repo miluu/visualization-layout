@@ -327,7 +327,7 @@ class LanguageMsgForm extends React.PureComponent<ILanguageMsgFormProps> {
                     createRichLengthRule({ label: '消息键值', max: 50 }),
                     createEnNumUlStringRule({ label: '消息键值' }),
                     createUniqGlRules({
-                      label: '消息键值',
+                      label: ['消息键值'],
                       boName: 'IpfLanguageMsg',
                       entityName: 'com.gillion.platform.implement.dml.domain.IpfLanguageMsg',
                       fields: ['messageKey'],

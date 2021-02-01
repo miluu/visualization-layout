@@ -2,6 +2,7 @@
 import * as _ from 'lodash';
 
 import { VISUALIZATION_CONFIG } from './config';
+import { ELEMENT_FIELDS } from './addFields';
 
 const {
   layoutEventsKey,
@@ -103,7 +104,7 @@ function formatBoPgLoElement(boPgLoElementIn: any) {
   let ipfCcmBoPgLoElementId = _ipfCcmBoPgLoElement.ipfCcmBoPgLoElementId;
   let cellName = boPgLoElementIn.cellName;
   let columnName = boPgLoElementIn.fieldText;
-  let elementFormData;
+  let elementFormData: any;
   if (_ipfCcmBoPgLoElement.layoutElementType === 'FORM_COLUMN') {
       elementFormData = boPgLoElementIn.ipfCcmBoFormColumn;
   } else if (_ipfCcmBoPgLoElement.layoutElementType === 'SEARCH_FORM') {
@@ -112,7 +113,7 @@ function formatBoPgLoElement(boPgLoElementIn: any) {
   if (!cellName) {
       return null;
   }
-  return {
+  const result:any = {
       ipfCcmBoPgLoElementId: ipfCcmBoPgLoElementId,
       cellName: cellName,
       columnName: columnName,
@@ -192,4 +193,8 @@ function formatBoPgLoElement(boPgLoElementIn: any) {
       ipfCcmBoElementEvents: _ipfCcmBoPgLoElement[elementEventsKey] || _ipfCcmBoPgLoElement[elementEventsCopyKey] || (elementFormData ? (elementFormData[elementEventsKey] || elementFormData[elementEventsCopyKey]) : null),
       _fromFormHeader: false
   };
+  _.forEach(ELEMENT_FIELDS, field => {
+    result[field] = _ipfCcmBoPgLoElement[field] || (elementFormData ? elementFormData[field] : null);
+  });
+  return result;
 }

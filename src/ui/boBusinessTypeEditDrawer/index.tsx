@@ -12,7 +12,7 @@ import { createSaveOrUpdateBusinessTypeEffect } from 'src/models/businessTypesAc
 import { ROW_STATUS } from 'src/config';
 import { isFormDataModified } from 'src/utils/forms';
 import { IAppState, IDictsMap } from 'src/models/appModel';
-import { createFirstLetterUpperRule, createNotSpecialCharacterRule, createRequireRule, createRichLengthRule } from 'src/utils/validateRules';
+import { createFirstLetterUpperRule, createNotSpecialCharacterRule, createRequireRule, createRichLengthRule, createAlphabetOrDigitalRule, createUniqGlRules } from 'src/utils/validateRules';
 
 const FormItem = Form.Item;
 
@@ -159,6 +159,9 @@ export class UiBoBusinessTypeEditDrawer extends React.PureComponent<IUiBoBusines
     }
     const formValues = form.getFieldsValue();
     const { boBusinessType } = this.state;
+    if (!boBusinessType) {
+      return false;
+    }
     return isFormDataModified(boBusinessType, formValues);
   }
 
@@ -220,10 +223,22 @@ class BoBusinessTypeEditForm extends React.PureComponent<IBoBusinessTypeEditForm
               rules: [
                 createRequireRule({ label: '业务类型' }),
                 createFirstLetterUpperRule({ label: '业务类型' }),
+                createAlphabetOrDigitalRule({ label: '业务类型' }),
                 createRichLengthRule({
                   label: '业务类型',
                   min: 0,
-                  max: 200,
+                  max: 50,
+                }),
+                createUniqGlRules({
+                  label: ['业务类型', '业务对象id'],
+                  boName: 'IpfCcmBoBusinessType',
+                  entityName: 'com.gillion.platform.implement.metadata.domain.IpfCcmBoBusinessType',
+                  fields: ['businessType', 'ipfCcmBoId'],
+                  form: this.props.form,
+                  property: 'businessType',
+                  url: '/ipf/validation/uniqueGl',
+                  baseViewId: window['__urlParams']?.baseViewId,
+                  pkValue: this.props.form.getFieldValue('ipfCcmBoBusinessTypeId'),
                 }),
               ],
             })(
@@ -245,6 +260,24 @@ class BoBusinessTypeEditForm extends React.PureComponent<IBoBusinessTypeEditForm
                 createNotSpecialCharacterRule({ label: '描述' }),
               ],
             })(
+              <Input
+                size="small"
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="业务对象id" style={{ display: 'none' }} >
+          {
+            getFieldDecorator('ipfCcmBoId')(
+              <Input
+                size="small"
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="主键" style={{ display: 'none' }} >
+          {
+            getFieldDecorator('ipfCcmBoBusinessTypeId')(
               <Input
                 size="small"
               />,

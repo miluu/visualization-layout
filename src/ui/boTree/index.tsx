@@ -9,9 +9,9 @@ import { connect } from 'dva';
 import { Dispatch, AnyAction } from 'redux';
 import { IBoTreeSourceItem, IRelationsState } from 'src/models/relationsModel';
 import { DEFAULT_COLORS } from 'src/config';
-import { createSelectBoTreeItemAction as createSelectBoTreeItemForRelationAction } from 'src/models/relationsAction';
-import { createSelectBoTreeItemAction as createSelectBoTreeItemForPropAction } from 'src/models/propertiesAction';
-import { createSelectBoTreeItemAction as createSelectBoTreeItemBusinessTypeAction } from 'src/models/businessTypesAction';
+import { createSelectBoTreeItemAction as createSelectBoTreeRelationAction } from 'src/models/relationsAction';
+import { createSelectBoTreeItemAction as createSelectBoTreePropertyAction } from 'src/models/propertiesAction';
+import { createSelectBoTreeItemAction as createSelectBoTreeMethodAction } from 'src/models/methodsAction';
 
 const { TreeNode } = Tree;
 
@@ -86,9 +86,9 @@ export class UiBoTree extends React.PureComponent<IUiBoTreeProps, IUiBoTreeState
   }
 
   private _onSelect = (keys: string[]) => {
-    this.props.dispatch(createSelectBoTreeItemForRelationAction(keys[0], true));
-    this.props.dispatch(createSelectBoTreeItemForPropAction(keys[0], true));
-    this.props.dispatch(createSelectBoTreeItemBusinessTypeAction(keys[0], true));
+    this.props.dispatch(createSelectBoTreeRelationAction(keys[0], true));
+    this.props.dispatch(createSelectBoTreePropertyAction(keys[0], true));
+    this.props.dispatch(createSelectBoTreeMethodAction(keys[0], true));
   }
 
   private _buildSourceMap() {

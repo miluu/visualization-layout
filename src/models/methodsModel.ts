@@ -4,20 +4,39 @@ import produce from 'immer';
 import {
   ActionTypes,
   NAMESPACE,
+  ISetBoTreeSourceAction,
+  ISelectBoTreeItemAction,
   ILoadMethodsEffect,
   ISetMethodsAction,
   createSetMethodsAction,
-  // createLoadMethodsEffect,
+  createLoadMethodsEffect,
+  createSelectBoTreeItemWatcher,
   IDeleteMethodsEffect,
   ISaveOrUpdateMethodEffect,
   createSaveOrUpdateMethodWatcher,
   createResetMethodsAction,
   createLoadBoTreeSourceEffect,
+  createSelectBoTreeItemAction,
 } from './methodsAction';
 import { deleteBoMethods, loadBoMethods, saveOrUpdateBoMethod } from 'src/services/methods';
 import { IAppState } from './appModel';
+import { getSelectBoTreeItem } from 'src/utils/boMethods';
 import { createSetIsLoadingAction } from './appActions';
 import { Modal, notification } from 'antd';
+
+export interface IBoTreeSourceItem {
+  appModule: string;
+  custom: string;
+  description: string;
+  name: string;
+  id: string;
+  pid: string;
+  boName: string;
+  pidName: string;
+  javaPath: string;
+  tableName: string;
+  [key: string]: any;
+}
 
 export interface IBoMethod {
   propertyName?: string;
@@ -35,7 +54,7 @@ export interface IBoMethod {
 
 export interface IBoMethodColumn {
   baseViewId: string;
-  businessType: string;
+  method: string;
   columnName: string;
   commitRemark: string;
   configItemCode: string;
@@ -60,10 +79,14 @@ export interface IBoMethodColumn {
 }
 
 export interface IMethodsState {
+  boTreeSource: IBoTreeSourceItem[];
+  selectedBoTreeItem: string;
   methods: _.Dictionary<IBoMethod[]>;
 }
 
 const initMethodsState: IMethodsState = {
+  boTreeSource: [],
+  selectedBoTreeItem: null,
   methods: {},
 };
 
@@ -81,6 +104,12 @@ export const methodsModel: IMethodsModel = {
   state: initMethodsState,
 
   reducers: {
+    [ActionTypes.SetBoTreeSource](state, { boTreeSource }: ISetBoTreeSourceAction) {
+      return produce(state, draft => {
+        draft.boTreeSource = boTreeSource;
+      });
+    },
+
     [ActionTypes.SetMethods](state, { ipfCcmBoId, methods }: ISetMethodsAction) {
       return produce(state, draft => {
         draft.methods[ipfCcmBoId] = methods;
@@ -93,17 +122,28 @@ export const methodsModel: IMethodsModel = {
       });
     },
 
+    [ActionTypes.SelectBoTreeItem](state, { id }: ISelectBoTreeItemAction) {
+      return produce(state, draft => {
+        draft.selectedBoTreeItem = id;
+      });
+    },
+
   },
 
   effects: {
     *[ActionTypes.LoadMethodsEffect]({ force }: ILoadMethodsEffect, { put, call, select }) {
       const { params }: IAppState = yield select((s: any) => s.APP);
       const methodsState: IMethodsState = yield select((s: any) => s.METHODS);
-      const baseViewId: string = params.baseViewId;
-      const ipfCcmBoId: string = params.ipfCcmBoId;
+      let baseViewId: string = params.baseViewId;
+      let ipfCcmBoId: string = params.ipfCcmBoId;
+      if (methodsState.selectedBoTreeItem) {
+        const selectedBoTreeItem = getSelectBoTreeItem(methodsState);
+        baseViewId = selectedBoTreeItem?.baseViewId || params.baseViewId;
+        ipfCcmBoId = selectedBoTreeItem?.id || params.ipfCcmBoId;
+      }
 
       if (!force && methodsState.methods[ipfCcmBoId]) {
-        console.log('[LoadMethodsEffect] 子对象关系已加载，不再重复加载:', ipfCcmBoId);
+        console.log('[LoadMethodsEffect] 方法定义已加载，不再重复加载:', ipfCcmBoId);
         return;
       }
 
@@ -113,8 +153,12 @@ export const methodsModel: IMethodsModel = {
 
     *[ActionTypes.DeleteMethodsEffect]({ ids }: IDeleteMethodsEffect, { put, call, select }) {
       const { params }: IAppState = yield select((s: any) => s.APP);
-      // const methodsState: IMethodsState = yield select((s: any) => s.METHODS);
-      const baseViewId: string = params.baseViewId;
+      const methodsState: IMethodsState = yield select((s: any) => s.METHODS);
+      let baseViewId: string = params.baseViewId;
+      if (methodsState.selectedBoTreeItem) {
+        const selectedBoTreeItem = getSelectBoTreeItem(methodsState);
+        baseViewId = selectedBoTreeItem?.baseViewId || params.baseViewId;
+      }
       let result;
       yield put(createSetIsLoadingAction(true, true));
       try {
@@ -135,8 +179,12 @@ export const methodsModel: IMethodsModel = {
 
     *[ActionTypes.SaveOrUpdateMethodEffect]({ data, editType, callback }: ISaveOrUpdateMethodEffect, { put, call, select }) {
       const { params }: IAppState = yield select((s: any) => s.APP);
-      // const methodsState: IMethodsState = yield select((s: any) => s.METHODS);
-      const baseViewId: string = params.baseViewId;
+      const methodsState: IMethodsState = yield select((s: any) => s.METHODS);
+      let baseViewId: string = params.baseViewId;
+      if (methodsState.selectedBoTreeItem) {
+        const selectedBoTreeItem = getSelectBoTreeItem(methodsState);
+        baseViewId = selectedBoTreeItem?.baseViewId || params.baseViewId;
+      }
       yield put(createSetIsLoadingAction(true, true));
       let result;
       try {
@@ -163,13 +211,26 @@ export const methodsModel: IMethodsModel = {
           `${ActionTypes.DeleteMethodsEffect}/@@end`,
         ]);
         yield put(createLoadBoTreeSourceEffect(false));
+        const methodsState: IMethodsState = yield select((s: any) => s.METHODS);
+        const selectedBoTreeItem = getSelectBoTreeItem(methodsState);
         yield put(createResetMethodsAction());
+        yield put(createSelectBoTreeItemAction(selectedBoTreeItem?.id));
+      }
+    },
+
+    *[ActionTypes.SelectBoTreeItemWatcher](__, { take, put }) {
+      while (true) {
+        yield take([
+          ActionTypes.SelectBoTreeItem,
+        ]);
+        yield put(createLoadMethodsEffect(false, false));
       }
     },
   },
 
   subscriptions: {
     watchActions({ dispatch }) {
+      dispatch(createSelectBoTreeItemWatcher());
       dispatch(createSaveOrUpdateMethodWatcher());
     },
   },

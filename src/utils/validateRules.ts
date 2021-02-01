@@ -178,8 +178,8 @@ export function createEnNumUlStringRule({ label }: { label: string }): Validatio
   };
 }
 
-export function createUniqGlRules({ label, boName, entityName, fields, form, configItemCode, url, baseViewId }: {
-  label: string;
+export function createUniqGlRules({ label, boName, entityName, fields, form, configItemCode, url, baseViewId, pkValue }: {
+  label: string[];
   boName: string;
   entityName: string;
   fields: string[];
@@ -188,8 +188,9 @@ export function createUniqGlRules({ label, boName, entityName, fields, form, con
   configItemCode?: string;
   url?: string;
   baseViewId?: string;
+  pkValue?: string;
 }) {
-  const message = `【${label}】必须唯一。`;
+  const message = `【${label.length === 1 ? label : label.join('】,【')}】必须唯一。`;
   return {
     async validator(rule: any, value: string, callback: (message?: string) => void) {
       let result;
@@ -205,7 +206,7 @@ export function createUniqGlRules({ label, boName, entityName, fields, form, con
           entityName,
           fieldNames: _.map(fields, f => `${_.camelCase(boName)}.${f}`),
           fieldValues: _.map(fields, f => form.getFieldValue(f) || ''),
-          pkValue: '',
+          pkValue,
           version: true,
         });
       } catch (e) {

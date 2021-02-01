@@ -330,7 +330,7 @@ class ElementCodeForm extends React.PureComponent<IElementCodeFormProps> {
                     createEnUcNumUlStringRule({ label: '数据元素代码' }),
                     createRichLengthRule({ label: '数据元素代码', max: 50 }),
                     createUniqGlRules({
-                      label: '数据元素代码',
+                      label: ['数据元素代码'],
                       boName: 'IpfDmlElement',
                       entityName: 'com.gillion.platform.implement.dml.domain.IpfDmlElement',
                       fields: ['elementCode'],

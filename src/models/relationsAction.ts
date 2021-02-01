@@ -24,6 +24,7 @@ export enum ActionTypes {
   DeleteRelationsEffect = 'Delete Relations Effect',
   LoadBoTreeSourceEffect = 'Load Bo Tree Source Effect',
   LoadBoChecksEffect = 'Load Bo Checks Effect',
+  LoadBoMethodsEffect = 'Load Bo Methods Effect',
 
   // Watchers
   SelectBoTreeItemWatcher = 'Select Bo Tree Item Watcher',
@@ -168,6 +169,14 @@ export interface ILoadBoChecksEffect extends Action {
 
 export function createLoadBoChecksEffect(force = false, withNamespace = true): ILoadBoChecksEffect {
   const type = addNamespace(ActionTypes.LoadBoChecksEffect, withNamespace);
+  return {
+    force,
+    type,
+  };
+}
+
+export function createLoadBoMethodsEffect(force = false, withNamespace = true): ILoadBoChecksEffect {
+  const type = addNamespace(ActionTypes.LoadBoMethodsEffect, withNamespace);
   return {
     force,
     type,

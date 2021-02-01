@@ -4,10 +4,11 @@ import { ColumnProps } from 'antd/lib/table';
 import { connect } from 'dva';
 import { Dispatch, AnyAction } from 'redux';
 import React from 'react';
-import { IBoMethod } from 'src/models/methodsModel';
+import { IBoMethod, IMethodsState } from 'src/models/methodsModel';
+import { getSelectBoTreeItem } from 'src/utils/boMethods';
+import { createLoadMethodsEffect, createDeleteMethodsEffect } from 'src/models/methodsAction';
 import { openBoMethodEditDrawer } from 'src/utils/modal';
 import './style.less';
-import { createDeleteMethodsEffect, createLoadMethodsEffect } from 'src/models/methodsAction';
 import { IAppState, IDictsMap } from 'src/models/appModel';
 import { ROW_STATUS } from 'src/config';
 import { createId, getDictDisplay } from 'src/utils';
@@ -27,19 +28,24 @@ interface IUiBoMethodsPanelState {
 
 @connect(
   ({
-    // METHODS,
+    METHODS,
     APP,
   }: {
-    // METHODS: IMethodsState,
+    METHODS: IMethodsState,
     APP: IAppState,
   }) => {
-    const {
+    let {
       ipfCcmBoId,
       baseViewId,
     } = APP.params;
-    // const { methods } = METHODS;
+    const { selectedBoTreeItem, methods } = METHODS;
+    const selectedBoTreeItemObj = getSelectBoTreeItem(METHODS);
+    ipfCcmBoId = selectedBoTreeItem || ipfCcmBoId;
+    if (selectedBoTreeItemObj) {
+      baseViewId = selectedBoTreeItemObj.baseViewId || baseViewId;
+    }
     return {
-      // methods: methods[baseViewId || ipfCcmBoId] || [],
+      methods: methods[selectedBoTreeItem || ipfCcmBoId] || [],
       ipfCcmBoId,
       baseViewId,
       dicts: APP.dicts,
@@ -74,9 +80,9 @@ export class UiBoMethodsPanel extends React.PureComponent<IUiBoMethodsPanelProps
           );
         },
       },
-      { title: '属性名称', dataIndex: 'propertyName', width: '180px' },
-      { title: '子对象名称', dataIndex: 'subBoName', width: '180px' },
-      { title: '对象关系类型', dataIndex: 'subBoRelType', render: (text: string) => this.renderDictValue(text)('SubBoRelType') },
+      { title: '方法名称', dataIndex: 'methodName', width: '180px' },
+      { title: '方法描述', dataIndex: 'methodDesc', width: '180px' },
+      { title: '方法类型', dataIndex: 'methodType', render: (text: string) => this.renderDictValue(text)('IpfCcmBoMethodType') },
     ],
     selectedMethods: [],
   };
@@ -151,7 +157,6 @@ export class UiBoMethodsPanel extends React.PureComponent<IUiBoMethodsPanelProps
     const boMethod: IBoMethod = {
       rowStatus: ROW_STATUS.ADDED,
       ipfCcmBoMethodId: createId(),
-      subBoOrderNo: 0,
       ipfCcmBoId,
       baseViewId,
     };

@@ -239,3 +239,78 @@ export async function querySubPropertyNameMethod(options: IQueryOptions, boName?
   };
   return result;
 }
+
+export async function queryBusinessTypeMethod(options: IQueryOptions, ipfCcmBoId?: string, boName?: string) {
+  const baseViewId = window['__urlParams']?.baseViewId;
+  let result: IQueryResult;
+  const {
+    currentPage,
+    pageSize,
+    keywords,
+    isExactQuery,
+  } = options;
+  const searchColumns: any[] = [{
+    propertyName: 'baseViewId',
+    columnName: 'BASE_VIEW_ID',
+    dataType: 'S',
+    value: baseViewId,
+    operation:'EQ',
+  }];
+  if (boName) {
+    searchColumns.push({
+      propertyName: 'boName',
+      columnName: 'BO_NAME',
+      dataType:'S',
+      value: boName || '',
+      operation: 'EQ',
+    });
+  }
+  if (ipfCcmBoId) {
+    searchColumns.push({
+      propertyName: 'ipfCcmBoId',
+      columnName: 'IPF_CCM_BO_ID',
+      dataType:'S',
+      value: ipfCcmBoId || '',
+      operation: 'EQ',
+    });
+  }
+  if (keywords && isExactQuery) {
+    searchColumns.push({
+      propertyName:'businessType',
+      columnName:'BUSINESS_TYPE',
+      dataType:'S',
+      value: keywords,
+      operation: 'EQ',
+    });
+  } else if (keywords) {
+    searchColumns.push({
+      propertyName:'businessType',
+      columnName:'BUSINESS_TYPE',
+      dataType:'S',
+      junction:'or',
+      value: keywords,
+      operation: 'LIKEIC',
+    });
+  }
+  let res: any;
+  res = await httpGet('/ipf/commonSearchHelp/query', {
+    paramsSerializer,
+    params: {
+      type: 'S',
+      sourceName: 'VwIpfBoBusinessTypeLast',
+      searchName: 'BusinessType',
+      baseViewId,
+      currentPage,
+      propertyName: keywords,
+      pageSize,
+      queryResultType: 'page',
+      sum: 'false',
+      searchColumns,
+    },
+  });
+  result = {
+    source: res.vwIpfBoBusinessTypeLasts || [],
+    total: res.total,
+  };
+  return result;
+}

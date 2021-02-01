@@ -801,7 +801,7 @@ export function openBoEditDrawe({
   baseViewId: string;
   ipfCcmBoId: string;
 }) {
-  const modal = boEditDraweRef.current;
+  const modal = boEditDraweRef.current['wrappedInstance'];
   modal.open({
     baseViewId,
     ipfCcmBoId,

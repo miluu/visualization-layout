@@ -1,5 +1,6 @@
 import * as _ from 'lodash';
 import { ROW_STATUS } from 'src/config';
+import { LAYOUT_FIELDS, ELEMENT_FIELDS } from './addFields';
 
 let dm: any;
 
@@ -81,6 +82,10 @@ const emptyLayout: any = {
   rowStatus: ROW_STATUS.NOT_MODIFIED,
   searchFormColumns: [],
 };
+
+_.forEach(LAYOUT_FIELDS, field => {
+  emptyLayout.ipfCcmBoPageLayout[field] = null;
+});
 
 const emptyElement: any = {
   cellName: null,
@@ -172,6 +177,10 @@ const emptyElement: any = {
   },
   rowStatus: ROW_STATUS.NOT_MODIFIED,
 };
+
+_.forEach(ELEMENT_FIELDS, field => {
+  emptyElement.ipfCcmBoPgLoElement[field] = null;
+});
 
 const ipfCcmBoFormColumn: any = {
   activeExpree: null,
@@ -818,6 +827,9 @@ function formatPostElementData(initElementData: any, modifyedElementData: any) {
       NewElement[elementKey1].initValueType2 = element.initValueType2;
       NewElement[elementKey1].defaultValue2 = element.defaultValue2;
       NewElement[elementKey1].lockColumnExpress = element.lockColumnExpress;
+      _.forEach(ELEMENT_FIELDS, field => {
+        NewElement[elementKey1][field] = element[field];
+      });
       NewElement[elementKey1].ipfCcmBoPgLoElementId = element.__origin_ipfCcmBoPgLoElementId || element.ipfCcmBoPgLoElementId;
       NewElement[elementKey1][elementKey1 === 'ipfCcmBoPgLoElementCopy' ? elementEventsCopyKey : elementEventsKey] = element.ipfCcmBoElementEvents;
       if (_formColumnKey === 'ipfCcmBoFormColumn') {
@@ -868,7 +880,7 @@ function formatPostElementData(initElementData: any, modifyedElementData: any) {
     } else if (layoutElementType === 'SEARCH_FORM') {
       formColumnKey = 'ipfCcmBoGridColumn';
     }
-    let elementKey;
+    let elementKey: any;
     if (initElement.ipfCcmBoPgLoElement) {
       elementKey = 'ipfCcmBoPgLoElement';
     } else if (initElement.ipfCcmBoPgLoElementCopy) {
@@ -949,6 +961,9 @@ function formatPostElementData(initElementData: any, modifyedElementData: any) {
     initElement[elementKey].initValueType2 = element.initValueType2;
     initElement[elementKey].defaultValue2 = element.defaultValue2;
     initElement[elementKey].lockColumnExpress = element.lockColumnExpress;
+    _.forEach(ELEMENT_FIELDS, field => {
+      initElement[elementKey][field] = element[field];
+    });
     initElement[elementKey][elementKey === 'ipfCcmBoPgLoElementCopy' ? elementEventsCopyKey : elementEventsKey] = element.ipfCcmBoElementEvents;
 
     if (formColumnKey === 'ipfCcmBoFormColumn') {

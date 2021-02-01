@@ -14,7 +14,7 @@
   }
   li {
     user-select: none;
-    > a {
+    > a, .page-list-div {
       display: block;
       height: 24px;
       font-size: 12px;
@@ -31,9 +31,10 @@
         background: lighten(@colorPrimary, 40%);
       }
     }
-    &.active a, &.active:hover a {
+    &.active a, &.active:hover a, &.active .page-list-div {
       background-color: @colorPrimary;
       color: #fff;
     }
   }
 }
+

@@ -1,24 +1,25 @@
-import { Button, Drawer, Icon, Input, notification, Select, Table, Tabs } from 'antd';
+import { Button, Drawer, Input, notification, Select, Collapse, InputNumber } from 'antd';
 import * as _ from 'lodash';
 import Form, { FormProps, WrappedFormUtils } from 'antd/lib/form/Form';
 import { Dispatch, AnyAction } from 'redux';
-import { ColumnProps } from 'antd/lib/table';
 import React from 'react';
-import { IBoMethod, IBoMethodColumn } from 'src/models/methodsModel';
-import { UiBoMethodColumnEditDrawer } from './boMethodColumnEditDrawer';
 
 import './style.less';
-import { confirm, createId } from 'src/utils';
+import { confirm } from 'src/utils';
 import { connect } from 'dva';
-import { createSaveOrUpdateMethodEffect } from 'src/models/methodsAction';
 import { DROPDOWN_ALIGN_PROPS, ROW_STATUS } from 'src/config';
 import { isFormDataModified } from 'src/utils/forms';
-import produce from 'immer';
+import { IBoMethod } from 'src/models/methodsModel';
 import { IAppState, IDictsMap } from 'src/models/appModel';
-import { createRichLengthRule } from 'src/utils/validateRules';
+import { createRichLengthRule, createRequireRule, createFirstLetterLowerRule } from 'src/utils/validateRules';
+import { createSaveOrUpdateMethodEffect } from 'src/models/methodsAction';
+import { UiCheckbox } from '../checkbox';
+import { IAssociateColumn, IQueryOptions, IQueryResult, UiAssociate } from '../associate';
+import { querySearchHelpMethod, queryDictTableMethod } from '../../services/properties';
+import { queryPenetrationMethod, queryLanguageMsgMethod, queryDataTransferMethod, queryBoNameMethod, queryMethodMethod } from '../../services/methods';
 
 const FormItem = Form.Item;
-const TabPane = Tabs.TabPane;
+const { Panel } = Collapse;
 const Option = Select.Option;
 
 interface IUiBoMethodEditDrawerProps {
@@ -32,10 +33,6 @@ interface IUiBoMethodEditDrawerState {
   visible: boolean;
   selectedMethodColumns: string[];
   editingMethodColumn: string[];
-
-  boMethodColumns: IBoMethodColumn[];
-
-  columns: Array<ColumnProps<IBoMethodColumn>>;
   type: string;
 }
 
@@ -52,48 +49,12 @@ interface IUiBoMethodEditDrawerState {
 export class UiBoMethodEditDrawer extends React.PureComponent<IUiBoMethodEditDrawerProps, IUiBoMethodEditDrawerState> {
   state: IUiBoMethodEditDrawerState = {
     boMethod: null,
-    boMethodColumns: [],
     visible: false,
     selectedMethodColumns: [],
     editingMethodColumn: null,
     type: 'edit',
-    columns: [
-      {
-        title: '操作',
-        dataIndex: 'ipfCcmBoMethodColumnId',
-        width: '40px',
-        fixed: 'left',
-        render: (text: string, record: IBoMethodColumn) => {
-          return (
-            <>
-              <a
-                title="编辑"
-                onClick={() => this.editBoMethodColumn(record)}
-              >
-                <Icon type="edit" />
-              </a>
-              {' '}
-              <a
-                title="删除"
-                onClick={() => this.deleteBoMethodColumn(text)}
-              >
-                <Icon type="delete" />
-              </a>
-            </>
-          );
-        },
-      },
-      { title: '属性名称', dataIndex: 'propertyName', width: '140px' },
-      { title: '字段名', dataIndex: 'columnName', width: '140px' },
-      { title: '子属性名', dataIndex: 'subPropertyName', width: '140px' },
-      { title: '子字段名', dataIndex: 'subColumnName', width: '140px' },
-      { title: '顺序', dataIndex: 'seqNo', width: '140px' },
-      { title: '关联属性名', dataIndex: 'linkPropertyName', width: '140px' },
-      { title: '关联字段名', dataIndex: 'linkColumnName', width: '140px' },
-    ],
   };
 
-  boMethodColumnEditDrawerRef = React.createRef<UiBoMethodColumnEditDrawer>();
   formRef = React.createRef<any>();
 
   render() {
@@ -110,9 +71,7 @@ export class UiBoMethodEditDrawer extends React.PureComponent<IUiBoMethodEditDra
       >
         <div className="edito-drawer-body-content">
           { this.renderForm() }
-          { this.renderTable() }
           { this.renderFooter() }
-          <UiBoMethodColumnEditDrawer ref={this.boMethodColumnEditDrawerRef} onSubmit={this.onBoMethodColumnSubmit} />
         </div>
       </Drawer>
     );
@@ -123,47 +82,24 @@ export class UiBoMethodEditDrawer extends React.PureComponent<IUiBoMethodEditDra
       visible: true,
       type: options.type,
       boMethod: options.boMethod,
-      boMethodColumns: options.boMethod?.ipfCcmBoMethodColumns,
     });
   }
 
   close = () => {
     this.setState({
       boMethod: null,
-      boMethodColumns: [],
       visible: false,
       selectedMethodColumns: [],
       editingMethodColumn: null,
     });
   }
 
-  private onBoMethodColumnSubmit = ({ type, data }: any) => {
-    const { boMethodColumns } = this.state;
-    let newBoMethodColumns: IBoMethodColumn[];
-    if (type === 'add') {
-      newBoMethodColumns = [
-        data,
-        ...boMethodColumns || [],
-      ];
-    } else {
-      newBoMethodColumns = produce(boMethodColumns, draft => {
-        const index = _.findIndex(draft, item => item.ipfCcmBoMethodColumnId === data.ipfCcmBoMethodColumnId);
-        if (index >= 0) {
-          draft[index] = data;
-        }
-      });
-    }
-    this.setState({
-      boMethodColumns: newBoMethodColumns,
-    });
-  }
-
   private getTitle = () => {
     const { type } = this.state;
     if (type === 'add') {
-      return '新增子对象关系';
+      return '新增方法';
     }
-    return '编辑子对象关系';
+    return '编辑方法';
   }
 
   private afterVisibleChange = (visible: boolean) => {
@@ -182,8 +118,7 @@ export class UiBoMethodEditDrawer extends React.PureComponent<IUiBoMethodEditDra
 
   private save = () => {
     const isMethodModified = this.isDataModified();
-    const isMethodColumnsModified = this.isMethodColumnsModified();
-    if (!(isMethodModified || isMethodColumnsModified)) {
+    if (!(isMethodModified)) {
       notification.info({
         message: '提示',
         description: '数据未修改，无需保存。',
@@ -195,23 +130,6 @@ export class UiBoMethodEditDrawer extends React.PureComponent<IUiBoMethodEditDra
         return;
       }
       const data = this.combineBoMethodWithFormValues();
-      if (isMethodColumnsModified) {
-        data.ipfCcmBoMethodColumns = _.chain(this.state.boMethodColumns).filter(item => {
-          return item.rowStatus === ROW_STATUS.ADDED
-            || item.rowStatus === ROW_STATUS.MODIFIED
-            || item.rowStatus === ROW_STATUS.DELETED;
-        })
-          .map(item => {
-            if (item.rowStatus === ROW_STATUS.ADDED) {
-              return {
-                ...item,
-                ipfCcmBoMethodColumnId: null,
-              };
-            }
-            return item;
-          })
-          .value();
-      }
       this.props.dispatch(createSaveOrUpdateMethodEffect(data, this.state.type, () => {
         this.close();
       }));
@@ -237,7 +155,7 @@ export class UiBoMethodEditDrawer extends React.PureComponent<IUiBoMethodEditDra
   }
 
   private onClose = async () => {
-    const isModified = this.isDataModified() || this.isMethodColumnsModified();
+    const isModified = this.isDataModified();
     if (isModified) {
       const b = await confirm({ content: '数据已修改，确定关闭？' });
       if (!b) {
@@ -257,66 +175,9 @@ export class UiBoMethodEditDrawer extends React.PureComponent<IUiBoMethodEditDra
     return isFormDataModified(boMethod, formValues);
   }
 
-  private isMethodColumnsModified = () => {
-    const { boMethodColumns } = this.state;
-    return !!_.find(boMethodColumns, item => {
-      return item.rowStatus === ROW_STATUS.MODIFIED
-        || item.rowStatus === ROW_STATUS.DELETED
-        || item.rowStatus === ROW_STATUS.ADDED;
-    });
-  }
-
   private getForm = () => {
     const form: WrappedFormUtils = this.formRef.current?.getForm();
     return form;
-  }
-
-  private editBoMethodColumn = (record: IBoMethodColumn) => {
-    this.boMethodColumnEditDrawerRef.current.open({
-      boMethodColumn: record,
-      type: 'edit',
-      boMethod: this.combineBoMethodWithFormValues(),
-    });
-  }
-
-  private deleteBoMethodColumn = (id: string) => {
-    this.deleteBoMethodColumns([id]);
-  }
-
-  private addBoMethodColumn = () => {
-    console.log('addBoMethodColumn');
-    this.boMethodColumnEditDrawerRef.current.open({
-      boMethodColumn: {
-        rowStatus: ROW_STATUS.ADDED,
-        ipfCcmBoMethodColumnId: createId(),
-        baseViewId: this.state.boMethod.baseViewId || this.props.params.baseViewId,
-      } as any,
-      type: 'add',
-      boMethod: this.combineBoMethodWithFormValues(),
-    });
-  }
-
-  private deleteBoMethodColumns = (ids?: string[]) => {
-    const { selectedMethodColumns, boMethodColumns } = this.state;
-    const willDeleteIds = ids ?? selectedMethodColumns;
-    const newBoMethodColumns = produce(boMethodColumns, draft => {
-      _.forEach(willDeleteIds, id => {
-        const item = _.find(draft, _item => _item.ipfCcmBoMethodColumnId === id);
-        if (!item) {
-          return;
-        }
-        if (item.rowStatus === ROW_STATUS.ADDED) {
-          item.rowStatus = ROW_STATUS.ADDED_REMOVE;
-        } else {
-          item.rowStatus = ROW_STATUS.DELETED;
-        }
-      });
-    });
-    const newSelectedMethodColumns = _.differenceWith(selectedMethodColumns, willDeleteIds);
-    this.setState({
-      boMethodColumns: newBoMethodColumns,
-      selectedMethodColumns: newSelectedMethodColumns,
-    });
   }
 
   private renderForm = () => {
@@ -325,57 +186,6 @@ export class UiBoMethodEditDrawer extends React.PureComponent<IUiBoMethodEditDra
       <div className="editor-drawer-form">
         <BoMethodEditForm dicts={dicts} ref={this.formRef} />
       </div>
-    );
-  }
-
-  private onMethodColumnsSelectionChange = (keys: string[]) => {
-    this.setState({
-      selectedMethodColumns: keys,
-    });
-  }
-
-  private renderTable = () => {
-    const { selectedMethodColumns, columns, boMethodColumns } = this.state;
-    const rowSelection = {
-      selectedRowKeys: selectedMethodColumns,
-      onChange: this.onMethodColumnsSelectionChange,
-      columnWidth: '40px',
-    };
-    const renderBoMethodColumns = _.filter(boMethodColumns, item => !(item.rowStatus === ROW_STATUS.DELETED || item.rowStatus === ROW_STATUS.ADDED_REMOVE));
-    return (
-      <Tabs defaultActiveKey="1" size="small">
-        <TabPane
-          tab="子对象关系字段"
-          key="1"
-        >
-          <div className="editor-ui-buttons">
-            <Button
-              size="small"
-              type="primary"
-              onClick={this.addBoMethodColumn}
-            >新增</Button>
-            {' '}
-            <Button
-              size="small"
-              type="danger"
-              onClick={() => this.deleteBoMethodColumns()}
-              disabled={!selectedMethodColumns?.length}
-            >批量删除</Button>
-          </div>
-          <div className="editor-common-table">
-            <Table
-              dataSource={renderBoMethodColumns || []}
-              columns={columns}
-              size="small"
-              rowKey="ipfCcmBoMethodColumnId"
-              rowSelection={rowSelection}
-              scroll={{ x: 500, y: 300 }}
-              bordered
-              pagination={false}
-            />
-          </div>
-        </TabPane>
-      </Tabs>
     );
   }
 
@@ -399,6 +209,40 @@ export class UiBoMethodEditDrawer extends React.PureComponent<IUiBoMethodEditDra
 
 }
 
+const SEARCH_HELP_ASSOCIATE_COLUMNS: IAssociateColumn[] = [
+  { title: '搜索帮助名称', field: 'shlpName' },
+];
+
+const PENETRATION_CODE_ASSOCIATE_COLUMNS: IAssociateColumn[] = [
+  { title: '穿透编码', field: 'penetrationCode' },
+];
+
+const DICT_TABLE_ASSOCIATE_COLUMNS: IAssociateColumn[] = [
+  { title: '字典代码', field: 'dictCode' },
+  { title: '字典名称', field: 'dictName' },
+];
+
+const LANGUAGE_MSG_ASSOCIATE_COLUMNS: IAssociateColumn[] = [
+  { title: '消息键值', field: 'messageKey' },
+  { title: '消息内容', field: 'messageText' },
+  { title: '消息类型', field: 'messageType' },
+];
+
+const DATA_TRANSFER_ASSOCIATE_COLUMNS: IAssociateColumn[] = [
+  { title: '数据流转代码', field: 'dataTransferCode' },
+];
+
+const BO_NAME_ASSOCIATE_COLUMNS: IAssociateColumn[] = [
+  { title: '名称', field: 'boName' },
+  { title: '表名称', field: 'tableName' },
+];
+
+const METHOD_ASSOCIATE_COLUMNS: IAssociateColumn[] = [
+  { title: '调用方法名', field: 'methodName' },
+  { title: '调用方法描述', field: 'methodDesc' },
+  { title: '业务对象名', field: 'boName' },
+];
+
 interface IBoMethodEditFormProps {
   form?: WrappedFormUtils;
   dicts?: IDictsMap;
@@ -417,21 +261,49 @@ class BoMethodEditForm extends React.PureComponent<IBoMethodEditFormProps> {
     };
     return (
       <Form {...formItemLayout} >
-        <FormItem label="属性名称" >
+        <FormItem label="调用方法名称" >
           {
-            getFieldDecorator('propertyName')(
+            getFieldDecorator('methodName', {
+              rules: [
+                createRequireRule({ label: '调用方法名称' }),
+                createRichLengthRule({
+                  label: '调用方法名称',
+                  min: 0,
+                  max: 200,
+                }),
+              ],
+            })(
               <Input
                 size="small"
               />,
             )
           }
         </FormItem>
-        <FormItem label="对象关系类型">
+        <FormItem label="调用方法描述">
           {
-            getFieldDecorator('subBoRelType', {
+            getFieldDecorator('methodDesc', {
               rules: [
+                createRequireRule({ label: '调用方法描述' }),
                 createRichLengthRule({
-                  label: '对象关系类型',
+                  label: '调用方法描述',
+                  min: 0,
+                  max: 200,
+                }),
+              ],
+            })(
+              <Input
+                size="small"
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="方法类型">
+          {
+            getFieldDecorator('methodType', {
+              rules: [
+                createRequireRule({ label: '方法类型' }),
+                createRichLengthRule({
+                  label: '方法类型',
                   min: 0,
                   max: 50,
                 }),
@@ -442,7 +314,7 @@ class BoMethodEditForm extends React.PureComponent<IBoMethodEditFormProps> {
                 allowClear
                 {...DROPDOWN_ALIGN_PROPS}
               >
-                {_.map((dicts['SubBoRelType']), listItem => (
+                {_.map((dicts['IpfCcmBoMethodType']), listItem => (
                   <Option title={listItem.value} key={listItem.key} value={listItem.key}>
                     {listItem.value}
                   </Option>
@@ -451,7 +323,481 @@ class BoMethodEditForm extends React.PureComponent<IBoMethodEditFormProps> {
             )
           }
         </FormItem>
+        <FormItem label="URL地址">
+          {
+            getFieldDecorator('url', {
+              rules: [
+                createRequireRule({ label: 'URL地址' }),
+                createFirstLetterLowerRule({ label: 'URL地址' }),
+                createRichLengthRule({
+                  label: 'URL地址',
+                  min: 0,
+                  max: 200,
+                }),
+              ],
+            })(
+              <Input
+                size="small"
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="默认方法">
+          {
+            getFieldDecorator('isDefault')(
+              <UiCheckbox
+                trueValue="X"
+                falseValue=""
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="是否刷新主表">
+          {
+            getFieldDecorator('isRefreshParentBo')(
+              <UiCheckbox
+                trueValue="X"
+                falseValue=""
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="权限控制">
+          {
+            getFieldDecorator('isPermission')(
+              <UiCheckbox
+                trueValue="X"
+                falseValue=""
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="请求成功不提示">
+          {
+            getFieldDecorator('succeePop')(
+              <UiCheckbox
+                trueValue="X"
+                falseValue=""
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="请求之前提示">
+          {
+            getFieldDecorator('beforePop')(
+              <UiCheckbox
+                trueValue="X"
+                falseValue=""
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="图标">
+          {
+            getFieldDecorator('icon', {
+              rules: [
+                createRichLengthRule({
+                  label: '图标',
+                  min: 0,
+                  max: 200,
+                }),
+              ],
+            })(
+              <Input
+                size="small"
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="字典名称">
+          {
+            getFieldDecorator('dictName', {
+              rules: [
+                createRichLengthRule({
+                  label: '图标',
+                  min: 0,
+                  max: 200,
+                }),
+              ],
+            })(
+              <UiAssociate
+                columns={DICT_TABLE_ASSOCIATE_COLUMNS}
+                labelProp="dictName"
+                valueProp="dictCode"
+                labelInit={this.props.form.getFieldValue('dictName')}
+                queryMethod={this.dictTableQueryMehtod}
+                onChange={(value, option) => this.onSearchHelpChange({ dictName: option?.['dictName'], dictCode: option?.['dictCode'] })}
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="搜索帮助名称">
+          {
+            getFieldDecorator('refShlpName', {
+              rules: [
+                createRichLengthRule({
+                  label: '搜索帮助名称',
+                  min: 0,
+                  max: 200,
+                }),
+              ],
+            })(
+              <UiAssociate
+                columns={SEARCH_HELP_ASSOCIATE_COLUMNS}
+                labelProp="shlpName"
+                valueProp="shlpName"
+                labelInit={this.props.form.getFieldValue('refShlpName')}
+                queryMethod={this.searchHelpQueryMehtod}
+                onChange={(value, option) => this.onSearchHelpChange({ refShlpName: option?.['shlpName'] })}
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="校验分组名称">
+          {
+            getFieldDecorator('groupName', {
+              rules: [
+                createRichLengthRule({
+                  label: '校验分组名称',
+                  min: 0,
+                  max: 50,
+                }),
+              ],
+            })(
+              <Input
+                size="small"
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="穿透编码">
+          {
+            getFieldDecorator('penetrationCode', {
+              rules: [
+                createRichLengthRule({
+                  label: '穿透编码',
+                  min: 0,
+                  max: 50,
+                }),
+              ],
+            })(
+              <UiAssociate
+                columns={PENETRATION_CODE_ASSOCIATE_COLUMNS}
+                labelProp="penetrationCode"
+                valueProp="penetrationCode"
+                labelInit={this.props.form.getFieldValue('penetrationCode')}
+                queryMethod={this.penetrationQueryMehtod}
+                onChange={(value, option) => this.onSearchHelpChange({ penetrationCode: option?.['penetrationCode'] })}
+              />,
+            )
+          }
+        </FormItem>
+        <Panel
+          key="1"
+          header="打印相关"
+        />
+        <FormItem label="打印方法">
+          {
+            getFieldDecorator('printMethod', {
+              rules: [
+                createRichLengthRule({
+                  label: '打印方法',
+                  min: 0,
+                  max: 50,
+                }),
+              ],
+            })(
+              <Select
+                size="small"
+                allowClear
+                {...DROPDOWN_ALIGN_PROPS}
+              >
+                {_.map((dicts['IpfCcmBoPrintMethod']), listItem => (
+                  <Option title={listItem.value} key={listItem.key} value={listItem.key}>
+                    {listItem.value}
+                  </Option>
+                ))}
+              </Select>,
+            )
+          }
+        </FormItem>
+        <FormItem label="打印选项">
+          {
+            getFieldDecorator('printOption', {
+              rules: [
+                createRichLengthRule({
+                  label: '打印选项',
+                  min: 0,
+                  max: 50,
+                }),
+              ],
+            })(
+              <Select
+                size="small"
+                allowClear
+                {...DROPDOWN_ALIGN_PROPS}
+              >
+                {_.map((dicts['IpfCcmBoPrintOption']), listItem => (
+                  <Option title={listItem.value} key={listItem.key} value={listItem.key}>
+                    {listItem.value}
+                  </Option>
+                ))}
+              </Select>,
+            )
+          }
+        </FormItem>
+        <FormItem label="文件路径" >
+          {
+            getFieldDecorator('fileUrl')(
+              <Input
+                size="small"
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="操作类型">
+          {
+            getFieldDecorator('operateType', {
+              rules: [
+                createRichLengthRule({
+                  label: '操作类型',
+                  min: 0,
+                  max: 50,
+                }),
+              ],
+            })(
+              <Select
+                size="small"
+                allowClear
+                {...DROPDOWN_ALIGN_PROPS}
+              >
+                {_.map((dicts['IpfCcmBoMehtodOperateType']), listItem => (
+                  <Option title={listItem.value} key={listItem.key} value={listItem.key}>
+                    {listItem.value}
+                  </Option>
+                ))}
+              </Select>,
+            )
+          }
+        </FormItem>
+        <Panel
+          key="2"
+          header="页面标题"
+        />
+        <FormItem label="简易标题" >
+          {
+            getFieldDecorator('jumpWindowTitle', {
+              rules: [
+                createRichLengthRule({
+                  label: '简易标题',
+                  min: 0,
+                  max: 200,
+                }),
+              ],
+            })(
+              <Input
+                size="small"
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="国际化标题" >
+          {
+            getFieldDecorator('jumpWindowTitleText')(
+              <UiAssociate
+                columns={LANGUAGE_MSG_ASSOCIATE_COLUMNS}
+                labelProp="messageText"
+                valueProp="messageKey"
+                labelInit={this.props.form.getFieldValue('jumpWindowTitleText')}
+                queryMethod={this.languageMsgMehtod}
+                onChange={(value, option) => this.onSearchHelpChange({ jumpWindowTitleText: option?.['messageText'], jumpWindowTitleCode: option?.['messageKey'] })}
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="宽" >
+          {
+            getFieldDecorator('width')(
+              <InputNumber
+                size="small"
+                precision={8}
+                min={0}
+                style={{ width: '100%' }}
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="高" >
+          {
+            getFieldDecorator('height')(
+              <InputNumber
+                size="small"
+                precision={8}
+                min={0}
+                style={{ width: '100%' }}
+              />,
+            )
+          }
+        </FormItem>
+        <Panel
+          key="3"
+          header="方法多语言"
+        />
+        <FormItem label="国际化消息" >
+          {
+            getFieldDecorator('languageMessageKey')(
+              <UiAssociate
+                columns={LANGUAGE_MSG_ASSOCIATE_COLUMNS}
+                labelProp="messageKey"
+                valueProp="messageKey"
+                labelInit={this.props.form.getFieldValue('languageMessageKey')}
+                queryMethod={this.languageMsgMehtod}
+                onChange={(value, option) => this.onSearchHelpChange({ languageMessageKey: option?.['messageKey'] })}
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="提示信息" >
+          {
+            getFieldDecorator('methodHintText')(
+              <UiAssociate
+                columns={SEARCH_HELP_ASSOCIATE_COLUMNS}
+                labelProp="messageText"
+                valueProp="messageKey"
+                labelInit={this.props.form.getFieldValue('methodHintText')}
+                queryMethod={this.searchHelpQueryMehtod}
+                onChange={(value, option) => this.onSearchHelpChange({ methodHintText: option?.['messageText'], methodHintCode: option?.['messageKey'] })}
+              />,
+            )
+          }
+        </FormItem>
+        <Panel
+          key="4"
+          header="批量流转"
+        />
+        <FormItem label="跳转地址" >
+          {
+            getFieldDecorator('jumpAddress')(
+              <Input
+                size="small"
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="数据流转名称" >
+          {
+            getFieldDecorator('dataTransferName')(
+              <UiAssociate
+                columns={DATA_TRANSFER_ASSOCIATE_COLUMNS}
+                labelProp="dataTransferCode"
+                valueProp="ipfCcmDataTransferId"
+                labelInit={this.props.form.getFieldValue('dataTransferName')}
+                queryMethod={this.dataTransferQueryMehtod}
+                onChange={(value, option) => this.onSearchHelpChange({ dataTransferName: option?.['dataTransferCode'], dataTransferCode: option?.['ipfCcmDataTransferId'] })}
+              />,
+            )
+          }
+        </FormItem>
+        <Panel
+          key="4"
+          header="跳转方法"
+        />
+        <FormItem label="业务对象名" >
+          {
+            getFieldDecorator('jumpBoName')(
+              <UiAssociate
+                columns={BO_NAME_ASSOCIATE_COLUMNS}
+                labelProp="boName"
+                valueProp="boName"
+                labelInit={this.props.form.getFieldValue('jumpBoName')}
+                queryMethod={this.boNameQueryMehtod}
+                onChange={(value, option) => this.onSearchHelpChange({ jumpBoName: option?.['boName'] })}
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="方法名" >
+          {
+            getFieldDecorator('jumpMethodName')(
+              <UiAssociate
+                columns={METHOD_ASSOCIATE_COLUMNS}
+                labelProp="methodName"
+                valueProp="ipfCcmBoMethodId"
+                labelInit={this.props.form.getFieldValue('jumpMethodName')}
+                queryMethod={this.methodQueryMethod}
+                onChange={(value, option) => this.onSearchHelpChange({ jumpMethodName: option?.['methodName'], jumpMethodId: option?.['ipfCcmBoMethodId'] })}
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="业务对象视图" >
+          {
+            getFieldDecorator('jumpBoViewDesc')(
+              <Input
+                size="small"
+                disabled
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="方法内容" >
+          {
+            getFieldDecorator('methodBody')(
+              <Input
+                type="textarea"
+                style={ { height:100 } }
+                size="small"
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="备注" >
+          {
+            getFieldDecorator('remark')(
+              <Input
+                type="textarea"
+                style={ { height:100 } }
+                size="small"
+              />,
+            )
+          }
+        </FormItem>
       </Form>
     );
+  }
+
+  private onSearchHelpChange = (object: any) => {
+    this.props.form.setFieldsValue({
+      // [formProp]: option?.[optionProp] || null,
+      ...object,
+    });
+  }
+
+  private searchHelpQueryMehtod = async (options: IQueryOptions): Promise<IQueryResult> => {
+    return querySearchHelpMethod(options);
+  }
+
+  private languageMsgMehtod = async (options: IQueryOptions): Promise<IQueryResult> => {
+    return queryLanguageMsgMethod(options);
+  }
+
+  private dictTableQueryMehtod = async (options: IQueryOptions): Promise<IQueryResult> => {
+    return queryDictTableMethod(options);
+  }
+
+  private penetrationQueryMehtod = async (options: IQueryOptions): Promise<IQueryResult> => {
+    return queryPenetrationMethod(options);
+  }
+
+  private dataTransferQueryMehtod = async (options: IQueryOptions): Promise<IQueryResult> => {
+    return queryDataTransferMethod(options);
+  }
+
+  private boNameQueryMehtod = async (options: IQueryOptions): Promise<IQueryResult> => {
+    return queryBoNameMethod(options);
+  }
+
+  private methodQueryMethod = async (options: IQueryOptions): Promise<IQueryResult> => {
+    return queryMethodMethod(options);
   }
 }

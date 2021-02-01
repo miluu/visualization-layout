@@ -1,4 +1,4 @@
-import { Button, Drawer, Input, Select, notification } from 'antd';
+import { Button, Drawer, Input, Select, notification, Checkbox } from 'antd';
 import * as _ from 'lodash';
 import Form, { FormProps, WrappedFormUtils } from 'antd/lib/form/Form';
 // import { ColumnProps } from 'antd/lib/table';
@@ -11,11 +11,16 @@ import { IIpfCcmPage } from '../../routes/Visualization/types';
 import { DROPDOWN_ALIGN_PROPS, ROW_STATUS } from '../../config';
 import { isFormDataModified } from '../../utils/forms';
 import { createAddBoPageEffect, createUpdateBoPageEffect } from 'src/models/pagesActions';
+import { queryBoName } from '../../services/bo';
+import { getIpfCcmBoPage } from '../../services/page';
+import { queryBusinessTypeMethod } from '../../services/businessTypes';
+
 import { Dispatch, AnyAction } from 'redux';
 import { connect } from 'dva';
 import { IAppState, IDictsMap } from 'src/models/appModel';
-import { createRequireRule, createRichLengthRule } from 'src/utils/validateRules';
+import { createAlphabetOrDigitalRule, createRequireRule, createRichLengthRule } from 'src/utils/validateRules';
 import { confirm } from 'src/utils';
+import { IAssociateColumn, IQueryOptions, IQueryResult, UiAssociate } from '../associate';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -77,27 +82,38 @@ export class UiPageListEditDrawer extends React.PureComponent<IUiPageListEditDra
   }
 
   // 打开抽屉界面，传入要编辑页面数据
-  open({ type, page }:{ type: any, page: IIpfCcmPage }) {
+  async open({ type, page }:{ type: any, page: IIpfCcmPage }) {
+    let record = page;
     switch (type) {
       case 'add':
-        page.rowStatus = ROW_STATUS.ADDED;
-        page.baseViewId = this.props.params.baseViewId;
-        page.ipfCcmBoId = this.props.params.ipfCcmBoId;
-        page.boName = 'JwTest';
+        record.rowStatus = ROW_STATUS.ADDED;
+        record.baseViewId = this.props.params.baseViewId;
+        // 需要判断
+        record.ipfCcmBoId = this.props.params.ipfCcmBoId;
         break;
       case 'copy':
-        page.rowStatus = ROW_STATUS.ADDED;
-        page.copyPageId = page.ipfCcmBoPageId;
-        page.ipfCcmBoPageId = null;
-        page.baseViewId = this.props.params.baseViewId;
+        record = await getIpfCcmBoPage({
+          baseViewId: this.props.params.baseViewId,
+          ipfCcmBoPageId: record.ipfCcmBoPageId,
+        });
+        record.rowStatus = ROW_STATUS.ADDED;
+        record.copyPageId = record.ipfCcmBoPageId;
+        record.ipfCcmBoPageId = null;
+        record.baseViewId = this.props.params.baseViewId;
         break;
       case 'edit':
-        page.rowStatus = ROW_STATUS.MODIFIED;
+        record = await getIpfCcmBoPage({
+          baseViewId: this.props.params.baseViewId,
+          ipfCcmBoPageId: record.ipfCcmBoPageId,
+        });
+        record.rowStatus = ROW_STATUS.MODIFIED;
         break;
+      default:
+        alert(`未知的操作类型：${type}`);
     }
     this.setState({
       type,
-      page,
+      page: record,
       visible: true,
     });
   }
@@ -123,12 +139,19 @@ export class UiPageListEditDrawer extends React.PureComponent<IUiPageListEditDra
 
   private afterVisibleChange = (visible: boolean) => {
     if (visible) {
-      this.formRef.current.getForm().setFieldsValue(this.state.page);
+      const form: WrappedFormUtils = this.formRef.current?.getForm();
+      if (form) {
+        form.setFieldsValue(
+          _.pick(
+            this.state.page,
+            _.keys(form.getFieldsValue()),
+          ),
+        );
+      }
     }
   }
 
   private save = async () => {
-    console.log('保存。');
     switch (this.state.type) {
       case 'add':
         await this.saveIpfCcmBoPage(this.state.page);
@@ -163,7 +186,7 @@ export class UiPageListEditDrawer extends React.PureComponent<IUiPageListEditDra
     const { dicts } = this.props;
     return (
       <div className="editor-drawer-form">
-        <PageListEditForm dicts={dicts} ref={this.formRef} />
+        <PageListEditForm dicts={dicts} ref={this.formRef} page={this.state.page} />
       </div>
     );
   }
@@ -201,6 +224,16 @@ export class UiPageListEditDrawer extends React.PureComponent<IUiPageListEditDra
       ...formData,
       ...rowStatusObj,
     };
+    if (data.isDataPenetration && data.isDataPenetration.toString() === 'true') {
+      data.isDataPenetration = 'Y';
+    } else {
+      data.isDataPenetration = 'N';
+    }
+    if (data.isPageDispSetting && data.isPageDispSetting.toString() === 'true') {
+      data.isPageDispSetting = 'X';
+    } else {
+      data.isPageDispSetting = '';
+    }
     return data;
   }
 
@@ -211,6 +244,9 @@ export class UiPageListEditDrawer extends React.PureComponent<IUiPageListEditDra
     }
     const formValues = form.getFieldsValue();
     const { page } = this.state;
+    if (!page) {
+      return false;
+    }
     return isFormDataModified(page, formValues);
   }
 
@@ -286,8 +322,18 @@ export class UiPageListEditDrawer extends React.PureComponent<IUiPageListEditDra
 
 interface IPageListEditFormProps {
   form?: WrappedFormUtils;
+  page?: IIpfCcmPage;
   dicts?: IDictsMap;
 }
+
+const BO_NAME_ASSOCIATE_COLUMNS: IAssociateColumn[] = [
+  { title: '业务对象名称', field: 'boName' },
+];
+
+const BUSINESS_TYPE_ASSOCIATE_COLUMNS: IAssociateColumn[] = [
+  { title: '业务类型', field: 'businessType' },
+  { title: '描述', field: 'description' },
+];
 
 @(Form.create({ name: 'PageListEditForm' }) as any)
 class PageListEditForm extends React.PureComponent<IPageListEditFormProps> {
@@ -339,29 +385,52 @@ class PageListEditForm extends React.PureComponent<IPageListEditFormProps> {
         </FormItem>
         <FormItem label="业务对象名称">
           {
-            getFieldDecorator('boName')(
-              <Input
-                size="small"
-                value="JwTest"
+            getFieldDecorator('boName', {
+              rules: [
+                createRichLengthRule({
+                  label: '业务对象名称',
+                  min: 0,
+                  max: 200,
+                }),
+              ],
+            })(
+              <UiAssociate
+                columns={BO_NAME_ASSOCIATE_COLUMNS}
+                labelProp="boName"
+                valueProp="boName"
+                labelInit={this.props.form.getFieldValue('boName')}
+                queryMethod={this.boNameQueryMehtod}
               />,
             )
           }
         </FormItem>
-        <FormItem label="业务对象id">
+        <FormItem label="业务对象id" style={{ display: 'none' }} >
           {
             getFieldDecorator('ipfCcmBoId')(
               <Input
                 size="small"
-                value={'a488d838550b4a2f8c80f051cd9192f8'}
               />,
             )
           }
         </FormItem>
         <FormItem label="业务类型">
           {
-            getFieldDecorator('businessType')(
-              <Input
-                size="small"
+            getFieldDecorator('businessType', {
+              rules: [
+                createRichLengthRule({
+                  label: '业务类型',
+                  min: 0,
+                  max: 200,
+                }),
+                createAlphabetOrDigitalRule({ label: '业务类型' }),
+              ],
+            })(
+              <UiAssociate
+                columns={BUSINESS_TYPE_ASSOCIATE_COLUMNS}
+                labelProp="businessType"
+                valueProp="businessType"
+                labelInit={this.props.form.getFieldValue('businessType')}
+                queryMethod={this.businessTypeQueryMehtod}
               />,
             )
           }
@@ -402,19 +471,19 @@ class PageListEditForm extends React.PureComponent<IPageListEditFormProps> {
         </FormItem>
         <FormItem label="页面隐藏">
           {
-            getFieldDecorator('isPageDispSetting')(
-              <Input
-                size="small"
-              />,
+            getFieldDecorator('isPageDispSetting', {
+              valuePropName: 'checked',
+            })(
+              <Checkbox/>,
             )
           }
         </FormItem>
         <FormItem label="支持数据穿透">
           {
-            getFieldDecorator('isDataPenetration')(
-              <Input
-                size="small"
-              />,
+            getFieldDecorator('isDataPenetration', {
+              valuePropName: 'checked',
+            })(
+              <Checkbox/>,
             )
           }
         </FormItem>
@@ -422,13 +491,12 @@ class PageListEditForm extends React.PureComponent<IPageListEditFormProps> {
           {
             getFieldDecorator('linkBoName')(
               <Input
-                disabled
                 size="small"
               />,
             )
           }
         </FormItem>
-        <FormItem label="业务对象视图">
+        <FormItem label="业务对象视图" style={{ display: 'none' }}>
           {
             getFieldDecorator('baseViewId')(
               <Input
@@ -441,4 +509,14 @@ class PageListEditForm extends React.PureComponent<IPageListEditFormProps> {
       </Form>
     );
   }
+
+  private boNameQueryMehtod = async (options: IQueryOptions): Promise<IQueryResult> => {
+    return queryBoName(options);
+  }
+
+  private businessTypeQueryMehtod = async (options: IQueryOptions): Promise<IQueryResult> => {
+    const { page } = this.props;
+    return queryBusinessTypeMethod(options, page?.ipfCcmBoId);
+  }
+
 }

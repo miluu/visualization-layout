@@ -180,6 +180,38 @@ export const VISUALIZATION_CONFIG = {
       queryMethod: queryBoName,
       extra(__, values, ___, ____, dispatch) {
         return (
+          <>
+              <Button
+              size="small"
+              block
+             //  disabled={!values?.layoutBoName}
+              onClick={async () => {
+                let { baseViewId, ipfCcmBoId } = window?.['__urlParams'] || {};
+                if (values?.layoutBoName) {
+                  dispatch(createSetIsLoadingAction(true, true));
+                  const result = await queryBoName({
+                    pageSize: 1,
+                    currentPage: 1,
+                    keywords: values?.layoutBoName,
+                  });
+                  dispatch(createSetIsLoadingAction(false, true));
+                  const bo = result?.source?.[0];
+                  if (!bo) {
+                    notification.warn({ message: `未找到业务对象：${values?.layoutBoName}` });
+                    return;
+                  }
+                  baseViewId = bo.baseViewId;
+                  ipfCcmBoId = bo.ipfCcmBoId;
+                }
+                if (!(baseViewId && ipfCcmBoId)) {
+                  notification.warn({ message: 'Error.' });
+                }
+                openBoEditDrawe({
+                  baseViewId,
+                  ipfCcmBoId,
+                });
+              }}
+            >业务对象编辑</Button>
           <Button
             size="small"
             block
@@ -212,6 +244,7 @@ export const VISUALIZATION_CONFIG = {
           >
             校验配置
           </Button>
+           </>
         );
       },
     },

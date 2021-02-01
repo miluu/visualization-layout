@@ -14,7 +14,10 @@ import { DROPDOWN_ALIGN_PROPS, ROW_STATUS } from 'src/config';
 import { isFormDataModified } from 'src/utils/forms';
 // import produce from 'immer';
 import { IAppState, IDictsMap } from 'src/models/appModel';
-// import { createRequireRule, createRichLengthRule } from 'src/utils/validateRules';
+import { createRequireRule, createRichLengthRule, createFirstLetterLowerRule, createAlphabetOrDigitalRule, createEnUcNumUlStringRule } from 'src/utils/validateRules';
+import { IAssociateColumn, IQueryOptions, IQueryResult, UiAssociate } from '../associate';
+import { UiCheckbox } from '../checkbox';
+import { queryElementCodeMethod, querySearchHelpMethod, queryDictTableMethod } from '../../services/properties';
 
 const { Panel } = Collapse;
 const FormItem = Form.Item;
@@ -314,6 +317,24 @@ interface IBoPropertyEditFormProps {
   dicts?: IDictsMap;
 }
 
+const ELEMENT_CODE_ASSOCIATE_COLUMNS: IAssociateColumn[] = [
+  { title: '数据元素代码', field: 'elementCode' },
+  { title: '显示文本', field: 'fieldText' },
+  { title: '数据类型', field: 'dataType' },
+  { title: '字段长度', field: 'fieldLength' },
+  { title: '小数位', field: 'decimals' },
+  { title: '数据库类型', field: 'dbType' },
+];
+
+const SEARCH_HELP_ASSOCIATE_COLUMNS: IAssociateColumn[] = [
+  { title: '搜索帮助名称', field: 'shlpName' },
+];
+
+const DICT_TABLE_ASSOCIATE_COLUMNS: IAssociateColumn[] = [
+  { title: '数据字典代码', field: 'dictCode' },
+  { title: '数据字典名称', field: 'dictName' },
+];
+
 @(Form.create({ name: 'BoPropertyEditForm' }) as any)
 class BoPropertyEditForm extends React.PureComponent<IBoPropertyEditFormProps> {
   render() {
@@ -333,7 +354,18 @@ class BoPropertyEditForm extends React.PureComponent<IBoPropertyEditFormProps> {
         />
         <FormItem label="属性名" >
           {
-            getFieldDecorator('propertyName')(
+            getFieldDecorator('propertyName', {
+              rules: [
+                createRequireRule({ label: '属性名称' }),
+                createFirstLetterLowerRule({ label: '属性名称' }),
+                createAlphabetOrDigitalRule({ label: '属性名称' }),
+                createRichLengthRule({
+                  label: '属性名称',
+                  min: 0,
+                  max: 200,
+                }),
+              ],
+            })(
               <Input
                 size="small"
               />,
@@ -342,7 +374,17 @@ class BoPropertyEditForm extends React.PureComponent<IBoPropertyEditFormProps> {
         </FormItem>
         <FormItem label="字段名" >
           {
-            getFieldDecorator('columnName')(
+            getFieldDecorator('columnName', {
+              rules: [
+                createRequireRule({ label: '字段名' }),
+                createEnUcNumUlStringRule({ label: '字段名' }),
+                createRichLengthRule({
+                  label: '字段名',
+                  min: 0,
+                  max: 50,
+                }),
+              ],
+            })(
               <Input
                 size="small"
               />,
@@ -351,7 +393,16 @@ class BoPropertyEditForm extends React.PureComponent<IBoPropertyEditFormProps> {
         </FormItem>
         <FormItem label="属性类型">
           {
-            getFieldDecorator('propertyType')(
+            getFieldDecorator('propertyType', {
+              rules: [
+                createRequireRule({ label: '属性类型' }),
+                createRichLengthRule({
+                  label: '属性类型',
+                  min: 0,
+                  max: 50,
+                }),
+              ],
+            })(
               <Select
                 size="small"
                 allowClear
@@ -366,9 +417,29 @@ class BoPropertyEditForm extends React.PureComponent<IBoPropertyEditFormProps> {
             )
           }
         </FormItem>
+        <FormItem label="KEY">
+          {
+            getFieldDecorator('isKey')(
+              <UiCheckbox
+                trueValue="X"
+                falseValue=""
+              />,
+            )
+          }
+        </FormItem>
         <FormItem label="表名" >
           {
-            getFieldDecorator('tableName')(
+            getFieldDecorator('tableName', {
+              rules: [
+                createRequireRule({ label: '表名' }),
+                createEnUcNumUlStringRule({ label: '表名' }),
+                createRichLengthRule({
+                  label: '表名',
+                  min: 0,
+                  max: 50,
+                }),
+              ],
+            })(
               <Input
                 size="small"
               />,
@@ -386,9 +457,28 @@ class BoPropertyEditForm extends React.PureComponent<IBoPropertyEditFormProps> {
         </FormItem>
         <FormItem label="物理字段名" >
           {
-            getFieldDecorator('physicalColumnName')(
+            getFieldDecorator('physicalColumnName', {
+              rules: [
+                createEnUcNumUlStringRule({ label: '物理字段名' }),
+                createRichLengthRule({
+                  label: '物理字段名',
+                  min: 0,
+                  max: 50,
+                }),
+              ],
+            })(
               <Input
                 size="small"
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="非空">
+          {
+            getFieldDecorator('isNotNull')(
+              <UiCheckbox
+                trueValue="X"
+                falseValue=""
               />,
             )
           }
@@ -399,9 +489,23 @@ class BoPropertyEditForm extends React.PureComponent<IBoPropertyEditFormProps> {
         />
         <FormItem label="数据元素代码" >
           {
-            getFieldDecorator('elementCode')(
-              <Input
-                size="small"
+            getFieldDecorator('elementCode', {
+              rules: [
+                createRequireRule({ label: '数据元素代码' }),
+                createRichLengthRule({
+                  label: '数据元素代码',
+                  min: 0,
+                  max: 50,
+                }),
+              ],
+            })(
+              <UiAssociate
+                columns={ELEMENT_CODE_ASSOCIATE_COLUMNS}
+                labelProp="elementCode"
+                valueProp="elementCode"
+                labelInit={this.props.form.getFieldValue('elementCode')}
+                queryMethod={this.elementCodeQueryMehtod}
+                onChange={(value, option) => this.onElementCodeChange(option, 'columnName', 'columnName')}
               />,
             )
           }
@@ -411,6 +515,7 @@ class BoPropertyEditForm extends React.PureComponent<IBoPropertyEditFormProps> {
             getFieldDecorator('fieldText')(
               <Input
                 size="small"
+                disabled
               />,
             )
           }
@@ -418,9 +523,18 @@ class BoPropertyEditForm extends React.PureComponent<IBoPropertyEditFormProps> {
         <FormItem label="数据类型" >
           {
             getFieldDecorator('dataType')(
-              <Input
+              <Select
                 size="small"
-              />,
+                allowClear
+                disabled
+                {...DROPDOWN_ALIGN_PROPS}
+              >
+                {_.map((dicts['DataTypeCode']), listItem => (
+                  <Option title={listItem.value} key={listItem.key} value={listItem.key}>
+                    {listItem.value}
+                  </Option>
+                ))}
+              </Select>,
             )
           }
         </FormItem>
@@ -429,6 +543,7 @@ class BoPropertyEditForm extends React.PureComponent<IBoPropertyEditFormProps> {
             getFieldDecorator('fieldLength')(
               <Input
                 size="small"
+                disabled
               />,
             )
           }
@@ -438,6 +553,7 @@ class BoPropertyEditForm extends React.PureComponent<IBoPropertyEditFormProps> {
             getFieldDecorator('decimals')(
               <Input
                 size="small"
+                disabled
               />,
             )
           }
@@ -445,9 +561,17 @@ class BoPropertyEditForm extends React.PureComponent<IBoPropertyEditFormProps> {
         <FormItem label="UI组件类型" >
           {
             getFieldDecorator('uiType')(
-              <Input
+              <Select
                 size="small"
-              />,
+                allowClear
+                {...DROPDOWN_ALIGN_PROPS}
+              >
+                {_.map((dicts['IpfCcmBoUIType']), listItem => (
+                  <Option title={listItem.value} key={listItem.key} value={listItem.key}>
+                    {listItem.value}
+                  </Option>
+                ))}
+              </Select>,
             )
           }
         </FormItem>
@@ -458,8 +582,13 @@ class BoPropertyEditForm extends React.PureComponent<IBoPropertyEditFormProps> {
         <FormItem label="搜索帮助名" >
           {
             getFieldDecorator('searchHelp')(
-              <Input
-                size="small"
+              <UiAssociate
+                columns={SEARCH_HELP_ASSOCIATE_COLUMNS}
+                labelProp="shlpName"
+                valueProp="shlpName"
+                labelInit={this.props.form.getFieldValue('searchHelp')}
+                queryMethod={this.searchHelpQueryMehtod}
+                onChange={(value, option) => this.onSearchHelpChange(option, 'searchHelp', 'shlpName')}
               />,
             )
           }
@@ -478,19 +607,25 @@ class BoPropertyEditForm extends React.PureComponent<IBoPropertyEditFormProps> {
             getFieldDecorator('searchHelpViewDesc')(
               <Input
                 size="small"
+                disabled
               />,
             )
           }
         </FormItem>
         <Panel
-          key="3"
+          key="4"
           header="数据字典"
         />
         <FormItem label="字典表" >
           {
-            getFieldDecorator('dictTableName')(
-              <Input
-                size="small"
+            getFieldDecorator('dictCode')(
+              <UiAssociate
+                columns={DICT_TABLE_ASSOCIATE_COLUMNS}
+                labelProp="dictCode"
+                valueProp="dictCode"
+                labelInit={this.props.form.getFieldValue('dictCode')}
+                queryMethod={this.dictTableQueryMehtod}
+                onChange={(value, option) => this.onSearchHelpChange(option, 'dictCode', 'dictCode')}
               />,
             )
           }
@@ -506,5 +641,33 @@ class BoPropertyEditForm extends React.PureComponent<IBoPropertyEditFormProps> {
         </FormItem>
       </Form>
     );
+  }
+
+  private onElementCodeChange = (option: any, formProp: string, optionProp: string) => {
+    this.onSearchHelpChange(option, formProp, optionProp);
+    this.props.form.setFieldsValue({
+      fieldText: option?.['fieldText'] || null,
+      dataType: option?.['dataType'] || null,
+      fieldLength: option?.['fieldLength'] || null,
+      decimals: option?.['decimals'] || null,
+    });
+  }
+
+  private onSearchHelpChange = (option: any, formProp: string, optionProp: string) => {
+    this.props.form.setFieldsValue({
+      [formProp]: option?.[optionProp] || null,
+    });
+  }
+
+  private searchHelpQueryMehtod = async (options: IQueryOptions): Promise<IQueryResult> => {
+    return querySearchHelpMethod(options);
+  }
+
+  private dictTableQueryMehtod = async (options: IQueryOptions): Promise<IQueryResult> => {
+    return queryDictTableMethod(options);
+  }
+
+  private elementCodeQueryMehtod = async (options: IQueryOptions): Promise<IQueryResult> => {
+    return queryElementCodeMethod(options);
   }
 }

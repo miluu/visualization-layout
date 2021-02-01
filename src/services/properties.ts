@@ -220,3 +220,190 @@ export async function querySubPropertyNameMethod(options: IQueryOptions, boName?
   };
   return result;
 }
+
+export async function queryElementCodeMethod(options: IQueryOptions) {
+  const baseViewId = window['__urlParams']?.baseViewId;
+  let result: IQueryResult;
+  const {
+    currentPage,
+    pageSize,
+    keywords,
+    isExactQuery,
+  } = options;
+  const searchColumns: any[] = [{
+    propertyName: 'baseViewId',
+    columnName: 'BASE_VIEW_ID',
+    dataType: 'S',
+    value: baseViewId,
+    operation:'EQ',
+  }];
+  if (keywords && isExactQuery) {
+    searchColumns.push({
+      propertyName:'elementCode',
+      columnName:'ELEMENT_CODE',
+      dataType:'S',
+      value: keywords,
+      operation: 'EQ',
+    });
+  } else if (keywords) {
+    searchColumns.push({
+      propertyName:'elementCode',
+      columnName:'ELEMENT_CODE',
+      dataType:'S',
+      junction:'or',
+      value: keywords,
+      operation: 'LIKEIC',
+    });
+  }
+  let res: any;
+  res = await httpGet('/ipf/commonSearchHelp/query', {
+    paramsSerializer,
+    params: {
+      type: 'S',
+      sourceName: 'IpfDmlElementWithoutQuote',
+      searchName: 'ElementCode',
+      baseViewId,
+      currentPage,
+      propertyName: keywords,
+      pageSize,
+      queryResultType: 'page',
+      sum: 'false',
+      searchColumns,
+    },
+  });
+  result = {
+    source: res.ipfDmlElements || [],
+    total: res.total,
+  };
+  return result;
+}
+export async function querySearchHelpMethod(options: IQueryOptions) {
+  const baseViewId = window['__urlParams']?.baseViewId;
+  let result: IQueryResult;
+  const {
+    currentPage,
+    pageSize,
+    keywords,
+    isExactQuery,
+  } = options;
+  const searchColumns: any[] = [{
+    propertyName: 'baseViewId',
+    columnName: 'BASE_VIEW_ID',
+    dataType: 'S',
+    value: baseViewId,
+    operation:'EQ',
+  }, {
+    propertyName:'revisionStatus',
+    columnName:'REVISION_STATUS',
+    dataType:'S',
+    value: 'COM',
+    operation: 'EQ',
+  }];
+  if (keywords && isExactQuery) {
+    searchColumns.push({
+      propertyName:'shlpName',
+      columnName:'SHLP_NAME',
+      dataType:'S',
+      value: keywords,
+      operation: 'EQ',
+    });
+  } else if (keywords) {
+    searchColumns.push({
+      propertyName:'shlpName',
+      columnName:'SHLP_NAME',
+      dataType:'S',
+      junction:'or',
+      value: keywords,
+      operation: 'LIKEIC',
+    });
+  }
+  let res: any;
+  res = await httpGet('/ipf/ipfCcmShlp/query', {
+    paramsSerializer,
+    params: {
+      type: 'S',
+      baseViewId,
+      currentPage,
+      propertyName: keywords,
+      pageSize,
+      queryResultType: 'page',
+      sum: 'false',
+      searchColumns,
+    },
+  });
+  result = {
+    source: res.ipfCcmShlps || [],
+    total: res.total,
+  };
+  return result;
+}
+
+export async function queryDictTableMethod(options: IQueryOptions) {
+  const baseViewId = window['__urlParams']?.baseViewId;
+  let result: IQueryResult;
+  const {
+    currentPage,
+    pageSize,
+    keywords,
+    isExactQuery,
+  } = options;
+  const searchColumns: any[] = [{
+    propertyName: 'baseViewId',
+    columnName: 'BASE_VIEW_ID',
+    dataType: 'S',
+    value: baseViewId,
+    operation:'EQ',
+  }];
+  if (keywords && isExactQuery) {
+    searchColumns.push({
+      propertyName:'dictCode',
+      columnName:'DICT_CODE',
+      dataType:'S',
+      value: keywords,
+      operation: 'EQ',
+    });
+    searchColumns.push({
+      propertyName:'dictName',
+      columnName:'DICT_NAME',
+      dataType:'S',
+      value: keywords,
+      operation: 'EQ',
+    });
+  } else if (keywords) {
+    searchColumns.push({
+      propertyName:'dictCode',
+      columnName:'DICT_CODE',
+      dataType:'S',
+      junction:'or',
+      value: keywords,
+      operation: 'LIKEIC',
+    });
+    searchColumns.push({
+      propertyName:'dictName',
+      columnName:'DICT_NAME',
+      dataType:'S',
+      junction:'or',
+      value: keywords,
+      operation: 'LIKEIC',
+    });
+  }
+  let res: any;
+  res = await httpGet('/ipf/ipfCcmDict/query', {
+    paramsSerializer,
+    params: {
+      type: 'S',
+      baseViewId,
+      currentPage,
+      propertyName: keywords,
+      pageSize,
+      queryResultType: 'page',
+      sum: 'false',
+      searchColumns,
+    },
+  });
+  result = {
+    source: res.ipfCcmDicts || [],
+    total: res.total,
+  };
+  return result;
+}

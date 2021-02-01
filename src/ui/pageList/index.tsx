@@ -23,7 +23,7 @@ export function createUiPageListComponent<P>(idKey: string, displayFunc: (p: P) 
       const { list, currentPageId } = this.props;
       return (
         <ul className="editor-page-list">
-          <li>
+          {/*}<li>
             <div>
               <span>页面布局</span>
               <Button
@@ -33,27 +33,32 @@ export function createUiPageListComponent<P>(idKey: string, displayFunc: (p: P) 
                 onClick={this.addPage}
               >新增页面</Button>
             </div>
-          </li>
+      </li>*/}
           {
             _.map(list, (page, index) => {
               if (!page['ipfCcmBoPageId']) {
-                /*return <li>
-                  <div>
+                return <li
+                  key={index}
+                  className={classnames({ active: page[idKey] === currentPageId })}
+                >
+                  <div
+                  className="page-list-div"
+                  onDoubleClick={(e) => this.props.dblClickPage(page, e.ctrlKey)}
+                  >
                     <span>页面布局</span>
                     <Button
                       size="small"
-                      type="primary"
                       style={{ float: 'right' }}
                       onClick={this.addPage}
-                    >新增页面</Button>
+                    >新增页面<Icon type="plus" /></Button>
                   </div>
-                </li>;*/
+                </li>;
               }
               return <li
                 key={index}
                 className={classnames({ active: page[idKey] === currentPageId })}
               >
-                <div style={{ clear: 'both' }}>
+                <div className="page-list-div" style={{ clear: 'both' }}>
                   <a href="javascript:void(0)"
                     style={{ float: 'left' }}
                     onDoubleClick={(e) => this.props.dblClickPage(page, e.ctrlKey)}

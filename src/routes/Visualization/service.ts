@@ -7,12 +7,12 @@ import { IQueryOptions, IQueryResult } from 'src/ui/associate';
 import { paramsSerializer } from 'src/utils';
 
 export async function queryPageList(params: any): Promise<IIpfCcmPage[]> {
-  /*return axios.get(VISUALIZATION_CONFIG.queryPageListUrl, {
+  return axios.get(VISUALIZATION_CONFIG.queryPageListUrl, {
     params,
   }).then(resp => {
     return resp.data.boPageList;
-  });*/
-  const boParams = {
+  });
+  /*const boParams = {
     baseViewId: params['baseViewId'],
     cascadeParam: { name: 'IpfCcmBoPage' },
     currentPage: 1,
@@ -22,10 +22,10 @@ export async function queryPageList(params: any): Promise<IIpfCcmPage[]> {
     sum: false,
     searchColumns: [
       {
-        propertyName: 'ipfCcmBoId',
-        columnName: 'IPF_CCM_BO_ID',
+        propertyName: 'boName',
+        columnName: 'BO_NAME', // IPF_CCM_BO_ID
         dataType: 'S',
-        value: params['ipfCcmBoId'],
+        value: 'JwTest', // params['ipfCcmBoId']
         operation: 'EQ',
       },
       {
@@ -42,7 +42,7 @@ export async function queryPageList(params: any): Promise<IIpfCcmPage[]> {
     paramsSerializer,
   }).then(resp => {
     return resp.data.ipfCcmBoPages;
-  });
+  });*/
 }
 
 export async function queryPage(params: any): Promise<any> {

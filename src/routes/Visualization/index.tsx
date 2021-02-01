@@ -480,6 +480,13 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
       'CheckType',
       'DeviceType',
       'IpfCcmBoPropertyType',
+      'IpfCcmBoMethodType',
+      'IpfCcmBoType',
+      'IpfCcmBoTableType',
+      'GenerateOption',
+      'IpfCcmBoPrintMethod',
+      'IpfCcmBoPrintOption',
+      'IpfCcmBoMehtodOperateType',
     ].join(',')));
     this.props.dispatch(createLoadViewListEffect());
     this.props.dispatch(createWatchSelectionRangeEffect());
