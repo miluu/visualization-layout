@@ -16,6 +16,7 @@ export async function loadBoTreeSource({
     params: {
       baseViewId,
       ipfCcmBoId,
+      t: +new Date(),
     },
     paramsSerializer,
   });
@@ -72,7 +73,11 @@ export async function saveOrUpdateBoRelation({
   type,
 }: ISaveBoRelationOptions) {
   const method = type === 'add' ? 'save' : 'update';
-  return httpPost(`/ipf/ipfCcmBoRelation/${method}`, data, {
+  const param = {
+    ...data,
+    realBaseViewId: baseViewId,
+  };
+  return httpPost(`/ipf/ipfCcmBoRelation/${method}`, param, {
     params: {
       $v_group_name: 'IpfCcmBoRelation_Default',
       baseViewId,

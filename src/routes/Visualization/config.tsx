@@ -193,6 +193,7 @@ export const VISUALIZATION_CONFIG = {
                     pageSize: 1,
                     currentPage: 1,
                     keywords: values?.layoutBoName,
+                    isExactQuery: true,
                   });
                   dispatch(createSetIsLoadingAction(false, true));
                   const bo = result?.source?.[0];
@@ -223,6 +224,7 @@ export const VISUALIZATION_CONFIG = {
                   pageSize: 1,
                   currentPage: 1,
                   keywords: values?.layoutBoName,
+                  isExactQuery: true,
                 });
                 dispatch(createSetIsLoadingAction(false, true));
                 const bo = result?.source?.[0];
@@ -1089,6 +1091,7 @@ export const VISUALIZATION_CONFIG = {
                     pageSize: 1,
                     currentPage: 1,
                     keywords: values?.layoutBoName,
+                    isExactQuery: true,
                   });
                   dispatch(createSetIsLoadingAction(false, true));
                   const bo = result?.source?.[0];
@@ -1119,6 +1122,7 @@ export const VISUALIZATION_CONFIG = {
                     pageSize: 1,
                     currentPage: 1,
                     keywords: values?.layoutBoName,
+                    isExactQuery: true,
                   });
                   dispatch(createSetIsLoadingAction(false, true));
                   const bo = result?.source?.[0];
