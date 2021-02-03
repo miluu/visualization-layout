@@ -104,9 +104,9 @@ export const VISUALIZATION_CONFIG = {
   /** 页面 ID 字段 */
   pageIdKey: 'ipfCcmBoPageId',
   /** cellName 字段 */
-  cellNameKey: 'cellName',
+  cellNameKey: 'realCellName',
   /** 父 cellName 字段 */
-  parentCellNameKey: 'parentCellName',
+  parentCellNameKey: 'realParentCellName',
   /** layout ID 字段 */
   layoutIdKey: 'ipfCcmBoPageLayoutId',
   /** layout 上的子 element 字段 */
