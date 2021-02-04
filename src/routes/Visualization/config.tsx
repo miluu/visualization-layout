@@ -73,6 +73,9 @@ const INIT_ELEMENT_DATA: IPgLoElement = {
   ipfCcmBoPgLoElementId: '',
 };
 
+const CELL_NAME_KEY = 'realCellName';
+const PARENT_CELL_NAME_KEY = 'realParentCellName';
+
 export const VISUALIZATION_CONFIG = {
   /** 查询页面列表 URL */
   queryPageListUrl: '/ipf/boPageLayout/getIpfCcmBoPageList',
@@ -104,9 +107,9 @@ export const VISUALIZATION_CONFIG = {
   /** 页面 ID 字段 */
   pageIdKey: 'ipfCcmBoPageId',
   /** cellName 字段 */
-  cellNameKey: 'realCellName',
+  cellNameKey: CELL_NAME_KEY,
   /** 父 cellName 字段 */
-  parentCellNameKey: 'realParentCellName',
+  parentCellNameKey: PARENT_CELL_NAME_KEY,
   /** layout ID 字段 */
   layoutIdKey: 'ipfCcmBoPageLayoutId',
   /** layout 上的子 element 字段 */
@@ -1352,6 +1355,8 @@ export const VISUALIZATION_CONFIG = {
         ipfCcmOriginPageLayoutId: createId(),
         cellName: cellName0,
         parentCellName: null,
+        [CELL_NAME_KEY]: cellName0,
+        [PARENT_CELL_NAME_KEY]: null,
       }),
       createLayout({
         layoutContainerType: 'DIV',
@@ -1359,6 +1364,8 @@ export const VISUALIZATION_CONFIG = {
         ipfCcmOriginPageLayoutId: createId(),
         cellName: cellName1,
         parentCellName: cellName0,
+        [CELL_NAME_KEY]: cellName1,
+        [PARENT_CELL_NAME_KEY]: cellName0,
       }),
     ];
   })(),
