@@ -14,6 +14,7 @@ export interface IQueryOptions {
   keywords: string;
   pageSize: number;
   currentPage: number;
+  value?: string;
   isExactQuery?: boolean;
 }
 
@@ -247,9 +248,10 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
     return display ?? '';
   }
 
-  private _createQueryOptions = (keywords: string = '', isExactQuery = false): IQueryOptions => {
+  private _createQueryOptions = (keywords: string = '', value: string = '', isExactQuery = false): IQueryOptions => {
     return {
       keywords,
+      value,
       pageSize: this.state.pageSize,
       currentPage: this.state.currentPage,
       isExactQuery,
@@ -261,7 +263,8 @@ export class UiAssociate extends React.PureComponent<IUiAssociateProps, IUiAssoc
     this.setState({
       isLoading: true,
     });
-    const options = this._createQueryOptions(keywords, isExactQuery);
+    const value = this.props.value;
+    const options = this._createQueryOptions(keywords, value, isExactQuery);
     try {
       const result = await this.props.queryMethod(options);
       const source = result.source || [];

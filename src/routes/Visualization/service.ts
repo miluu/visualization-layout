@@ -37,7 +37,7 @@ export async function uniqValidateLayoutCode(value: string): Promise<any> {
     .then((data) => {
       return new Promise((resolve, reject) => {
         if (data && data.success) {
-          resolve();
+          resolve(void 0);
           return;
         }
         reject();
@@ -67,6 +67,7 @@ export function dataElementCodeQueryMethodCreator(urlParams: {urlParams: any}) {
       currentPage,
       pageSize,
       keywords,
+      value,
       isExactQuery,
     } = options;
     const searchColumns: any[] = [{
@@ -76,10 +77,18 @@ export function dataElementCodeQueryMethodCreator(urlParams: {urlParams: any}) {
       value: baseViewId,
       operation:'EQ',
     }];
-    if (isExactQuery && keywords) {
+    if (isExactQuery && value) {
       searchColumns.push({
         propertyName: 'elementCode',
         columnName: 'ELEMENT_CODE',
+        dataType: 'S',
+        value,
+        operation:'EQ',
+      });
+    } else if (isExactQuery && keywords) {
+      searchColumns.push({
+        propertyName: 'fieldText',
+        columnName: 'FIELD_TEXT',
         dataType: 'S',
         value: keywords,
         operation:'EQ',
