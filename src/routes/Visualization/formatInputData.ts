@@ -117,7 +117,7 @@ function formatBoPgLoElement(boPgLoElementIn: any) {
   return {
       ipfCcmBoPgLoElementId: ipfCcmBoPgLoElementId,
       cellName: cellName,
-      realCellName: cellName,
+      [cellNameKey]: cellName,
       columnName: columnName,
       conditionType: _ipfCcmBoPgLoElement.conditionType,
       baseViewId: _ipfCcmBoPgLoElement.baseViewId,
