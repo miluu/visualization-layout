@@ -235,6 +235,7 @@ const DATA_TRANSFER_ASSOCIATE_COLUMNS: IAssociateColumn[] = [
 const BO_NAME_ASSOCIATE_COLUMNS: IAssociateColumn[] = [
   { title: '名称', field: 'boName' },
   { title: '表名称', field: 'tableName' },
+  { title: '源视图名称', field: 'ownSourceViewDesc' },
 ];
 
 const METHOD_ASSOCIATE_COLUMNS: IAssociateColumn[] = [
@@ -661,11 +662,11 @@ class BoMethodEditForm extends React.PureComponent<IBoMethodEditFormProps> {
           {
             getFieldDecorator('methodHintText')(
               <UiAssociate
-                columns={SEARCH_HELP_ASSOCIATE_COLUMNS}
+                columns={LANGUAGE_MSG_ASSOCIATE_COLUMNS}
                 labelProp="messageText"
                 valueProp="messageKey"
                 labelInit={this.props.form.getFieldValue('methodHintText')}
-                queryMethod={this.searchHelpQueryMehtod}
+                queryMethod={this.languageMsgMehtod}
                 onChange={(value, option) => this.onSearchHelpChange({ methodHintText: option?.['messageText'], methodHintCode: option?.['messageKey'] })}
               />,
             )
@@ -689,11 +690,11 @@ class BoMethodEditForm extends React.PureComponent<IBoMethodEditFormProps> {
             getFieldDecorator('dataTransferName')(
               <UiAssociate
                 columns={DATA_TRANSFER_ASSOCIATE_COLUMNS}
-                labelProp="dataTransferCode"
-                valueProp="ipfCcmDataTransferId"
+                labelProp="dataTransferName"
+                valueProp="dataTransferCode"
                 labelInit={this.props.form.getFieldValue('dataTransferName')}
                 queryMethod={this.dataTransferQueryMehtod}
-                onChange={(value, option) => this.onSearchHelpChange({ dataTransferName: option?.['dataTransferCode'], dataTransferCode: option?.['ipfCcmDataTransferId'] })}
+                onChange={(value, option) => this.onSearchHelpChange({ dataTransferName: option?.['dataTransferName'], dataTransferCode: option?.['dataTransferCode'] })}
               />,
             )
           }
@@ -711,7 +712,7 @@ class BoMethodEditForm extends React.PureComponent<IBoMethodEditFormProps> {
                 valueProp="boName"
                 labelInit={this.props.form.getFieldValue('jumpBoName')}
                 queryMethod={this.boNameQueryMehtod}
-                onChange={(value, option) => this.onSearchHelpChange({ jumpBoName: option?.['boName'] })}
+                onChange={(value, option) => this.onSearchHelpChange({ jumpBoName: option?.['boName'], jumpBoViewDesc: option?.['jumpBoViewDesc'], jumpBoViewId: option?.['jumpBoViewId'] })}
               />,
             )
           }

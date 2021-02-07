@@ -16,7 +16,6 @@ export async function loadBoTreeSource({
     params: {
       baseViewId,
       ipfCcmBoId,
-      t: +new Date(),
     },
     paramsSerializer,
   });

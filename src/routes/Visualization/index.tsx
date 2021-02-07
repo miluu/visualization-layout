@@ -312,6 +312,33 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
             </Panel>
             <Panel
               key="3"
+              header="属性定义 / 方法定义"
+            >
+            <Tabs
+                size="small"
+                animated={{
+                  tabPane: false,
+                  inkBar: true,
+                }}
+              >
+                <TabPane
+                  tab="属性定义"
+                  key="boProperty"
+                  forceRender
+                >
+                  <UiBoPropertiesPanel />
+                </TabPane>
+                <TabPane
+                  tab="方法定义"
+                  key="boMethod"
+                  forceRender
+                >
+                  <UiBoMethodsPanel />
+                </TabPane>
+              </Tabs>
+            </Panel>
+            <Panel
+              key="4"
               header="子对象关系 / 业务类型"
             >
               <Tabs
@@ -339,37 +366,10 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
               </Tabs>
             </Panel>
             <Panel
-              key="4"
+              key="5"
               header="校验"
             >
               <UiBoChecksPanel />
-            </Panel>
-            <Panel
-              key="5"
-              header="属性定义 / 方法定义"
-            >
-            <Tabs
-                size="small"
-                animated={{
-                  tabPane: false,
-                  inkBar: true,
-                }}
-              >
-                <TabPane
-                  tab="属性定义"
-                  key="boProperty"
-                  forceRender
-                >
-                  <UiBoPropertiesPanel />
-                </TabPane>
-                <TabPane
-                  tab="方法定义"
-                  key="boMethod"
-                  forceRender
-                >
-                  <UiBoMethodsPanel />
-                </TabPane>
-              </Tabs>
             </Panel>
           </Collapse>
         </UiSidebar>
@@ -487,6 +487,9 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
       'IpfCcmBoPrintMethod',
       'IpfCcmBoPrintOption',
       'IpfCcmBoMehtodOperateType',
+      'PageSize',
+      'PageGroup',
+      'gridAlign',
     ].join(',')));
     this.props.dispatch(createLoadViewListEffect());
     this.props.dispatch(createWatchSelectionRangeEffect());
@@ -527,6 +530,7 @@ export default class Visualization extends React.PureComponent<IVisualizationPro
         ipfCcmBoPageId: p.ipfCcmBoPageId,
         isOnlyShowMain: this.props.isOnlyShowMain,
         baseViewId: this.props.urlParams['baseViewId'],
+        isFromMenuOfPage: this.props.urlParams['isFromMenuOfPage'],
       }],
       this._initPageData,
       forceQuery,

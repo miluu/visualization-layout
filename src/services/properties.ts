@@ -359,6 +359,7 @@ export async function queryDictTableMethod(options: IQueryOptions) {
       propertyName:'dictCode',
       columnName:'DICT_CODE',
       dataType:'S',
+      junction:'or',
       value: keywords,
       operation: 'EQ',
     });
@@ -366,6 +367,7 @@ export async function queryDictTableMethod(options: IQueryOptions) {
       propertyName:'dictName',
       columnName:'DICT_NAME',
       dataType:'S',
+      junction:'or',
       value: keywords,
       operation: 'EQ',
     });

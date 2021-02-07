@@ -334,6 +334,12 @@ export async function saveOrUpdateIpfCcmBo({
   data,
   baseViewId,
 }: ISaveOrUpdateIpfCcmBoOptions) {
+  if (data && !data.realBaseViewId) {
+    data.realBaseViewId = baseViewId;
+  }
+  if (data && data.ipfCcmBoExtend && !data.ipfCcmBoExtend.realBaseViewId) {
+    data.ipfCcmBoExtend.realBaseViewId = baseViewId;
+  }
   return httpPost('/ipf/ipfCcmBo/update', data, {
     params: {
       $v_group_name: 'IpfCcmBo_Default',
@@ -554,4 +560,24 @@ export async function dynaCacheKeyQueryMehtod(options: IQueryOptions): Promise<I
     total: res.total,
   };
   return result;
+}
+export interface ICommitIpfCcmBoOptions {
+  baseViewId: string;
+  ids: string;
+  remark : string;
+}
+export async function commitIpfCcmBo({
+    baseViewId,
+    ids,
+    remark,
+    }: ICommitIpfCcmBoOptions) {
+  const result = await httpGet('/ipf/ipfCcmBo/commit', {
+    params: {
+      baseViewId,
+      ids,
+      remark,
+    },
+    paramsSerializer,
+  });
+  return result?.msg;
 }

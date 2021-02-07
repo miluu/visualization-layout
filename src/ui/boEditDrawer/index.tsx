@@ -3,7 +3,9 @@ import { Drawer, Button, Input, notification, Select } from 'antd';
 import Form, { FormProps, WrappedFormUtils } from 'antd/lib/form/Form';
 import * as _ from 'lodash';
 import './style.less';
-import { appModuleQueryMehtod, getIpfCcmBo, saveOrUpdateIpfCcmBo, tableNameQueryMehtod, messageQueryMehtod, dynaCacheKeyQueryMehtod } from 'src/services/bo';
+import { confirm } from 'src/utils';
+import { isFormDataModified } from 'src/utils/forms';
+import { appModuleQueryMehtod, getIpfCcmBo, saveOrUpdateIpfCcmBo, tableNameQueryMehtod, messageQueryMehtod, dynaCacheKeyQueryMehtod, commitIpfCcmBo } from 'src/services/bo';
 import { DROPDOWN_ALIGN_PROPS, ROW_STATUS } from 'src/config';
 import { connect } from 'dva';
 import { IAppState, IDictsMap } from 'src/models/appModel';
@@ -127,20 +129,58 @@ export class BoEditDrawe extends React.PureComponent<IUiAssociateProps, IUiDrawe
     form.setFieldsValue(values);
   }
 
-  private _onClose = () => {
-    this.setState({
-      visible: false,
-    });
+  private _onClose = async () => {
+    const isModified = this.isDataModified();
+    if (isModified) {
+      const s = await confirm({ content: '当前页面数据已修改是否要提交业务对象？' });
+      let result: any;
+      const { record, baseViewId } = this.state;
+      const remark = '8888';
+      const ids = record.ipfCcmBoId;
+      if (!s) {
+        return;
+      }
+      if (s) {
+        try {
+          result = await commitIpfCcmBo({
+            baseViewId,
+            ids,
+            remark,
+          });
+        } catch (e) {
+          notification.error({
+            message: e?.msg || '失败！',
+          });
+          return;
+        }
+        notification.success({
+          message: result.msg || '成功！',
+        });
+        this.setState({
+          visible: false,
+        });
+      }
+    }
   }
+  private isDataModified() {
+    const form = this.getForm();
+    if (!form) {
+      return false;
+    }
+    const formValues = form.getFieldsValue();
+    const { record } = this.state;
+    return isFormDataModified(record, formValues);
 
+  }
   private getForm = () => {
     const form: WrappedFormUtils = this.formRef.current?.getForm();
     return form;
   }
-
   private save = async () => {
     const formValue = this.getForm().getFieldsValue();
     const { record, baseViewId } = this.state;
+    const remark = '8888';
+    const ids = record.ipfCcmBoId;
     const data = {
       ...record,
       ...formValue,
@@ -166,7 +206,25 @@ export class BoEditDrawe extends React.PureComponent<IUiAssociateProps, IUiDrawe
     notification.success({
       message: result.msg || '成功！',
     });
-    this._onClose();
+    try {
+      result = await commitIpfCcmBo({
+        baseViewId,
+        ids,
+        remark,
+      });
+    } catch (e) {
+      notification.error({
+        message: e?.msg || '失败！',
+      });
+      return;
+    }
+    notification.success({
+      message: result.msg || '成功！',
+    });
+    this.setState({
+      visible: false,
+    });
+   // this._onClose();
   }
 
   private onClose = () => {
@@ -226,6 +284,7 @@ class BoForm extends React.PureComponent<IBoFormProps> {
             })(
               <Input
                 size="small"
+                disabled
               />,
             )
           }
@@ -423,12 +482,12 @@ class BoForm extends React.PureComponent<IBoFormProps> {
             )
           }
         </FormItem>
-        <FormItem label="系统消息代码" required>
+        <FormItem label="系统消息代码">
           {
             getFieldDecorator('ipfCcmBoExtend.descMsgCode')(
               <UiAssociate
                 columns={MESSAGE_ASSOCIATE_COLUMNS}
-                labelProp="descMsgCode"
+                labelProp="messageKey"
                 valueProp="messageKey"
                 labelInit={this.props.form.getFieldValue('ipfCcmBoExtend.descMsgCode')}
                 queryMethod={messageQueryMehtod}
@@ -520,4 +579,9 @@ class BoForm extends React.PureComponent<IBoFormProps> {
       'ipfCcmBoExtend.tableType': option?.tableType,
     });
   }
+  // private onMessageChange = (value: string, option: any) => {
+  //   this.props.form.setFieldsValue({
+  //     'ipfCcmBoExtend.descMsgCode': option?.messageKey,
+  //   });
+  // }
 }

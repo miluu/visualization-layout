@@ -11,14 +11,14 @@ import { IIpfCcmPage } from '../../routes/Visualization/types';
 import { DROPDOWN_ALIGN_PROPS, ROW_STATUS } from '../../config';
 import { isFormDataModified } from '../../utils/forms';
 import { createAddBoPageEffect, createUpdateBoPageEffect } from 'src/models/pagesActions';
-import { queryBoName } from '../../services/bo';
+import { queryBoName, getIpfCcmBo } from '../../services/bo';
 import { getIpfCcmBoPage } from '../../services/page';
 import { queryBusinessTypeMethod } from '../../services/businessTypes';
 
 import { Dispatch, AnyAction } from 'redux';
 import { connect } from 'dva';
 import { IAppState, IDictsMap } from 'src/models/appModel';
-import { createAlphabetOrDigitalRule, createRequireRule, createRichLengthRule } from 'src/utils/validateRules';
+import { createAlphabetOrDigitalRule, createRequireRule, createRichLengthRule, createUniqGlRules } from 'src/utils/validateRules';
 import { confirm } from 'src/utils';
 import { IAssociateColumn, IQueryOptions, IQueryResult, UiAssociate } from '../associate';
 
@@ -88,8 +88,15 @@ export class UiPageListEditDrawer extends React.PureComponent<IUiPageListEditDra
       case 'add':
         record.rowStatus = ROW_STATUS.ADDED;
         record.baseViewId = this.props.params.baseViewId;
-        // 需要判断
+        // 是否需要判断
         record.ipfCcmBoId = this.props.params.ipfCcmBoId;
+        const ipfCcmBo = await getIpfCcmBo({
+          baseViewId: this.props.params.baseViewId,
+          ipfCcmBoId: this.props.params.ipfCcmBoId,
+        });
+        record.boName = ipfCcmBo?.boName;
+        record.ownSourceViewDesc = ipfCcmBo?.ownSourceViewDesc;
+        record.ownSourceViewId = ipfCcmBo?.ownSourceViewId;
         break;
       case 'copy':
         record = await getIpfCcmBoPage({
@@ -299,17 +306,16 @@ export class UiPageListEditDrawer extends React.PureComponent<IUiPageListEditDra
   }
 
   private copyIpfCcmBoPage = (page: IIpfCcmPage) => {
-    console.log('copyIpfCcmBoPage');
-    const isPageModified = this.isDataModified();
-    if (!isPageModified) {
-      notification.info({
-        message: '提示',
-        description: '数据未修改，无需保存。',
-      });
-      return;
-    }
     this.getForm().validateFields(null, { force: true }, (err) => {
       if (err) {
+        return;
+      }
+      const isPageModified = this.isDataModified();
+      if (!isPageModified) {
+        notification.info({
+          message: '提示',
+          description: '数据未修改，无需保存。',
+        });
         return;
       }
       const data = this.combineBoPageWithFormValues();
@@ -328,6 +334,8 @@ interface IPageListEditFormProps {
 
 const BO_NAME_ASSOCIATE_COLUMNS: IAssociateColumn[] = [
   { title: '业务对象名称', field: 'boName' },
+  { title: '源视图名称', field: 'ownSourceViewDesc' },
+  { title: '描述', field: 'description' },
 ];
 
 const BUSINESS_TYPE_ASSOCIATE_COLUMNS: IAssociateColumn[] = [
@@ -357,6 +365,17 @@ class PageListEditForm extends React.PureComponent<IPageListEditFormProps> {
                   label: '页面类型',
                   min: 0,
                   max: 50,
+                }),
+                createUniqGlRules({
+                  label: ['页面类型', '业务类型', '业务对象名称'],
+                  boName: 'IpfCcmBoPage',
+                  entityName: 'com.gillion.platform.implement.metadata.domain.IpfCcmBoPage',
+                  fields: ['pageType', 'businessType', 'boName'],
+                  form: this.props.form,
+                  property: 'pageType',
+                  url: '/ipf/validation/uniqueGl',
+                  baseViewId: window['__urlParams']?.baseViewId,
+                  pkValue: this.props.form.getFieldValue('ipfCcmBoPageId'),
                 }),
               ],
             })(
@@ -392,6 +411,17 @@ class PageListEditForm extends React.PureComponent<IPageListEditFormProps> {
                   min: 0,
                   max: 200,
                 }),
+                createUniqGlRules({
+                  label: ['页面类型', '业务类型', '业务对象名称'],
+                  boName: 'IpfCcmBoPage',
+                  entityName: 'com.gillion.platform.implement.metadata.domain.IpfCcmBoPage',
+                  fields: ['pageType', 'businessType', 'boName'],
+                  form: this.props.form,
+                  property: 'pageType',
+                  url: '/ipf/validation/uniqueGl',
+                  baseViewId: window['__urlParams']?.baseViewId,
+                  pkValue: this.props.form.getFieldValue('ipfCcmBoPageId'),
+                }),
               ],
             })(
               <UiAssociate
@@ -400,6 +430,7 @@ class PageListEditForm extends React.PureComponent<IPageListEditFormProps> {
                 valueProp="boName"
                 labelInit={this.props.form.getFieldValue('boName')}
                 queryMethod={this.boNameQueryMehtod}
+                onChange={(value, option) => this.onBoNameChange(option)}
               />,
             )
           }
@@ -423,6 +454,17 @@ class PageListEditForm extends React.PureComponent<IPageListEditFormProps> {
                   max: 200,
                 }),
                 createAlphabetOrDigitalRule({ label: '业务类型' }),
+                createUniqGlRules({
+                  label: ['页面类型', '业务类型', '业务对象名称'],
+                  boName: 'IpfCcmBoPage',
+                  entityName: 'com.gillion.platform.implement.metadata.domain.IpfCcmBoPage',
+                  fields: ['pageType', 'businessType', 'boName'],
+                  form: this.props.form,
+                  property: 'pageType',
+                  url: '/ipf/validation/uniqueGl',
+                  baseViewId: window['__urlParams']?.baseViewId,
+                  pkValue: this.props.form.getFieldValue('ipfCcmBoPageId'),
+                }),
               ],
             })(
               <UiAssociate
@@ -496,9 +538,29 @@ class PageListEditForm extends React.PureComponent<IPageListEditFormProps> {
             )
           }
         </FormItem>
-        <FormItem label="业务对象视图" style={{ display: 'none' }}>
+        <FormItem label="业务对象视图id" style={{ display: 'none' }}>
           {
-            getFieldDecorator('baseViewId')(
+            getFieldDecorator('layoutBoViewId')(
+              <Input
+                disabled
+                size="small"
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="业务对象视图">
+          {
+            getFieldDecorator('layoutBoViewDesc')(
+              <Input
+                disabled
+                size="small"
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="页面列表id" style={{ display: 'none' }}>
+          {
+            getFieldDecorator('ipfCcmBoPageId')(
               <Input
                 disabled
                 size="small"
@@ -510,12 +572,28 @@ class PageListEditForm extends React.PureComponent<IPageListEditFormProps> {
     );
   }
 
+  private onBoNameChange = (option: any) => {
+    this.props.form.setFieldsValue({
+      ['layoutBoViewId']: option?.['ownSourceViewId'] || null,
+    });
+    this.props.form.setFieldsValue({
+      ['layoutBoViewDesc']: option?.['ownSourceViewDesc'] || null,
+    });
+    this.props.form.setFieldsValue({
+      ['businessType']: null,
+    });
+  }
+
   private boNameQueryMehtod = async (options: IQueryOptions): Promise<IQueryResult> => {
     return queryBoName(options);
   }
 
   private businessTypeQueryMehtod = async (options: IQueryOptions): Promise<IQueryResult> => {
     const { page } = this.props;
+    const boName = this.props.form.getFieldValue('boName');
+    if (boName) {
+      return queryBusinessTypeMethod(options, null, boName);
+    }
     return queryBusinessTypeMethod(options, page?.ipfCcmBoId);
   }
 

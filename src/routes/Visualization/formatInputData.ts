@@ -9,6 +9,8 @@ const {
   layoutEventsCopyKey,
   elementEventsKey,
   elementEventsCopyKey,
+  cellNameKey,
+//   parentCellNameKey,
 } = VISUALIZATION_CONFIG;
 
 export function formatInputData(dataIn: any) {
@@ -28,7 +30,7 @@ export function formatInputData(dataIn: any) {
       let element = formatBoPgLoElement(boPgLoElementIn);
       if (element) {
           let layout = _.find(boPageLayout, function(l) {
-              return l.cellName === element.cellName;
+              return l[cellNameKey] === element[cellNameKey];
           });
           if (layout) {
               layout.__ipfCcmBoPgLoElements = layout.__ipfCcmBoPgLoElements || [];
@@ -102,7 +104,7 @@ function formatBoPageLayout(boPageLayoutIn: any) {
 function formatBoPgLoElement(boPgLoElementIn: any) {
   let _ipfCcmBoPgLoElement = boPgLoElementIn.ipfCcmBoPgLoElement || boPgLoElementIn.ipfCcmBoPgLoElementCopy;
   let ipfCcmBoPgLoElementId = _ipfCcmBoPgLoElement.ipfCcmBoPgLoElementId;
-  let cellName = boPgLoElementIn.cellName;
+  let cellName = boPgLoElementIn[cellNameKey];
   let columnName = boPgLoElementIn.fieldText;
   let elementFormData: any;
   if (_ipfCcmBoPgLoElement.layoutElementType === 'FORM_COLUMN') {
@@ -116,6 +118,7 @@ function formatBoPgLoElement(boPgLoElementIn: any) {
   const result:any = {
       ipfCcmBoPgLoElementId: ipfCcmBoPgLoElementId,
       cellName: cellName,
+      [cellNameKey]: cellName,
       columnName: columnName,
       conditionType: _ipfCcmBoPgLoElement.conditionType,
       baseViewId: _ipfCcmBoPgLoElement.baseViewId,

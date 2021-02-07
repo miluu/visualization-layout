@@ -53,7 +53,11 @@ export async function saveOrUpdateBoMethod({
   type,
 }: ISaveBoMethodOptions) {
   const method = type === 'add' ? 'save' : 'update';
-  return httpPost(`/ipf/ipfCcmBoMethod/${method}`, data, {
+  const param = {
+    ...data,
+    realBaseViewId: baseViewId,
+  };
+  return httpPost(`/ipf/ipfCcmBoMethodExt/${method}`, param, {
     params: {
       $v_group_name: 'IpfCcmBoMethod_Default',
       baseViewId,
@@ -397,7 +401,7 @@ export async function queryBoNameMethod(options: IQueryOptions, boName?: string)
   if (keywords) {
     searchColumns.push({
       propertyName:'boName',
-      columnName:'DATA_TRANSFER_CODE',
+      columnName:'BO_NAME',
       dataType:'S',
       junction:'or',
       value: keywords,

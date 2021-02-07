@@ -20,7 +20,7 @@ import {
   createLoadBoTreeSourceEffect,
   createSelectBoTreeItemAction,
 } from './businessTypesAction';
-import { deleteBoBusinessTypes, ILoadBoTreeSourceOptions, loadBoBusinessTypes, loadBoTreeSource, saveOrUpdateBoBusinessType } from 'src/services/businessTypes';
+import { deleteBoBusinessTypes, ILoadBoTreeSourceOptions, loadBoBusinessTypes, loadBoTreeSource, saveOrUpdateBoBusinessType, commitBoBusinessType } from 'src/services/businessTypes';
 import { IAppState } from './appModel';
 import { getSelectBoTreeItem } from 'src/utils/boBusinessTypes';
 import { createSetIsLoadingAction } from './appActions';
@@ -174,6 +174,14 @@ export const businessTypesModel: IBusinessTypesModel = {
       yield put(createSetIsLoadingAction(true, true));
       try {
         result = yield call(deleteBoBusinessTypes, { ids, baseViewId });
+        // 删除后自动提交
+        /*if (result.success) {
+          commitBoBusinessType({
+            ids: ids.join(','),
+            remark: '系统自动提交',
+            baseViewId:  window['__urlParams']?.baseViewId,
+          });
+        }*/
         notification.success({
           message: '提示',
           description: result?.msg || '删除成功。',
@@ -200,6 +208,15 @@ export const businessTypesModel: IBusinessTypesModel = {
       let result;
       try {
         result = yield call(saveOrUpdateBoBusinessType, { data, baseViewId, type: editType });
+        // 修改后自动提交
+        debugger;
+        if (result['ipfCcmBoBusinessType'] && result['ipfCcmBoBusinessType']['ipfCcmBoBusinessTypeId']) {
+          commitBoBusinessType({
+            ids: result['ipfCcmBoBusinessType']['ipfCcmBoBusinessTypeId'],
+            remark: '系统自动提交',
+            baseViewId:  window['__urlParams']?.baseViewId,
+          });
+        }
         notification.success({
           message: '提示',
           description: result?.msg || '保存成功。',

@@ -16,6 +16,8 @@ import { isFormDataModified } from 'src/utils/forms';
 import produce from 'immer';
 import { IAppState, IDictsMap } from 'src/models/appModel';
 import { createFirstLetterLowerRule, createNotSpecialCharacterRule, createRequireRule, createRichLengthRule } from 'src/utils/validateRules';
+import { UiAssociate } from '../associate';
+import { queryBoName } from 'src/services/bo';
 
 const FormItem = Form.Item;
 const TabPane = Tabs.TabPane;
@@ -279,8 +281,8 @@ export class UiBoRelationEditDrawer extends React.PureComponent<IUiBoRelationEdi
     });
   }
 
-  private deleteBoRelationColumn = (id: string) => {
-    this.deleteBoRelationColumns([id]);
+  private deleteBoRelationColumn = async (id: string) => {
+    return this.deleteBoRelationColumns([id]);
   }
 
   private addBoRelationColumn = () => {
@@ -296,7 +298,11 @@ export class UiBoRelationEditDrawer extends React.PureComponent<IUiBoRelationEdi
     });
   }
 
-  private deleteBoRelationColumns = (ids?: string[]) => {
+  private deleteBoRelationColumns = async (ids?: string[]) => {
+    const b = await confirm({ content: '确认删除?' });
+    if (!b) {
+      return;
+    }
     const { selectedRelationColumns, boRelationColumns } = this.state;
     const willDeleteIds = ids ?? selectedRelationColumns;
     const newBoRelationColumns = produce(boRelationColumns, draft => {
@@ -399,6 +405,12 @@ export class UiBoRelationEditDrawer extends React.PureComponent<IUiBoRelationEdi
 
 }
 
+const BO_NAME_COLUMNS = [
+  { title: '业务对象名称', field: 'boName' },
+  { title: '视图名称', field: 'ownSourceViewDesc' },
+  { title: '视图ID', field: 'ownSourceViewId' },
+];
+
 interface IBoRelationEditFormProps {
   form?: WrappedFormUtils;
   dicts?: IDictsMap;
@@ -448,8 +460,33 @@ class BoRelationEditForm extends React.PureComponent<IBoRelationEditFormProps> {
                 }),
               ],
             })(
+              <UiAssociate
+                columns={BO_NAME_COLUMNS}
+                labelProp="boName"
+                valueProp="boName"
+                labelInit={this.props.form.getFieldValue('subBoName')}
+                queryMethod={queryBoName}
+                onChange={this.onSubBoNameChange}
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="子对象视图" >
+          {
+            getFieldDecorator('subBoViewDesc')(
               <Input
                 size="small"
+                disabled={true}
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="子对象视图Id" style={{ display: 'none' }} >
+          {
+            getFieldDecorator('subBoViewId')(
+              <Input
+                size="small"
+                disabled={true}
               />,
             )
           }
@@ -598,12 +635,39 @@ class BoRelationEditForm extends React.PureComponent<IBoRelationEditFormProps> {
                 }),
               ],
             })(
-              <Input
-                size="small"
+              <UiAssociate
+                columns={BO_NAME_COLUMNS}
+                labelProp="boName"
+                valueProp="boName"
+                labelInit={this.props.form.getFieldValue('linkBoName')}
+                queryMethod={queryBoName}
+                onChange={this.onLinkBoNameChange}
               />,
             )
           }
         </FormItem>
+
+        <FormItem label="关联对象视图" >
+          {
+            getFieldDecorator('linkBoViewDesc')(
+              <Input
+                size="small"
+                disabled={true}
+              />,
+            )
+          }
+        </FormItem>
+        <FormItem label="关联对象视图Id" style={{ display: 'none' }}>
+          {
+            getFieldDecorator('linkBoViewId')(
+              <Input
+                size="small"
+                disabled={true}
+              />,
+            )
+          }
+        </FormItem>
+
         <FormItem label="页签生成方式">
           {
             getFieldDecorator('tabBuildType', {
@@ -631,5 +695,17 @@ class BoRelationEditForm extends React.PureComponent<IBoRelationEditFormProps> {
         </FormItem>
       </Form>
     );
+  }
+  onSubBoNameChange = (value: string, option: any) => {
+    this.props.form.setFieldsValue({
+      subBoViewDesc: option?.ownSourceViewDesc,
+      subBoViewId: option?.ownSourceViewId,
+    });
+  }
+  onLinkBoNameChange = (value: string, option: any) => {
+    this.props.form.setFieldsValue({
+      linkBoViewDesc: option?.ownSourceViewDesc,
+      linkBoViewId: option?.ownSourceViewId,
+    });
   }
 }

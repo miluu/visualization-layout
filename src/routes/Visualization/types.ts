@@ -16,6 +16,8 @@ export interface IIpfCcmPage {
   isDataPenetration?: string;
   linkBoName?: string;
   baseViewId?: string;
+  layoutBoViewDesc?: string;
+  layoutBoViewId?: string;
   [key: string]: any;
 }
 

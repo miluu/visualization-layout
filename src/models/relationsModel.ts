@@ -28,6 +28,7 @@ import { IAppState } from './appModel';
 import { getSelectBoTreeItem } from 'src/utils/boRelations';
 import { createSetIsLoadingAction } from './appActions';
 import { Modal, notification } from 'antd';
+import { confirm } from 'src/utils';
 
 export interface IBoTreeSourceItem {
   appModule: string;
@@ -163,10 +164,15 @@ export const relationsModel: IRelationsModel = {
   effects: {
     *[ActionTypes.LoadBoTreeSourceEffect]({}: ILoadBoTreeSourceEffect, { put, call, select }) {
       const { params }: IAppState = yield select((s: any) => s.APP);
-      const boTreeSource: IBoTreeSourceItem[] = yield call(loadBoTreeSource, {
-        baseViewId: params.baseViewId,
-        ipfCcmBoId: params.ipfCcmBoId,
-      } as ILoadBoTreeSourceOptions);
+      let boTreeSource: IBoTreeSourceItem[];
+      try {
+        boTreeSource = yield call(loadBoTreeSource, {
+          baseViewId: params.baseViewId,
+          ipfCcmBoId: params.ipfCcmBoId,
+        } as ILoadBoTreeSourceOptions);
+      } catch (e) {
+        notification.error({ message: e?.errorMessage || e?.msg || '数据源加载出错' });
+      }
       yield put(createSetBoTreeSourceAction(boTreeSource));
     },
 
@@ -191,6 +197,10 @@ export const relationsModel: IRelationsModel = {
     },
 
     *[ActionTypes.DeleteRelationsEffect]({ ids }: IDeleteRelationsEffect, { put, call, select }) {
+      const b: boolean = yield call(confirm, { content: '确认删除子对象关系?' });
+      if (!b) {
+        return;
+      }
       const { params }: IAppState = yield select((s: any) => s.APP);
       const relationsState: IRelationsState = yield select((s: any) => s.RELATIONS);
       let baseViewId: string = params.baseViewId;
@@ -208,7 +218,7 @@ export const relationsModel: IRelationsModel = {
         });
       } catch (e) {
         Modal.error({
-          content: e?.msg || '删除失败。',
+          content: e?.errorMessage || e?.msg || '删除失败。',
         });
       } finally {
         yield put(createSetIsLoadingAction(false, true));

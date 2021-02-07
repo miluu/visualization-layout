@@ -7,6 +7,7 @@ export interface IUiCheckSettingsModalState {
   visible: boolean;
   baseViewId: string;
   ipfCcmBoId: string;
+  groupName?: string;
 }
 
 export interface IUiCheckSettingsModalProps {
@@ -38,11 +39,12 @@ export class UiCheckSettingsModal extends React.PureComponent<IUiCheckSettingsMo
     );
   }
 
-  open = ({ baseViewId, ipfCcmBoId }: any) => {
+  open = ({ baseViewId, ipfCcmBoId, groupName }: any) => {
     this.setState({
       visible: true,
       baseViewId,
       ipfCcmBoId,
+      groupName,
     });
   }
 
@@ -53,13 +55,16 @@ export class UiCheckSettingsModal extends React.PureComponent<IUiCheckSettingsMo
   }
 
   private _renderModalBody = () => {
-    const { ipfCcmBoId, baseViewId } = this.state;
+    const { ipfCcmBoId, baseViewId, groupName } = this.state;
     if (!ipfCcmBoId) {
       return (
         <div>缺少业务对象ID!</div>
       );
     }
-    const url = `/html/platform/implement/metadata/ipfCcmBoCheckSettings.html?openFrom=1&ipfCcmBoId=${ipfCcmBoId}&baseViewId=${baseViewId}`;
+    let url = `/html/platform/implement/metadata/ipfCcmBoCheckSettings.html?openFrom=1&ipfCcmBoId=${ipfCcmBoId}&baseViewId=${baseViewId}`;
+    if (groupName) {
+      url += `&groupName=${groupName}`;
+    }
     return (
       <iframe
         src={url}

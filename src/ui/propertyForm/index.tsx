@@ -10,7 +10,7 @@ import { connect } from 'dva';
 import { IDictsMap, IAppState } from 'src/models/appModel';
 import { IFormsState } from 'src/models/formsModel';
 import { ILayoutsState, ICreateLayouttsModelOptions, IPropertiesMap, IMehtodsMap } from 'src/models/layoutsModel';
-import { findElementById, findLayoutByCellName, delay } from 'src/utils';
+import { findElementById, findLayoutByCellName, delay, getClosestLayout } from 'src/utils';
 import { Dispatch, AnyAction } from 'redux';
 import { createDoUpdateSelectedLayoutFieldsEffect, createDoUpdateSelectedElementFieldsEffect } from 'src/models/layoutsActions';
 import { createValues, transformOutputValue } from 'src/utils/valueFransformers';
@@ -33,12 +33,14 @@ function createConnector(type: string) {
       const {
         properties,
         methods,
+        layouts,
+        config,
       } = LAYOUTS;
       const selectedItemType = LAYOUTS.selectedElement ? 'element' : (LAYOUTS.selectedLayout ? 'layout' : null);
       const isInReference = _.get(LAYOUTS, 'selectionOptions.isInReference');
       let isGridColumn = false;
       const selectedItem = (() => {
-        const { layouts, selectedElement, selectedLayout, config } = LAYOUTS;
+        const { selectedElement, selectedLayout } = LAYOUTS;
         if (type === 'element' && selectedElement) {
           const result = findElementById(layouts, selectedElement, config.childrenElementsKey, config.elementIdKey, true);
           if (result && result.parentLayout && result.parentLayout.layoutElementType === 'GRID') {
@@ -51,6 +53,16 @@ function createConnector(type: string) {
         }
         return null;
       })();
+      // 获取上层带有校验分组的布局
+      let inheritValidationGroupNameLayout: any;
+      if (selectedItem) {
+        inheritValidationGroupNameLayout = getClosestLayout(
+          layouts,
+          type === 'layout' ? selectedItem : { [config.parentCellNameKey]: selectedItem?.[config.cellNameKey] },
+          (l: any) => l?.validationGroupName,
+          config,
+        );
+      }
       return {
         type,
         formItemsOpts,
@@ -66,6 +78,7 @@ function createConnector(type: string) {
         methodsMap: methods,
         config: LAYOUTS.config,
         isMultiLanguage: LAYOUTS.defaultSetting?.settings?.isMulLanguage ?? false,
+        inheritValidationGroupName: inheritValidationGroupNameLayout?.validationGroupName,
       };
     },
   );
@@ -95,18 +108,42 @@ interface IPropertyFormProps {
 
   type?: string;
   isMultiLanguage?: boolean;
+  inheritValidationGroupName?: string;
 
   renderLocked?: boolean;
 }
 
 class PropertyForm extends React.Component<IPropertyFormProps> {
   render() {
-    const { selectedItem, dicts, params, formItemsOpts, form, selectedItemType, type, isGridColumn, isInReference, config, dispatch, isMultiLanguage, propertiesMap, methodsMap } = this.props;
-    const values = selectedItem ? createValues(formItemsOpts, selectedItem, isGridColumn, isInReference) : null;
+    const {
+      selectedItem,
+      dicts,
+      params,
+      formItemsOpts,
+      form,
+      selectedItemType,
+      type,
+      isGridColumn,
+      isInReference,
+      config,
+      dispatch,
+      isMultiLanguage,
+      propertiesMap,
+      methodsMap,
+      inheritValidationGroupName,
+    } = this.props;
+    const values = selectedItem ? createValues(formItemsOpts,
+       selectedItem,
+       isGridColumn,
+       isInReference) : null;
     if (selectedItem && selectedItem.layoutElementType === 'GRID') {
       values.__gridColumns = selectedItem[config.childrenElementsKey];
     }
-    console.log('[PropertyForm#rendervi]', this.props['type']);
+    if (values && inheritValidationGroupName) {
+      values.__inheritValidationGroupName = inheritValidationGroupName;
+    }
+    console.log('[PropertyForm#rendervi]',
+     this.props['type']);
     return (
       <div style={{
         display: (selectedItemType === type || !selectedItemType && type === 'layout') ? 'block' : 'none',
