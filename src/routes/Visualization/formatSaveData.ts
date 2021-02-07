@@ -370,6 +370,10 @@ export function formatSaveData(dataIn: any, _dm: any) {
   }));
 }
 
+function assetIsPage(isPage: any) {
+  return isPage === 'true' || isPage === true;
+}
+
 function removePrefix(cellName: string) {
   if (!cellName) {
     return cellName;
@@ -656,9 +660,9 @@ function formatPostLayoutData(initLayoutData: any, modifyedLayoutData: any) {
       const rowStatus = modifyedLayout.rowStatus;
       delete modifyedLayout.rowStatus;
       const newLayout = _.cloneDeep(emptyLayout);
-      const layoutKey = dm.isPage === 'true' ? 'ipfCcmBoPageLayout' : 'ipfCcmBoPageLayoutCopy';
+      const layoutKey = assetIsPage(dm.isPage) ? 'ipfCcmBoPageLayout' : 'ipfCcmBoPageLayoutCopy';
       newLayout[layoutKey] = _.assign({}, newLayout.ipfCcmBoPageLayout, modifyedLayout);
-      if (dm.isPage !== 'true') {
+      if (!assetIsPage(dm.isPage)) {
         newLayout.ipfCcmBoPageLayout = null;
       }
       newLayout.rowStatus = rowStatus;
@@ -739,8 +743,8 @@ function formatPostElementData(initElementData: any, modifyedElementData: any) {
         _formColumnKey = 'ipfCcmBoGridColumn';
         emptyFormColumn = _.clone(ipfCcmBoGridColumn);
       }
-      const elementKey1: string = dm.isPage === 'true' ? 'ipfCcmBoPgLoElement' : 'ipfCcmBoPgLoElementCopy';
-      if (dm.isPage !== 'true') {
+      const elementKey1: string = assetIsPage(dm.isPage) ? 'ipfCcmBoPgLoElement' : 'ipfCcmBoPgLoElementCopy';
+      if (!assetIsPage(dm.isPage)) {
         NewElement.ipfCcmBoPgLoElementCopy = NewElement.ipfCcmBoPgLoElement;
         NewElement.ipfCcmBoPgLoElement = null;
       }
